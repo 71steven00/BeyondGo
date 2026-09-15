@@ -1,0 +1,30 @@
+# Python / Entorno virtual
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+env/
+ENV/
+
+# Base de datos local
+*.sqlite3
+*.db
+
+# Variables de entorno y secretos
+.env
+db.sqlite3-journal
+
+# Archivos multimedia y estáticos recolectados (opcional según tu flujo)
+/media/
+/static/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores de código e IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
