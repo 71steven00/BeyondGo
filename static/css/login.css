@@ -1,0 +1,73 @@
+/* static/css/auth.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@600;700&display=swap');
+
+:root {
+  --bg-main: #171925;
+  --bg-card: #232738;
+  --bg-input: #1a1d2c;
+  --bg-input-hover: #282d45;
+  --color-accent: #22c55e;
+  --color-accent-hover: #16a34a;
+  --border-card: rgba(51, 65, 85, 0.6);
+  --border-input: rgba(51, 65, 85, 0.6);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-main);
+  color: #e2e8f0;
+}
+
+/* Tipografía de Marca */
+.font-brand {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+/* Componentes Visuales Reutilizables */
+.auth-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+}
+
+.auth-input {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: #ffffff;
+  transition: all 0.2s ease-in-out;
+}
+
+.auth-input::placeholder {
+  color: #64748b;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.btn-primary-green {
+  background-color: var(--color-accent);
+  color: #ffffff;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-primary-green:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.btn-secondary-dark {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-input);
+  color: #ffffff;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-secondary-dark:hover {
+  background-color: var(--bg-input-hover);
+}
+
+.text-accent {
+  color: var(--color-accent);
+}
