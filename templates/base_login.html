@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Beyond Go{% endblock %}</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome para Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Estilo CSS Personalizado por aparte -->
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body class="min-h-screen flex flex-col justify-center items-center p-4 antialiased">
+
+    <!-- Enlace Volver -->
+    <div class="w-full max-w-md mb-4 text-left">
+        {% block top_navigation %}
+        <a href="/" class="text-xs text-slate-400 hover:text-white inline-flex items-center gap-2 transition">
+            <i class="fa-solid fa-arrow-left"></i> Volver al inicio
+        </a>
+        {% endblock %}
+    </div>
+
+    <!-- Encabezado / Logo BEYOND GO -->
+    <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-14 h-14 bg-[#1f2638] border border-slate-700/50 rounded-xl text-accent mb-3 text-xl shadow-lg">
+            {% block brand_icon %}
+            <i class="fa-solid fa-right-to-bracket"></i>
+            {% endblock %}
+        </div>
+        <h1 class="text-3xl font-brand uppercase tracking-wider text-white">BEYOND GO</h1>
+        <p class="text-accent text-xs font-medium tracking-wide mt-1">Descubre Aquitania</p>
+    </div>
+
+    <!-- Tarjeta Formulario -->
+    <main class="w-full max-w-md auth-card rounded-2xl p-6 md:p-8 shadow-2xl">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>
