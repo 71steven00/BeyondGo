@@ -17,7 +17,7 @@ db.sqlite3-journal
 
 # Archivos multimedia y estáticos recolectados (opcional según tu flujo)
 /media/
-/static/
+#/static/
 
 # Archivos del sistema operativo
 .DS_Store
