@@ -44,6 +44,8 @@
         {% block content %}
         {% endblock %}
     </main>
-    <script src="{% static ''%}"></script>
+    {% block extra_js %}
+    <script src="{% static 'js/register-validation.js' %}"></script>
+    {% endblock %}
 </body>
 </html>
