@@ -1,0 +1,98 @@
+{% extends "base_login.html" %}
+{% load static %}
+
+{% block title %}Crear Cuenta | Beyond Go{% endblock %}
+
+<!-- Vinculación del archivo CSS exclusivo para el registro -->
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/registro.css' %}">
+{% endblock %}
+
+{% block brand_icon %}
+<i class="fa-solid fa-user-plus icon-neon"></i>
+{% endblock %}
+{% block title_tarjeta %}CREAR CUENTA{% endblock %}
+{% block subtitle_tarjeta %} Únete a Beyond Go {% endblock %}
+{% block content %}
+<div class="card-header">
+    <h2 class="card-title">INFORMACIÓN PERSONAL</h2>
+    <p class="card-subtitle">Completa tus datos para personalizar tu experiencia</p>
+</div>
+
+<form method="POST" action="" class="register-form">
+    {% csrf_token %}
+
+    <!-- Nombre Completo (Ancho completo) -->
+    <div class="form-group full-width">
+        <label for="fullname">Nombre completo</label>
+        <div class="input-container">
+            <i class="fa-solid fa-user input-icon"></i>
+            <input type="text" id="fullname" name="fullname" placeholder="Juan Pérez">
+        </div>
+    </div>
+
+    <!-- Correo y Teléfono (Dos columnas) -->
+    <div class="form-group">
+        <label for="email">Correo electrónico</label>
+        <div class="input-container">
+            <i class="fa-solid fa-envelope input-icon"></i>
+            <input type="email" id="email" name="email" placeholder="correo@ejemplo.com">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="phone">Teléfono</label>
+        <div class="input-container">
+            <i class="fa-solid fa-phone input-icon"></i>
+            <input type="tel" id="phone" name="phone" placeholder="300 123 4567">
+        </div>
+    </div>
+
+    <!-- Ciudad y Fecha de Nacimiento (Dos columnas) -->
+    <div class="form-group">
+        <label for="city">Ciudad de origen</label>
+        <div class="input-container">
+            <i class="fa-solid fa-location-dot input-icon"></i>
+            <input type="text" id="city" name="city" placeholder="Bogotá, Colombia">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="birthdate">Fecha de nacimiento</label>
+        <div class="input-container">
+            <i class="fa-solid fa-calendar-days input-icon"></i>
+            <input type="text" id="birthdate" name="birthdate" placeholder="mm/dd/yyyy" onfocus="(this.type='date')" onblur="(this.type='text')">
+        </div>
+    </div>
+
+
+    <!-- Contraseñas (Dos columnas) -->
+    <div class="form-group">
+        <label for="password">Contraseña</label>
+        <div class="input-container">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="password" name="password" placeholder="••••••••">
+            <i class="fa-solid fa-eye toggle-password"></i>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="confirm_password">Confirmar contraseña</label>
+        <div class="input-container">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input type="password" id="confirm_password" name="confirm_password" placeholder="••••••••">
+            <i class="fa-solid fa-eye toggle-password"></i>
+        </div>
+    </div>
+
+    <!-- Botones de Acción (Ancho completo) -->
+    <div class="actions-group full-width">
+        <button type="submit" class="btn btn-primary">CREAR CUENTA</button>
+        <a href="{% url 'login' %}" class="btn btn-secondary">YA TENGO CUENTA</a>
+    </div>
+</form>
+
+<p class="terms-text">
+    Al registrarte, aceptas nuestros términos y condiciones
+</p>
+{% endblock %}
