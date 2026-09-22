@@ -1,0 +1,293 @@
+/* =========================================================
+   REGISTRO - BEYOND GO
+   ========================================================= */
+
+/* ---------- CONTENEDOR PRINCIPAL ---------- */
+
+.register-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    margin-top: 25px;
+}
+
+/* ---------- ENCABEZADO ---------- */
+
+.card-header {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.card-title {
+    margin: 0;
+    color: #fcfcfc;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.card-subtitle {
+    margin: 8px 0 0;
+    color: #d7d9e0;
+    font-size: 14px;
+}
+
+
+/* ---------- CAMPOS ---------- */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group.full-width,
+.actions-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* ---------- CONTENEDOR DEL INPUT ---------- */
+
+.input-container {
+    position: relative;
+    width: 100%;
+}
+
+
+/* ---------- INPUTS ---------- */
+
+.input-container input {
+    width: 100%;
+    height: 48px;
+    box-sizing: border-box;
+
+    padding: 0 45px;
+
+    border: 1px solid #50566b;
+    border-radius: 10px;
+
+    background-color: #252b40;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-family: inherit;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+
+/* Placeholder */
+
+.input-container input::placeholder {
+    color: #858b9d;
+}
+
+
+/* Cuando el usuario escribe */
+
+.input-container input:focus {
+    border-color: #84ff60;
+    background-color: #292f45;
+
+    box-shadow: 0 0 0 2px rgba(132, 255, 96, 0.15);
+}
+
+
+/* ---------- ICONOS DE LOS INPUTS ---------- */
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: #84ff60;
+    font-size: 15px;
+
+    pointer-events: none;
+}
+
+
+/* ---------- OJO DE CONTRASEÑA ---------- */
+
+.toggle-password {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: #858b9d;
+    font-size: 15px;
+
+    cursor: pointer;
+
+    transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+    color: #84ff60;
+}
+
+
+/* ---------- BOTONES ---------- */
+
+.actions-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+
+    margin-top: 5px;
+}
+
+
+/* Estilo general */
+
+.btn {
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+
+    text-decoration: none;
+    letter-spacing: 0.5px;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+
+/* ---------- BOTÓN CREAR CUENTA ---------- */
+
+.btn-primary {
+    border: none;
+
+    background-color: #84ff60;
+    color: #10151f;
+
+    box-shadow: 0 4px 15px rgba(132, 255, 96, 0.15);
+}
+
+.btn-primary:hover {
+    background-color: #9aff7c;
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 6px 20px rgba(132, 255, 96, 0.25);
+}
+
+
+/* ---------- BOTÓN YA TENGO CUENTA ---------- */
+
+.btn-secondary {
+    border: 1px solid #84ff60;
+
+    background-color: transparent;
+    color: #84ff60;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(132, 255, 96, 0.08);
+
+    transform: translateY(-2px);
+}
+
+
+/* ---------- TÉRMINOS ---------- */
+
+.terms-text {
+    margin: 22px 0 0;
+
+    text-align: center;
+
+    color: #858b9d;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+/* ---------- TABLETS ---------- */
+
+@media (max-width: 768px) {
+
+    .register-form {
+        grid-template-columns: 1fr;
+        gap: 17px;
+    }
+
+    .form-group.full-width,
+    .actions-group.full-width {
+        grid-column: auto;
+    }
+
+    .actions-group {
+        grid-template-columns: 1fr;
+    }
+
+    .card-title {
+        font-size: 21px;
+    }
+}
+
+
+/* ---------- CELULARES ---------- */
+
+@media (max-width: 480px) {
+
+    .register-form {
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .card-title {
+        font-size: 19px;
+    }
+
+    .card-subtitle {
+        font-size: 13px;
+    }
+
+    .input-container input {
+        height: 46px;
+        font-size: 13px;
+    }
+
+    .btn {
+        height: 46px;
+        font-size: 12px;
+    }
+
+    .terms-text {
+        font-size: 11px;
+        margin-top: 18px;
+    }
+}
