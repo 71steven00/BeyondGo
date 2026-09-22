@@ -2,12 +2,21 @@
    REGISTRO - BEYOND GO
    ========================================================= */
 
+/* Overrides para ampliar la tarjeta heredada de base_login.html */
+.card-container, 
+.login-card, 
+.card, 
+main {
+    max-width: 620px !important;
+    width: 100% !important;
+}
+
 /* ---------- CONTENEDOR PRINCIPAL ---------- */
 
 .register-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 16px 20px;
     width: 100%;
     margin-top: 25px;
 }
@@ -33,13 +42,12 @@
     font-size: 14px;
 }
 
-
 /* ---------- CAMPOS ---------- */
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
 }
 
 .form-group.full-width,
@@ -49,10 +57,9 @@
 
 .form-group label {
     color: #ffffff;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
 }
-
 
 /* ---------- CONTENEDOR DEL INPUT ---------- */
 
@@ -61,17 +68,17 @@
     width: 100%;
 }
 
-
-/* ---------- INPUTS ---------- */
+/* ---------- INPUTS Y ESPACIADO SUFICIENTE ---------- */
 
 .input-container input {
     width: 100%;
     height: 48px;
     box-sizing: border-box;
 
-    padding: 0 45px;
+    padding: 0 42px 0 42px !important;
 
-    border: 1px solid #50566b;
+    border-width: 1px;
+    border-style: solid;
     border-radius: 10px;
 
     background-color: #252b40;
@@ -88,23 +95,41 @@
         background-color 0.2s ease;
 }
 
-
 /* Placeholder */
 
 .input-container input::placeholder {
     color: #858b9d;
 }
 
+/* BORDES Y ALERTAS CON CLASES DE TAILWIND */
+
+.border-slate-700 {
+    border-color: #50566b !important;
+}
+
+.border-red-500 {
+    border-color: #ef4444 !important;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.error-msg {
+    color: #ef4444;
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 2px;
+}
 
 /* Cuando el usuario escribe */
 
 .input-container input:focus {
-    border-color: #84ff60;
+    border-color: #84ff60 !important;
     background-color: #292f45;
 
     box-shadow: 0 0 0 2px rgba(132, 255, 96, 0.15);
 }
-
 
 /* ---------- ICONOS DE LOS INPUTS ---------- */
 
@@ -119,8 +144,8 @@
     font-size: 15px;
 
     pointer-events: none;
+    z-index: 2;
 }
-
 
 /* ---------- OJO DE CONTRASEÑA ---------- */
 
@@ -135,6 +160,7 @@
     font-size: 15px;
 
     cursor: pointer;
+    z-index: 3;
 
     transition: color 0.2s ease;
 }
@@ -142,7 +168,6 @@
 .toggle-password:hover {
     color: #84ff60;
 }
-
 
 /* ---------- BOTONES ---------- */
 
@@ -153,9 +178,6 @@
 
     margin-top: 5px;
 }
-
-
-/* Estilo general */
 
 .btn {
     height: 48px;
@@ -181,7 +203,6 @@
         background-color 0.2s ease;
 }
 
-
 /* ---------- BOTÓN CREAR CUENTA ---------- */
 
 .btn-primary {
@@ -201,7 +222,6 @@
     box-shadow: 0 6px 20px rgba(132, 255, 96, 0.25);
 }
 
-
 /* ---------- BOTÓN YA TENGO CUENTA ---------- */
 
 .btn-secondary {
@@ -217,7 +237,6 @@
     transform: translateY(-2px);
 }
 
-
 /* ---------- TÉRMINOS ---------- */
 
 .terms-text {
@@ -230,14 +249,11 @@
     line-height: 1.5;
 }
 
-
 /* =========================================================
    RESPONSIVE
    ========================================================= */
 
-/* ---------- TABLETS ---------- */
-
-@media (max-width: 768px) {
+@media (max-width: 650px) {
 
     .register-form {
         grid-template-columns: 1fr;
@@ -257,9 +273,6 @@
         font-size: 21px;
     }
 }
-
-
-/* ---------- CELULARES ---------- */
 
 @media (max-width: 480px) {
 
