@@ -29,23 +29,25 @@
     </div>
 
     <!-- Encabezado / Logo BEYOND GO -->
-    <div class="text-center mb-6">
-        <div class="inline-flex items-center justify-center w-14 h-14 bg-[#1f2638] border border-slate-700/50 rounded-xl text-accent mb-3 text-xl shadow-lg">
-            {% block brand_icon %}
-            <i class="fa-solid fa-right-to-bracket"></i>
-            {% endblock %}
+     {% block encabezado_login %}
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-14 h-14 bg-[#1f2638] border border-slate-700/50 rounded-xl text-accent mb-3 text-xl shadow-lg">
+                {% block brand_icon %}
+                <i class="fa-solid fa-right-to-bracket"></i>
+                {% endblock %}
+            </div>
+            <h1 class="text-3xl font-brand uppercase tracking-wider text-white">{% block title_tarjeta %}BEYOND GO{% endblock %}</h1>
+            <p class="text-accent text-xs font-medium tracking-wide mt-1">{% block subtitle_tarjeta %}Descubre Aquitania{% endblock %}</p>
         </div>
-        <h1 class="text-3xl font-brand uppercase tracking-wider text-white">{% block title_tarjeta %}BEYOND GO{% endblock %}</h1>
-        <p class="text-accent text-xs font-medium tracking-wide mt-1">{% block subtitle_tarjeta %}Descubre Aquitania{% endblock %}</p>
-    </div>
+    {% endblock %}
 
     <!-- Tarjeta Formulario -->
     <main class="w-full max-w-md auth-card rounded-2xl p-6 md:p-8 shadow-2xl">
         {% block content %}
         {% endblock %}
     </main>
+    <!-- Contenido si se necesita un archivo.js  -->
     {% block extra_js %}
-    <script src="{% static 'js/register-validation.js' %}"></script>
     {% endblock %}
 </body>
 </html>
