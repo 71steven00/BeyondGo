@@ -3,7 +3,6 @@
 
 {% block title %}Crear Cuenta | Beyond Go{% endblock %}
 
-<!-- Vinculación del archivo CSS exclusivo para el registro -->
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/registro.css' %}">
 {% endblock %}
@@ -11,15 +10,17 @@
 {% block brand_icon %}
 <i class="fa-solid fa-user-plus icon-neon"></i>
 {% endblock %}
+
 {% block title_tarjeta %}CREAR CUENTA{% endblock %}
 {% block subtitle_tarjeta %} Únete a Beyond Go {% endblock %}
+
 {% block content %}
 <div class="card-header">
     <h2 class="card-title">INFORMACIÓN PERSONAL</h2>
     <p class="card-subtitle">Completa tus datos para personalizar tu experiencia</p>
 </div>
 
-<form method="POST" action="" class="register-form">
+<form method="POST" action="" class="register-form" id="register-form" novalidate>
     {% csrf_token %}
 
     <!-- Nombre Completo (Ancho completo) -->
@@ -27,8 +28,9 @@
         <label for="fullname">Nombre completo</label>
         <div class="input-container">
             <i class="fa-solid fa-user input-icon"></i>
-            <input type="text" id="fullname" name="fullname" placeholder="Juan Pérez">
+            <input type="text" id="fullname" name="fullname" placeholder="Juan Pérez" class="border-slate-700">
         </div>
+        <span class="error-msg hidden" id="fullname-error">Ingresa tu nombre completo.</span>
     </div>
 
     <!-- Correo y Teléfono (Dos columnas) -->
@@ -36,16 +38,18 @@
         <label for="email">Correo electrónico</label>
         <div class="input-container">
             <i class="fa-solid fa-envelope input-icon"></i>
-            <input type="email" id="email" name="email" placeholder="correo@ejemplo.com">
+            <input type="email" id="email" name="email" placeholder="correo@ejemplo.com" class="border-slate-700">
         </div>
+        <span class="error-msg hidden" id="email-error">El correo electrónico es obligatorio.</span>
     </div>
 
     <div class="form-group">
-        <label for="phone">Teléfono</label>
+        <label for="phone">Teléfono (Colombia)</label>
         <div class="input-container">
             <i class="fa-solid fa-phone input-icon"></i>
-            <input type="tel" id="phone" name="phone" placeholder="300 123 4567">
+            <input type="tel" id="phone" name="phone" placeholder="3001234567" maxlength="10" class="border-slate-700">
         </div>
+        <span class="error-msg hidden" id="phone-error">El teléfono es obligatorio.</span>
     </div>
 
     <!-- Ciudad y Fecha de Nacimiento (Dos columnas) -->
@@ -53,36 +57,56 @@
         <label for="city">Ciudad de origen</label>
         <div class="input-container">
             <i class="fa-solid fa-location-dot input-icon"></i>
-            <input type="text" id="city" name="city" placeholder="Bogotá, Colombia">
+            <input type="text" id="city" name="city" list="colombia-cities" placeholder="Ej: Sogamoso, Bogotá" class="border-slate-700">
+            <datalist id="colombia-cities">
+                <option value="Bogotá"></option>
+                <option value="Sogamoso"></option>
+                <option value="Tunja"></option>
+                <option value="Duitama"></option>
+                <option value="Medellín"></option>
+                <option value="Cali"></option>
+                <option value="Barranquilla"></option>
+                <option value="Bucaramanga"></option>
+                <option value="Cartagena"></option>
+                <option value="Pereira"></option>
+                <option value="Manizales"></option>
+                <option value="Cúcuta"></option>
+                <option value="Ibagué"></option>
+                <option value="Pasto"></option>
+                <option value="Villavicencio"></option>
+            </datalist>
         </div>
+        <span class="error-msg hidden" id="city-error">La ciudad de origen es obligatoria.</span>
     </div>
 
     <div class="form-group">
         <label for="birthdate">Fecha de nacimiento</label>
         <div class="input-container">
             <i class="fa-solid fa-calendar-days input-icon"></i>
-            <input type="text" id="birthdate" name="birthdate" placeholder="mm/dd/yyyy" onfocus="(this.type='date')" onblur="(this.type='text')">
+            <input type="text" id="birthdate" name="birthdate" placeholder="mm/dd/yyyy" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" class="border-slate-700">
         </div>
+        <span class="error-msg hidden" id="birthdate-error">Selecciona tu fecha de nacimiento.</span>
     </div>
-
 
     <!-- Contraseñas (Dos columnas) -->
     <div class="form-group">
-        <label for="password">Contraseña</label>
+        <label for="password">Contraseña (8 a 14 caracteres)</label>
         <div class="input-container">
             <i class="fa-solid fa-lock input-icon"></i>
-            <input type="password" id="password" name="password" placeholder="••••••••">
+            <input type="password" id="password" name="password" placeholder="••••••••" maxlength="14" class="border-slate-700">
             <i class="fa-solid fa-eye toggle-password"></i>
         </div>
+        <span class="error-msg hidden" id="password-error">La contraseña es obligatoria.</span>
     </div>
 
     <div class="form-group">
         <label for="confirm_password">Confirmar contraseña</label>
         <div class="input-container">
             <i class="fa-solid fa-lock input-icon"></i>
-            <input type="password" id="confirm_password" name="confirm_password" placeholder="••••••••">
+            <input type="password" id="confirm_password" name="confirm_password" placeholder="••••••••" maxlength="14" class="border-slate-700">
             <i class="fa-solid fa-eye toggle-password"></i>
         </div>
+        <span class="error-msg hidden" id="confirm_password-error">Debes confirmar la contraseña.</span>
     </div>
 
     <!-- Botones de Acción (Ancho completo) -->
@@ -95,4 +119,7 @@
 <p class="terms-text">
     Al registrarte, aceptas nuestros términos y condiciones
 </p>
+
+<!-- Carga del archivo JavaScript -->
+<script src="{% static 'js/form-validation.js' %}"></script>
 {% endblock %}
