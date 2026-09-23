@@ -1,13 +1,17 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+import phonenumber_field
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class Usuario(AbstractUser):
+    # def __init__(self, *args, **kwargs):
 
+        
     ROL_CHOICES = (
         ('ADMIN', 'Administrador'),
-        ('ADMIN_H', 'Administrador_hotel')
-        ('ADMIN_R', 'Administrador_Restuarante')
+        ('ADMIN_H', 'Administrador_hotel'),
+        ('ADMIN_R', 'Administrador_Restaurante'),
         ('GUIA', 'Guia'),
         ('TURISTA', 'Turista'),
     )
@@ -21,12 +25,33 @@ class Usuario(AbstractUser):
         ('NU', 'Otro')
     )
     first_name = models.CharField(max_length=50,blank=False,verbose_name="Nombre")
-    last_name = models.CharField(max_length=50,blank=False,verbose_name="Apellido")
-    tipo_documento = models.CharField(max_length=3,choices=TIPO_DOCUMENTO_CHOICES ,verbose_name="Tipo de Documento")
-    documento = models.CharField(max_length=20,unique=True,verbose_name="Documento")
-    fecha_nacimiento = models.DateField(blank=True, verbose_name="Fecha de Nacimiento")
+    telefono = PhoneNumberField(blank=False, region="CO")
+    email = models.EmailField(max_length=254, unique= True, blank= False)
     rol = models.CharField(max_length=10,choices=ROL_CHOICES,default='TURISTA',verbose_name="Rol")
-    REQUIRED_FIELDS = ["first_name", "last_name", "tipo_documento", "documento", "fecha_nacimiento"]
+
+    # CONFIGURACIÓN PARA INICIO DE SESIÓN CON EMAIL
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'telefono']  # Solo los campos obligatorios al usar 'createsuperuser'
+    
+
+
+
+class Admin_hotel(models.Model):
+    usuario = models.OneToOneField(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name= 'perfil_admin_hotel',
+        verbose_name= 'Cuenta de Usuario'
+    )
+    descripcion = models.TextField(blank=True, null = True, verbose_name= 'Detalles')
+    # direccion =
+    # ciudad=
+    # pais= 
+    # url_img= 
+    # servicios = 
+    # rtn = 
+    # registro_sanitario = 
+
     
     
         
