@@ -128,8 +128,173 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         }
 
-    
-    });
-    
+        regForm.addEventListener('submit', function(event) {
+            let hasRegError = false;
+            const emailRegex = /^[^\s@]+@(gmail\.com|hotmail\.com)$/i;
+            const phoneRegex = /^3\d{9}$/;
+
+            // 1. Validar Nombre Completo
+            if (!regFullname.value.trim()) {
+                event.preventDefault();
+                regFullnameError.textContent = "Ingresa tu nombre completo.";
+                regFullnameError.classList.remove('hidden');
+                regFullname.classList.add('border-red-500');
+                regFullname.classList.remove('border-slate-700');
+                hasRegError = true;
+            } else {
+                regFullnameError.classList.add('hidden');
+                regFullname.classList.remove('border-red-500');
+                regFullname.classList.add('border-slate-700');
+            }
+
+            // 2. Validar Correo
+            if (!regEmail.value.trim()) {
+                event.preventDefault();
+                regEmailError.textContent = "El correo electrónico es obligatorio.";
+                regEmailError.classList.remove('hidden');
+                regEmail.classList.add('border-red-500');
+                regEmail.classList.remove('border-slate-700');
+                hasRegError = true;
+            } else if (!emailRegex.test(regEmail.value.trim())) {
+                event.preventDefault();
+                regEmailError.textContent = "El correo debe ser de un dominio válido (@gmail.com o @hotmail.com).";
+                regEmailError.classList.remove('hidden');
+                regEmail.classList.add('border-red-500');
+                regEmail.classList.remove('border-slate-700');
+                hasRegError = true;
+            } else {
+                regEmailError.classList.add('hidden');
+                regEmail.classList.remove('border-red-500');
+                regEmail.classList.add('border-slate-700');
+            }
+
+            // 3. Validar Teléfono (10 dígitos iniciando en 3)
+            if (!regPhone.value.trim()) {
+                event.preventDefault();
+                regPhoneError.textContent = "El teléfono es obligatorio.";
+                regPhoneError.classList.remove('hidden');
+                regPhone.classList.add('border-red-500');
+                regPhone.classList.remove('border-slate-700');
+                hasRegError = true;
+            } else if (!phoneRegex.test(regPhone.value.trim())) {
+                event.preventDefault();
+                regPhoneError.textContent = "Ingresa un celular válido de Colombia (10 dígitos iniciando en 3).";
+                regPhoneError.classList.remove('hidden');
+                regPhone.classList.add('border-red-500');
+                regPhone.classList.remove('border-slate-700');
+                hasRegError = true;
+            } else {
+                regPhoneError.classList.add('hidden');
+                regPhone.classList.remove('border-red-500');
+                regPhone.classList.add('border-slate-700');
+            }
+
+            // 4. Validar Ciudad de Colombia
+            const cityVal = regCity.value.trim().toLowerCase();
+            if (!cityVal) {
+                event.preventDefault();
+                regCityError.textContent = "La ciudad de origen es obligatoria.";
+                regCityError.classList.remove('hidden');
+                regCity.classList.add('border-red-500');
+                regCity.classList.remove('border-slate-700');
+                hasRegError = true;
+            } else if (!colombianCities.includes(cityVal)) {
+                event.preventDefault();
+                regCityError.textContent = "Ingresa una ciudad válida de Colombia.";
+                regCityError.classList.remove('hidden');
+                regCity.classList.add('border-red-500');
+                regCity.classList.remove('border-slate-700');
+                hasRegError = true;
+            } else {
+                regCityError.classList.add('hidden');
+                regCity.classList.remove('border-red-500');
+                regCity.classList.add('border-slate-700');
+            }
+
+            // 5. Validar Fecha de nacimiento
+            if (!regBirthdate.value.trim()) {
+                event.preventDefault();
+                regBirthdateError.textContent = "Selecciona tu fecha de nacimiento.";
+                regBirthdateError.classList.remove('hidden');
+                regBirthdate.classList.add('border-red-500');
+                regBirthdate.classList.remove('border-slate-700');
+                hasRegError = true;
+            } else {
+                regBirthdateError.classList.add('hidden');
+                regBirthdate.classList.remove('border-red-500');
+                regBirthdate.classList.add('border-slate-700');
+            }
+
+            // 6. Validar Contraseña (Mínimo 8, Máximo 14)
+            if (!regPassword.value.trim()) {
+                event.preventDefault();
+                regPasswordError.textContent = "La contraseña es obligatoria.";
+                regPasswordError.classList.remove('hidden');
+                regPassword.classList.add('border-red-500');
+                regPassword.classList.remove('border-slate-700');
+                hasRegError = true;
+            } else if (regPassword.value.length < 8 || regPassword.value.length > 14) {
+                event.preventDefault();
+                regPasswordError.textContent = "La contraseña debe tener entre 8 y 14 caracteres.";
+                regPasswordError.classList.remove('hidden');
+                regPassword.classList.add('border-red-500');
+                regPassword.classList.remove('border-slate-700');
+                hasRegError = true;
+            } else {
+                regPasswordError.classList.add('hidden');
+                regPassword.classList.remove('border-red-500');
+                regPassword.classList.add('border-slate-700');
+            }
+
+            // 7. Validar Confirmar Contraseña
+            if (!regConfirmPassword.value.trim()) {
+                event.preventDefault();
+                regConfirmPasswordError.textContent = "Debes confirmar la contraseña.";
+                regConfirmPasswordError.classList.remove('hidden');
+                regConfirmPassword.classList.add('border-red-500');
+                regConfirmPassword.classList.remove('border-slate-700');
+                hasRegError = true;
+            } else if (regConfirmPassword.value !== regPassword.value) {
+                event.preventDefault();
+                regConfirmPasswordError.textContent = "Las contraseñas no coinciden.";
+                regConfirmPasswordError.classList.remove('hidden');
+                regConfirmPassword.classList.add('border-red-500');
+                regConfirmPassword.classList.remove('border-slate-700');
+                hasRegError = true;
+            } else {
+                regConfirmPasswordError.classList.add('hidden');
+                regConfirmPassword.classList.remove('border-red-500');
+                regConfirmPassword.classList.add('border-slate-700');
+            }
+
+            // ALERTA AL PRESIONAR "CREAR CUENTA" SI TODOS LOS CAMPOS ESTÁN CORRECTOS
+            if (!hasRegError) {
+                alert("¡Cuenta creada con éxito en Beyond Go!");
+            }
+        });
+
+        // Limpiar alertas en tiempo real
+        const inputsToClean = [
+            { input: regFullname, error: regFullnameError },
+            { input: regEmail, error: regEmailError },
+            { input: regPhone, error: regPhoneError },
+            { input: regCity, error: regCityError },
+            { input: regBirthdate, error: regBirthdateError },
+            { input: regPassword, error: regPasswordError },
+            { input: regConfirmPassword, error: regConfirmPasswordError }
+        ];
+
+        inputsToClean.forEach(function(item) {
+            if (item.input) {
+                item.input.addEventListener('input', function() {
+                    if (item.input.value.trim()) {
+                        item.error.classList.add('hidden');
+                        item.input.classList.remove('border-red-500');
+                        item.input.classList.add('border-slate-700');
+                    }
+                });
+            }
+        });
+    }
 
 });
