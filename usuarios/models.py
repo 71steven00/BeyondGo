@@ -1,23 +1,11 @@
-from itertools import pairwise
-from operator import truediv
-from pickle import TRUE
-from pyexpat import model
-from tabnanny import verbose
-
-from django.conf.locale import de
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-import phonenumber_field
 from phonenumber_field.modelfields import PhoneNumberField
-
-import usuarios
-
 
 # 1. MODELO DE USUARIO PRINCIPAL
 class Usuario(AbstractUser):
     # def __init__(self, *args, **kwargs):
 
-        
     ROL_CHOICES = (
         ('ADMIN', 'Administrador'),
         ('ADMIN_H', 'Administrador_hotel'),
@@ -41,8 +29,12 @@ class Usuario(AbstractUser):
 
     # CONFIGURACIÓN PARA INICIO DE SESIÓN CON EMAIL
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'telefono', 'last_name', 'cedula']  # Solo los campos obligatorios al usar 'createsuperuser'
+    REQUIRED_FIELDS = ['first_name', 'telefono']  # Solo los campos obligatorios al usar 'createsuperuser'
     
+    # Campos para el control de intentos fallidos de autentificacion.
+    AXES_FAILURE_LIMIT = 5
+    AXES_LOCKOUT_TEMPLATE = None
+
 
 
 # 2. CATÁLOGO GLOBAL DE SERVICIOS (Reutilizable para Hoteles y Restaurantes)
@@ -73,8 +65,7 @@ class hoteles(models.Model):
     rtn = models.CharField(max_length=50, unique=True, verbose_name='Registro Nacional de Turismo (RNT/RTN)') 
     registro_sanitario = models.CharField(max_length=50, blank=True, null=True, verbose_name='Registro Sanitario')
     
-    # servicios = esta en una clase aparte 
-    # Unión ManyToMany con el modelo Servicio
+    # servicios = esta en una clase aparte. Unión ManyToMany con el modelo Servicio
     servicios = models.ManyToManyField('Servicio', blank=True, related_name="Hoteles", verbose_name="Servicios Ofrecidos")
 
     class Meta:
@@ -99,8 +90,7 @@ class restaurantes (models.Model):
     pais = models.CharField(max_length=100, default='Colombia', verbose_name='Pais')     
     url_img = models.ImageField(upload_to='restaurantes/', blank=True, null=True, verbose_name='Imagen del Restaurante')
 
-    # servicios = esta en una clase aparte 
-    # Unión ManyToMany con el modelo Servicio
+    # servicios = esta en una clase aparte. Unión ManyToMany con el modelo Servicio
     servicios = models.ManyToManyField('Servicio', blank=True, related_name='Restaurantes', verbose_name='Servicios Ofrecidos')
 
     class Meta:

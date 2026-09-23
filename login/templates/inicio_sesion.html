@@ -14,6 +14,12 @@
 <form method="post"  action="{% url 'login' %}" class="space-y-4" novalidate id="login-form">
     {% csrf_token %}
 
+    {% if messages %}
+        {% for message in messages %}
+            {% include 'components/server_alert.html' with alert_id="global-auth-error" alert_message=message %}
+        {% endfor %}
+    {% endif %}
+
     <!-- Campo: Correo / Usuario -->
     <div>
         <label for="username" class="block text-xs text-slate-300 font-medium mb-1 text-left">Correo electrónico</label>
