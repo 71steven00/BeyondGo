@@ -43,6 +43,8 @@ INSTALLED_APPS = [
 
     # librerias añadidas 
     "phonenumber_field",
+    "axes",
+    
 ]
 
 MIDDLEWARE = [
@@ -53,6 +55,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'axes.middleware.AxesMiddleware',
+]
+
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesBackend',  # Intercepta los intentos y valida bloqueos
+    'django.contrib.auth.backends.ModelBackend',  # El autenticador nativo de Django
 ]
 
 ROOT_URLCONF = 'app.urls'
