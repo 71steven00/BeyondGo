@@ -108,18 +108,32 @@
         </div>
         <span class="error-msg hidden" id="confirm_password-error">Debes confirmar la contraseña.</span>
     </div>
+        
 
     <!-- Botones de Acción (Ancho completo) -->
     <div class="actions-group full-width">
         <button type="submit" class="btn btn-primary">CREAR CUENTA</button>
         <a href="{% url 'login' %}" class="btn btn-secondary">YA TENGO CUENTA</a>
     </div>
+
 </form>
+
+
 
 <p class="terms-text">
     Al registrarte, aceptas nuestros términos y condiciones
 </p>
-
+<!-- ALERTA FLOTANTE (MODAL CENTRADO EN PANTALLA) BIEN -->
+<div id="success-alert" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-icon">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <h3 class="modal-title">¡REGISTRO EXITOSO!</h3>
+        <p class="modal-text">Tu cuenta en <strong>Beyond Go</strong> ha sido creada correctamente.</p>
+<button type="button" id="close-modal-btn" class="btn btn-primary btn-modal" data-url="{% url 'login' %}">CONTINUAR</button>    </div>
+</div>
 <!-- Carga del archivo JavaScript -->
 <script src="{% static 'js/form-validation.js' %}"></script>
-{% endblock %}
+
+{% endblock %} 
