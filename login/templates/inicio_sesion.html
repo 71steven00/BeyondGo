@@ -45,7 +45,7 @@
             <input type="password" name="password" id="id_password" required placeholder="••••••••" 
                 class="w-full pl-9 pr-3 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
         </div>
-        <a href="{% url 'password_reset' %}" class="text-xs text-emerald-400 hover:text-emerald-300 transition">¿Olvidaste tu contraseña?</a>
+        <a href="{% url 'email_request' %}" class="text-xs text-emerald-400 hover:text-emerald-300 transition">¿Olvidaste tu contraseña?</a>
         {% include 'components/alert.html' with alert_id='password-error' alert_message='Ingresa tu contraseña.' %}
     </div>
 

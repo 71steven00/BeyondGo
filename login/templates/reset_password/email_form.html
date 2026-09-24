@@ -1,0 +1,42 @@
+{% extends 'base_login.html' %}
+{% load static %}
+
+{% block title %}Enviar Código de Verificación{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/email_form.css' %}">
+{% endblock %}
+
+{% block content %}
+    <h2 class="auth-title">ENVIAR CÓDIGO DE VERIFICACIÓN</h2>
+    <p class="auth-subtitle">Ingresa el correo electrónico asociado a tu cuenta para recibir el código</p>
+
+    <form method="post" action="" novalidate id="login-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="email" class="form-label">Correo electrónico</label>
+            <div class="input-wrapper">
+                <span class="input-icon-left text-emerald-400">
+                    <i class="fa-solid fa-envelope"></i>
+                </span>
+                <input type="email" name="email" id="id_email" required placeholder="correo@ejemplo.com" class="form-input">
+            </div>
+            {% include 'components/alert.html' with alert_id='email-error' alert_message='Ingresa un correo electrónico válido.' %}
+            <div style="display:none;">
+                <input type="password" id="id_password" value="">
+                {% include 'components/alert.html' with alert_id='password-error' alert_message='' %}
+            </div>
+            
+        </div>
+        <button type="submit" class="btn-primary">
+            ENVIAR CÓDIGO <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </form>
+
+    <div class="auth-footer">
+        <a href="{% url 'login' %}" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i> Volver al inicio de sesión
+        </a>
+    </div>
+    <script src="{% static 'js/form-validation.js' %}"></script>
+{% endblock %}

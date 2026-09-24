@@ -1,0 +1,62 @@
+{% extends 'base_login.html' %}
+{% load static %}
+
+{% block title %}Verificar Código{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/codigo_verif.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="icon-lock-container">
+        <i class="fa-solid fa-lock"></i>
+    </div>
+
+    <h2 class="auth-title">VERIFICAR CÓDIGO</h2>
+    <p class="auth-subtitle">Ingresa el código de 6 dígitos que enviamos a tu correo</p>
+
+    <form method="post" action="" novalidate id="login-form">
+        {% csrf_token %}
+        
+        <div class="otp-container">
+            <input type="text" maxlength="1" class="otp-input" required>
+            <input type="text" maxlength="1" class="otp-input" required>
+            <input type="text" maxlength="1" class="otp-input" required>
+            <input type="text" maxlength="1" class="otp-input" required>
+            <input type="text" maxlength="1" class="otp-input" required>
+            <input type="text" maxlength="1" class="otp-input" required>
+        </div>
+        
+        <button type="submit" class="btn-primary mt-4">
+            VERIFICAR <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+        <!-- Alerta directa para el OTP (Ahora ubicada debajo del botón y dentro del form) -->
+        <div id="otp-error" style="display: none;" class="mt-3 p-3 text-xs rounded-lg bg-red-500/20 border border-red-500/50 text-red-200 flex items-center gap-2">
+            <svg class="w-4 h-4 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <span>Por favor ingresa el código completo de 6 dígitos.</span>
+        </div>
+    </form>
+
+    <!-- Inputs fantasmas para evitar errores con el validador global -->
+    <div style="display:none;">
+        <input type="email" id="id_email" value="dummy@example.com">
+        <input type="password" id="id_password" value="dummy123">
+        {% include 'components/alert.html' with alert_id='email-error' alert_message='' %}
+        {% include 'components/alert.html' with alert_id='password-error' alert_message='' %}
+    </div>
+
+    <div class="resend-container">
+        <a href="#" id="resend-code-btn" class="resend-link">REENVIAR CÓDIGO</a>
+    </div>
+
+    <div class="auth-footer">
+        <a href="{% url 'email_request' %}" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i> Volver a recuperación
+        </a>
+    </div>
+    
+    <script src="{% static 'js/form-validation.js' %}?v=2"></script>
+{% endblock %}
