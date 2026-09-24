@@ -1,7 +1,25 @@
+from django.contrib.auth.base_user import BaseUserManager
+from django.db import transaction
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
+
+class UsuarioManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('El Email es obligatorio')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields) 
+    
 # 1. MODELO DE USUARIO PRINCIPAL
 class Usuario(AbstractUser):
     # def __init__(self, *args, **kwargs):
@@ -22,6 +40,7 @@ class Usuario(AbstractUser):
         ('RC', 'Registro Civil'),
         ('NU', 'Otro')
     )
+    username= None
     first_name = models.CharField(max_length=50,blank=False,verbose_name="Nombre")
     telefono = PhoneNumberField(blank=False, region="CO")
     email = models.EmailField(max_length=254, unique= True, blank= False)
@@ -31,6 +50,7 @@ class Usuario(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'telefono']  # Solo los campos obligatorios al usar 'createsuperuser'
     
+    objects = UsuarioManager()
     # Campos para el control de intentos fallidos de autentificacion.
     AXES_FAILURE_LIMIT = 5
     AXES_LOCKOUT_TEMPLATE = None
@@ -66,7 +86,7 @@ class hoteles(models.Model):
     registro_sanitario = models.CharField(max_length=50, blank=True, null=True, verbose_name='Registro Sanitario')
     
     # servicios = esta en una clase aparte. Unión ManyToMany con el modelo Servicio
-    servicios = models.ManyToManyField('Servicio', blank=True, related_name="Hoteles", verbose_name="Servicios Ofrecidos")
+    servicios = models.ManyToManyField('servicios', blank=True, related_name="Hoteles", verbose_name="Servicios Ofrecidos")
 
     class Meta:
         verbose_name = "Administrador de Hotel"
@@ -82,7 +102,7 @@ class restaurantes (models.Model):
         Usuario,
         on_delete = models.CASCADE,
         related_name = 'perfil_admin_restaurante',
-        verbose_name = 'cuenta de usuario'
+        verbose_name = 'Cuenta de usuario'
     )
     descripcion = models.TextField(blank=True, null=True, verbose_name= 'Detalles')
     direccion = models.CharField(max_length=200, verbose_name='Direccion')  
@@ -91,7 +111,7 @@ class restaurantes (models.Model):
     url_img = models.ImageField(upload_to='restaurantes/', blank=True, null=True, verbose_name='Imagen del Restaurante')
 
     # servicios = esta en una clase aparte. Unión ManyToMany con el modelo Servicio
-    servicios = models.ManyToManyField('Servicio', blank=True, related_name='Restaurantes', verbose_name='Servicios Ofrecidos')
+    servicios = models.ManyToManyField('servicios', blank=True, related_name='Restaurantes', verbose_name='Servicios Ofrecidos')
 
     class Meta:
         verbose_name = 'Administrador de Restaurante'
@@ -100,22 +120,29 @@ class restaurantes (models.Model):
     def __str__(self):
         return f"Restaurante/Admin: {self.Usuario.first_name}"
 
-class Admin(Usuario):
-    last_name = models.CharField(max_length=50, blank=False, verbose_name='Apellido')
+class Admin(models.Model):
+    usuario = models.OneToOneField(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='perfil_admin',
+        verbose_name='Cuenta de usuario'
+    )
     tipo_documento = models.CharField(max_length=5, choices=Usuario.TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento')
-    numero_documneto = models.CharField(max_length=20, unique=True, blank=False, verbose_name='Numero de documento')
-    fecha_nacimineto = models.DateField(blank=False, null=False, verbose_name='Fecha de nacimineto')
+    numero_documento = models.CharField(max_length=20, unique=True, blank=False, verbose_name='Número de documento')
+    fecha_nacimiento = models.DateField(blank=False, null=False, verbose_name='Fecha de nacimiento')
 
     class Meta:
         verbose_name = 'Administrador general'
-        verbose_name_plural = 'Administradores genersles'
+        verbose_name_plural = 'Administradores generales'
 
     def save(self, *args, **kwargs):
-        # Asigna automáticamente el rol 'ADMIN' al guardarse
-        self.rol = 'ADMIN'
-        super().save(*args, **kwargs)
+        # Asegura que al guardar el perfil, el rol del usuario base sea 'ADMIN'
+        with transaction.atomic():
+            self.usuario.rol = 'ADMIN'
+            self.usuario.save()
+            super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Admin: {self.first_name} {self.last_name} {self.numero_documneto}"
+        return f"Admin: {self.usuario.first_name} {self.usuario.last_name} ({self.numero_documento})"
     
         
