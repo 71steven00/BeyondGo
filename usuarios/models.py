@@ -145,4 +145,39 @@ class Admin(models.Model):
     def __str__(self):
         return f"Admin: {self.usuario.first_name} {self.usuario.last_name} ({self.numero_documento})"
     
-        
+class Cliente(Usuario):
+    last_name = models.CharField(max_length=50, blank=False, verbose_name='Apellido')
+    tipo_documento = models.CharField(max_length=5, choices=Usuario.TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento')
+    numero_documento = models.CharField(max_length=20, unique=True, blank=False, verbose_name='Numero de documento')
+    fecha_nacimiento = models.DateField(blank=False, null=False, verbose_name='Fecha de nacimineto')
+
+    class Meta:
+        verbose_name = 'Cliente'
+        verbose_name_plural = 'Clientes'
+
+    def save(self, *args, **kwargs):
+        # Asigna automáticamente el rol 'TURISTA' al guardarse
+        self.rol = 'TURISTA'
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"TURISTA: {self.first_name} {self.last_name} {self.numero_documneto}"
+
+class Guia(Usuario):
+    last_name = models.CharField(max_length=50, blank=False, verbose_name='Apellido')
+    tipo_documento = models.CharField(max_length=5, choices=Usuario.TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento')
+    numero_documento = models.CharField(max_length=20, unique=True, blank=False, verbose_name='Numero de documento')
+    fecha_nacimiento = models.DateField(blank=False, null=False, verbose_name='Fecha de nacimineto')
+    certificado_turismo = models.ImageField(upload_to='certificados_guias/', blank=True, null=True, verbose_name="Certificado de Turismo")
+    class Meta:
+        verbose_name = 'Guia'
+        verbose_name_plural = 'Guias'
+
+    def save(self, *args, **kwargs):
+        # Asigna automáticamente el rol 'TURISTA' al guardarse
+        self.rol = 'GUIA'
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"GUIA: {self.first_name} {self.last_name} {self.numero_documneto}"
+
