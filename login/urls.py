@@ -1,3 +1,4 @@
+from login.views import CustomLoginView
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
@@ -6,7 +7,7 @@ from . import views
 
 urlpatterns = [
     # Tu vista de login personalizada (o auth_views.LoginView si prefieres la nativa)
-    path('', auth_views.LoginView.as_view(template_name = "inicio_sesion.html"), name='login'),
+    path('', CustomLoginView.as_view(), name='login'),
     
     # Tus rutas existentes
     path('registro/', views.registro, name='registro'),
