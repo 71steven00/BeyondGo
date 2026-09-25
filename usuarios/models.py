@@ -161,7 +161,7 @@ class Cliente(Usuario):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"TURISTA: {self.first_name} {self.last_name} {self.numero_documneto}"
+        return f"TURISTA: {self.first_name} {self.last_name} {self.numero_documento}"
 
 class Guia(Usuario):
     last_name = models.CharField(max_length=50, blank=False, verbose_name='Apellido')
@@ -179,5 +179,5 @@ class Guia(Usuario):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"GUIA: {self.first_name} {self.last_name} {self.numero_documneto}"
+        return f"GUIA: {self.first_name} {self.last_name} {self.numero_documento}"
 
