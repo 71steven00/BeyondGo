@@ -148,3 +148,12 @@ MAILERS = {
 }
 # indicarle a Django cuál es el modelo de usuario personalizado en el archivo de configuración principal.
 AUTH_USER_MODEL = 'usuarios.Usuario'
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'perfil'  # O la ruta de tu vista principal tras iniciar sesión
+LOGOUT_REDIRECT_URL = 'login'
+
+#configuracion para intentos fallidos Django-axes
+AXES_LOCKOUT_CALLABLE = "login.views.lockout_respuesta_personalizada"
+AXES_FAILURE_LIMIT = 3
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
