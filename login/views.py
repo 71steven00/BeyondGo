@@ -100,24 +100,24 @@ def registro(request):
 class PasswordResetEmailView(TemplateView):
     # Paso 1: Solicitar correo electrónico
         template_name = 'reset_password/email_form.html'
-
-def post(self, request, *args, **kwargs):
-    email = self.request.POST.get('email')
-    limpiar_mensajes_previos(self.request)
         
-    # Validar si el correo existe en la base de datos
-    if not Usuario.objects.filter(email=email).exists():
-        messages.error(self.request, 'El correo electrónico no coincide con ninguna cuenta.')
-        return self.render_to_response(self.get_context_data())
+        def post(self, request, *args, **kwargs):
+            email = self.request.POST.get('email')
+            limpiar_mensajes_previos(self.request)
         
-        # Guardar el correo en sesión para los siguientes pasos
-        self.request.session['email_recuperacion'] = email
+        # Validar si el correo existe en la base de datos
+            if not Usuario.objects.filter(email=email).exists():
+                messages.error(self.request, 'El correo electrónico no coincide con ninguna cuenta.')
+            return self.render_to_response(self.get_context_data())
         
-        # TODO: Aquí generas y envías el código por correo (simulación por ahora: '123456')
-        self.request.session['codigo_recuperacion'] = '123456'
+            # Guardar el correo en sesión para los siguientes pasos
+            self.request.session['email_recuperacion'] = email
         
-        messages.success(self.request, 'Se ha enviado un código de verificación a tu correo.')
-        return redirect('password_request')
+            # TODO: Aquí generas y envías el código por correo (simulación por ahora: '123456')
+            self.request.session['codigo_recuperacion'] = '123456'
+        
+            messages.success(self.request, 'Se ha enviado un código de verificación a tu correo.')
+            return redirect('password_request')
 
 
 class PasswordResetCodeView(TemplateView):
