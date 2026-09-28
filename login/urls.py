@@ -1,7 +1,9 @@
+from django import views
+from app.urls import auth_views
+from . import views 
 from login.views import CustomLoginView
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from . import views
 
 
 
@@ -11,5 +13,8 @@ urlpatterns = [
     
     # Tus rutas existentes
     path('registro/', views.registro, name='registro'),
-    path('password-reset/', auth_views.PasswordResetView.as_view(template_name='login/password_reset.html'), name='password_reset'),
+    path('password_reset/', views.PasswordResetEmailView.as_view(), name='password_reset'),
+    path('password_request/', views.PasswordResetCodeView.as_view(), name='password_request'),
+    path('password_new/', views.PasswordResetNewView.as_view(), name='nueva_contraseña'),
 ]
+    
