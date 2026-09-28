@@ -14,6 +14,9 @@
 {% block title_tarjeta %}CREAR CUENTA{% endblock %}
 {% block subtitle_tarjeta %} Únete a Beyond Go {% endblock %}
 
+{% block home_url %}{% url 'login' %}{% endblock %}
+{% block home_title %}Volver al inicio de sesion{% endblock %}
+
 {% block content %}
 <div class="card-header">
     <h2 class="card-title">INFORMACIÓN PERSONAL</h2>
@@ -23,14 +26,50 @@
 <form method="POST" action="" class="register-form" id="register-form" novalidate>
     {% csrf_token %}
 
-    <!-- Nombre Completo (Ancho completo) -->
-    <div class="form-group full-width">
-        <label for="fullname">Nombre completo</label>
+    <!-- Nombres y Apellidos (Dos columnas) -->
+    <div class="form-group">
+        <label for="first_name">Nombres</label>
         <div class="input-container">
             <i class="fa-solid fa-user input-icon"></i>
-            <input type="text" id="fullname" name="fullname" placeholder="Juan Pérez" class="border-slate-700">
+            <input type="text" id="first_name" name="first_name" placeholder="Ej: Juan Esteban" class="border-slate-700">
         </div>
-        <span class="error-msg hidden" id="fullname-error">Ingresa tu nombre completo.</span>
+        <span class="error-msg hidden" id="first_name-error">Ingresa tus nombres.</span>
+    </div>
+
+    <div class="form-group">
+        <label for="last_name">Apellidos</label>
+        <div class="input-container">
+            <i class="fa-solid fa-user input-icon"></i>
+            <input type="text" id="last_name" name="last_name" placeholder="Ej: Pérez Gómez" class="border-slate-700">
+        </div>
+        <span class="error-msg hidden" id="last_name-error">Ingresa tus apellidos.</span>
+    </div>
+
+    <!-- Tipo de Documento y Número de Documento (Dos columnas) -->
+    <div class="form-group">
+        <label for="tipo_documento">Tipo de documento</label>
+        <div class="input-container">
+            <i class="fa-solid fa-id-card input-icon"></i>
+            <select id="tipo_documento" name="tipo_documento" class="border-slate-700 custom-select">
+                <option value="CC" selected>Cédula de Ciudadanía</option>
+                <option value="CE">Cédula de Extranjería</option>
+                <option value="PA">Pasaporte</option>
+                <option value="PPT">Permiso de Permanencia Temporal</option>
+                <option value="TI">Tarjeta de Identidad</option>
+                <option value="RC">Registro Civil</option>
+                <option value="NU">Otro</option>
+            </select>
+        </div>
+        <span class="error-msg hidden" id="tipo_documento-error">Selecciona un tipo de documento.</span>
+    </div>
+
+    <div class="form-group">
+        <label for="numero_documento">Número de documento</label>
+        <div class="input-container">
+            <i class="fa-solid fa-hashtag input-icon"></i>
+            <input type="text" id="numero_documento" name="numero_documento" placeholder="Ej: 1012345678" class="border-slate-700">
+        </div>
+        <span class="error-msg hidden" id="numero_documento-error">Ingresa tu número de documento.</span>
     </div>
 
     <!-- Correo y Teléfono (Dos columnas) -->
@@ -58,23 +97,7 @@
         <div class="input-container">
             <i class="fa-solid fa-location-dot input-icon"></i>
             <input type="text" id="city" name="city" list="colombia-cities" placeholder="Ej: Sogamoso, Bogotá" class="border-slate-700">
-            <datalist id="colombia-cities">
-                <option value="Bogotá"></option>
-                <option value="Sogamoso"></option>
-                <option value="Tunja"></option>
-                <option value="Duitama"></option>
-                <option value="Medellín"></option>
-                <option value="Cali"></option>
-                <option value="Barranquilla"></option>
-                <option value="Bucaramanga"></option>
-                <option value="Cartagena"></option>
-                <option value="Pereira"></option>
-                <option value="Manizales"></option>
-                <option value="Cúcuta"></option>
-                <option value="Ibagué"></option>
-                <option value="Pasto"></option>
-                <option value="Villavicencio"></option>
-            </datalist>
+            <datalist id="colombia-cities"></datalist>
         </div>
         <span class="error-msg hidden" id="city-error">La ciudad de origen es obligatoria.</span>
     </div>
@@ -108,7 +131,6 @@
         </div>
         <span class="error-msg hidden" id="confirm_password-error">Debes confirmar la contraseña.</span>
     </div>
-        
 
     <!-- Botones de Acción (Ancho completo) -->
     <div class="actions-group full-width">
@@ -118,12 +140,11 @@
 
 </form>
 
-
-
 <p class="terms-text">
     Al registrarte, aceptas nuestros términos y condiciones
 </p>
-<!-- ALERTA FLOTANTE (MODAL CENTRADO EN PANTALLA) BIEN -->
+
+<!-- ALERTA FLOTANTE (MODAL CENTRADO EN PANTALLA) -->
 <div id="success-alert" class="modal-overlay hidden">
     <div class="modal-card">
         <div class="modal-icon">
@@ -131,9 +152,11 @@
         </div>
         <h3 class="modal-title">¡REGISTRO EXITOSO!</h3>
         <p class="modal-text">Tu cuenta en <strong>Beyond Go</strong> ha sido creada correctamente.</p>
-<button type="button" id="close-modal-btn" class="btn btn-primary btn-modal" data-url="{% url 'login' %}">CONTINUAR</button>    </div>
+        <button type="button" id="close-modal-btn" class="btn btn-primary btn-modal" data-url="{% url 'login' %}">CONTINUAR</button>
+    </div>
 </div>
+
 <!-- Carga del archivo JavaScript -->
 <script src="{% static 'js/form-validation.js' %}"></script>
 
-{% endblock %} 
+{% endblock %}

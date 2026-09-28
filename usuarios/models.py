@@ -45,7 +45,7 @@ class Usuario(AbstractUser):
     telefono = PhoneNumberField(blank=False, region="CO")
     email = models.EmailField(max_length=254, unique= True, blank= False)
     rol = models.CharField(max_length=10,choices=ROL_CHOICES,default='TURISTA',verbose_name="Rol")
-
+    
     # CONFIGURACIÓN PARA INICIO DE SESIÓN CON EMAIL
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'telefono']  # Solo los campos obligatorios al usar 'createsuperuser'
