@@ -146,7 +146,6 @@ class Admin(models.Model):
         return f"Admin: {self.usuario.first_name} {self.usuario.last_name} ({self.numero_documento})"
     
 class Cliente(Usuario):
-    last_name = models.CharField(max_length=50, blank=False, verbose_name='Apellido')
     tipo_documento = models.CharField(max_length=5, choices=Usuario.TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento')
     numero_documento = models.CharField(max_length=20, unique=True, blank=False, verbose_name='Numero de documento')
     fecha_nacimiento = models.DateField(blank=False, null=False, verbose_name='Fecha de nacimiento')
@@ -164,7 +163,6 @@ class Cliente(Usuario):
         return f"TURISTA: {self.first_name} {self.last_name} {self.numero_documento}"
 
 class Guia(Usuario):
-    last_name = models.CharField(max_length=50, blank=False, verbose_name='Apellido')
     tipo_documento = models.CharField(max_length=5, choices=Usuario.TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento')
     numero_documento = models.CharField(max_length=20, unique=True, blank=False, verbose_name='Numero de documento')
     fecha_nacimiento = models.DateField(blank=False, null=False, verbose_name='Fecha de nacimiento')

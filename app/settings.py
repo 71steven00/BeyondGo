@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     #Apps o modulos agregados
     'login',
     'usuarios',
+    'admin_panel',
 
     # librerias añadidas 
     "phonenumber_field",
@@ -150,7 +151,7 @@ MAILERS = {
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'perfil'  # O la ruta de tu vista principal tras iniciar sesión
+  # O la ruta de tu vista principal tras iniciar sesión
 LOGOUT_REDIRECT_URL = 'login'
 
 #configuracion para intentos fallidos Django-axes
