@@ -7,9 +7,9 @@ venv/
 env/
 ENV/
 
-# Base de datos local
-*.sqlite3
-*.db
+# # Base de datos local
+# *.sqlite3
+# *.db
 
 # Variables de entorno y secretos
 .env
