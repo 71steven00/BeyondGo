@@ -1,0 +1,10 @@
+/* static/css/admin-styles.css */
+/* Estilos personalizados para el panel de Beyond Go Admin */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Transiciones suaves para la barra lateral */
+aside {
+    transition: all 0.3s ease-in-out;
+}
