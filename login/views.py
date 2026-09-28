@@ -9,6 +9,13 @@ from django.contrib import messages
 from django.contrib.auth.views import LoginView
 from axes.models import AccessAttempt
 from django.shortcuts import redirect
+from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.views.generic import FormView
+from django.contrib import messages
+# Importamos el formulario desde el módulo de usuarios
+from usuarios.forms import RegistroClienteForm
+
 
 def limpiar_mensajes_previos(request):
     """Limpia los mensajes acumulados en la sesión antes de agregar uno nuevo."""
@@ -170,3 +177,37 @@ class PasswordResetNewView(TemplateView):
                 
         messages.error(self.request, 'Ocurrió un error en el proceso. Inténtalo de nuevo.')
         return redirect('email_request')
+
+
+# validaciones de registro de usuario:
+
+class CustomRegisterView(FormView):
+    template_name = 'registro.html'
+    form_class = RegistroClienteForm
+    success_url = reverse_lazy('login')  # URL a la que redirige tras registrarse
+
+    def form_valid(self, form):
+        # 1. Limpiar mensajes previos en la sesión
+        limpiar_mensajes_previos(self.request)
+
+        # 2. Guardar el usuario/cliente en la base de datos
+        form.save()
+
+        # 3. Lanzar alerta de éxito
+        messages.success(
+            self.request,
+            'Registro exitoso. Por favor, inicia sesión.'
+        )
+
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        # 1. Limpiar mensajes previos en la sesión
+        limpiar_mensajes_previos(self.request)
+
+        # 2. Recorrer los errores devueltos por el formulario y generar las alertas rojas
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(self.request, error)
+
+        return super().form_invalid(form)
