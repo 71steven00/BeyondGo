@@ -1,13 +1,14 @@
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.conf import settings
 from django.shortcuts import render
-from django.views.generic import DetailView
+from django.views.generic import DetailView, FormView, TemplateView
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from usuarios.models import Usuario
 from django.contrib import messages
 from django.contrib.auth.views import LoginView
 from axes.models import AccessAttempt
+from django.shortcuts import redirect
 
 def limpiar_mensajes_previos(request):
     """Limpia los mensajes acumulados en la sesión antes de agregar uno nuevo."""
@@ -95,3 +96,77 @@ class PerfilUsuarioView(DetailView):
 
 def registro(request):
     return render(request, 'registro.html')
+
+class PasswordResetEmailView(TemplateView):
+    # Paso 1: Solicitar correo electrónico
+        template_name = 'reset_password/email_form.html'
+        
+        def post(self, request, *args, **kwargs):
+            email = self.request.POST.get('email')
+            limpiar_mensajes_previos(self.request)
+        
+        # Validar si el correo existe en la base de datos
+            if not Usuario.objects.filter(email=email).exists():
+                messages.error(self.request, 'El correo electrónico no coincide con ninguna cuenta.')
+            return self.render_to_response(self.get_context_data())
+        
+            # Guardar el correo en sesión para los siguientes pasos
+            self.request.session['email_recuperacion'] = email
+        
+            # TODO: Aquí generas y envías el código por correo (simulación por ahora: '123456')
+            self.request.session['codigo_recuperacion'] = '123456'
+        
+            messages.success(self.request, 'Se ha enviado un código de verificación a tu correo.')
+            return redirect('password_request')
+
+
+class PasswordResetCodeView(TemplateView):
+    """Paso 2: Verificar el código de 6 dígitos"""
+    template_name = 'reset_password/codigo_verif.html'
+
+    def post(self, request, *args, **kwargs):
+        limpiar_mensajes_previos(self.request)
+        
+        # Captura directa del input de 6 dígitos del HTML
+        codigo_ingresado = self.request.POST.get('codigo', '').strip()
+        codigo_valido_en_sesion = self.request.session.get('codigo_recuperacion')
+        
+        if not codigo_ingresado or codigo_ingresado != codigo_valido_en_sesion:
+            messages.error(self.request, 'El código de verificación es incorrecto.')
+            return self.render_to_response(self.get_context_data())
+            
+        messages.success(self.request, 'Código verificado correctamente.')
+        return redirect('nueva_contraseña')
+
+
+class PasswordResetNewView(TemplateView):
+    """Paso 3: Ingresar la nueva contraseña"""
+    template_name = 'reset_password/nueva_contraseña.html'
+
+    def post(self, request, *args, **kwargs):
+        nueva_password = self.request.POST.get('new_password')
+        confirmar_password = self.request.POST.get('confirm_password')
+        
+        limpiar_mensajes_previos(self.request)
+        
+        if nueva_password != confirmar_password:
+            messages.error(self.request, 'Las contraseñas no coinciden.')
+            return self.render_to_response(self.get_context_data())
+            
+        # Recuperar al usuario usando el correo guardado en sesión
+        email = self.request.session.get('email_recuperacion')
+        if email:
+            usuario = Usuario.objects.filter(email=email).first()
+            if usuario:
+                usuario.set_password(nueva_password)
+                usuario.save()
+                
+                # Limpiar variables temporales de la sesión
+                self.request.session.pop('codigo_recuperacion', None)
+                self.request.session.pop('email_recuperacion', None)
+                
+                messages.success(self.request, 'Contraseña actualizada con éxito. Ya puedes iniciar sesión.')
+                return redirect('login')
+                
+        messages.error(self.request, 'Ocurrió un error en el proceso. Inténtalo de nuevo.')
+        return redirect('email_request')
