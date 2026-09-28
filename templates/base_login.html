@@ -22,8 +22,8 @@
     <!-- Enlace Volver -->
     <div class="w-full max-w-md mb-4 text-left">
         {% block top_navigation %}
-        <a href="/" class="text-xs text-slate-400 hover:text-white inline-flex items-center gap-2 transition">
-            <i class="fa-solid fa-arrow-left"></i> Volver al inicio
+        <a href="{% block home_url %}/{% endblock %}" class="text-xs text-slate-400 hover:text-white inline-flex items-center gap-2 transition">
+            <i class="fa-solid fa-arrow-left"></i> {%block home_title%}Volver al inicio{% endblock %}
         </a>
         {% endblock %}
     </div>
