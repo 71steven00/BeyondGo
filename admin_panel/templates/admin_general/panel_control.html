@@ -1,0 +1,114 @@
+{% extends 'base_super_admin.html' %}
+{% load static %}
+
+{% block title %}Panel de control - Beyond Go Admin{% endblock %}
+
+{% block header_title %}Informacion de ventas{% endblock %}
+{% block header_subtitle %}Métricas de rendimiento en tiempo real para Aquitania{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    
+    <!-- Tarjeta Principal: Paquetes más vendidos -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+                <h3 class="text-lg font-bold text-slate-900">Paquetes mas vendidos</h3>
+                <p class="text-xs text-slate-500">Clasificacion de rendimiento del mes actual</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button class="px-4 py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold rounded-xl transition">
+                    Descargar CSV
+                </button>
+                <button class="px-4 py-2 bg-[#0d1527] text-white hover:bg-slate-800 text-xs font-semibold rounded-xl transition">
+                    Ver análisis
+                </button>
+            </div>
+        </div>
+
+        <!-- Grid de Paquetes con Bucle -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for p in paquetes %}
+            <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 bg-[#0d1527] text-white rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-house-chimney text-sm"></i>
+                        </div>
+                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full">#{{ forloop.counter }} POPULAR</span>
+                    </div>
+                    <h4 class="font-bold text-slate-900 text-sm mb-1">{{ p.titulo }}</h4>
+                    <p class="text-xs text-slate-500 mb-4">{{ p.descripcion }}</p>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center text-xs text-slate-500 mb-1">
+                        <span>Reservas</span>
+                        <span class="font-bold text-slate-900">{{ p.reservas }}</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-2 rounded-full mb-4 overflow-hidden">
+                        <div class="bg-[#0d1527] h-full rounded-full" style="width: {{ p.progreso }};"></div>
+                    </div>
+                    <div class="border-t border-slate-200 pt-3 flex items-baseline justify-between">
+                        <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">INGRESOS</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-slate-900 text-sm">{{ p.ingresos }}</span>
+                            <span class="{% if p.tipo_crecimiento == 'positivo' %}text-emerald-600{% else %}text-rose-600{% endif %} text-xs font-semibold">{{ p.crecimiento }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Estadísticas Inferiores (Hoteles, Restaurantes, Experiencias, Paquetes) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1">
+        
+        <!-- Hoteles -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-house-chimney text-lg"></i>
+            </div>
+            <div>
+                <div class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">HOTELES</div>
+                <div class="text-2xl font-black text-slate-900">84</div>
+            </div>
+        </div>
+
+        <!-- Restaurantes -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="w-12 h-12 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-utensils text-lg"></i>
+            </div>
+            <div>
+                <div class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">RESTAURANTES</div>
+                <div class="text-2xl font-black text-slate-900">126</div>
+            </div>
+        </div>
+
+        <!-- Experiencias -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-star text-lg"></i>
+            </div>
+            <div>
+                <div class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">EXPERIENCIAS</div>
+                <div class="text-2xl font-black text-slate-900">431</div>
+            </div>
+        </div>
+
+        <!-- Paquetes Turísticos -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-cube text-lg"></i>
+            </div>
+            <div>
+                <div class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">PAQUETES TURÍSTICOS</div>
+                <div class="text-2xl font-black text-slate-900">52</div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
