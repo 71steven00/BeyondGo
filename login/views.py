@@ -25,7 +25,7 @@ class CustomLoginView(LoginView):
         user = self.request.user
         # Redirige al panel administrativo si es superusuario o miembro del staff
         if user.is_superuser or user.is_staff:
-            return reverse('admin:index')
+            return reverse('dashboard_admin')
 
         # Para usuarios normales, redirige a la URL configurada por defecto
         return super().get_success_url()

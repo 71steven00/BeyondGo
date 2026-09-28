@@ -24,6 +24,6 @@ urlpatterns = [
     path('admin/login/', CustomLoginView.as_view()),
     path('admin/', admin.site.urls),
     path('login/', include('login.urls')),  # Ruta para el login 
-    path('usuarios/', include('usuarios.urls')), #ruta para Usuarios.urls
+    path('administrador/', include('admin_panel.urls')), #ruta para administradores.urls
     
 ]
