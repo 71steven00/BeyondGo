@@ -22,7 +22,6 @@
     <h2 class="card-title">INFORMACIÓN PERSONAL</h2>
     <p class="card-subtitle">Completa tus datos para personalizar tu experiencia</p>
 </div>
-
 <form method="POST" action="" class="register-form" id="register-form" novalidate>
     {% csrf_token %}
 
@@ -33,7 +32,9 @@
             <i class="fa-solid fa-user input-icon"></i>
             <input type="text" id="first_name" name="first_name" placeholder="Ej: Juan Esteban" class="border-slate-700">
         </div>
-        <span class="error-msg hidden" id="first_name-error">Ingresa tus nombres.</span>
+        {% if form.first_name.errors %}
+                <span class="error-msg text-red-500 text-xs mt-1 block">{{ form.first_name.errors.0 }}</span>
+        {% endif %}
     </div>
 
     <div class="form-group">
@@ -42,7 +43,10 @@
             <i class="fa-solid fa-user input-icon"></i>
             <input type="text" id="last_name" name="last_name" placeholder="Ej: Pérez Gómez" class="border-slate-700">
         </div>
-        <span class="error-msg hidden" id="last_name-error">Ingresa tus apellidos.</span>
+        {% if form.last_name.errors %}
+                <span class="error-msg text-red-500 text-xs mt-1 block">{{ form.last_name.errors.0 }}</span>
+        {% endif %}
+        
     </div>
 
     <!-- Tipo de Documento y Número de Documento (Dos columnas) -->
@@ -55,12 +59,13 @@
                 <option value="CE">Cédula de Extranjería</option>
                 <option value="PA">Pasaporte</option>
                 <option value="PPT">Permiso de Permanencia Temporal</option>
-                <option value="TI">Tarjeta de Identidad</option>
                 <option value="RC">Registro Civil</option>
                 <option value="NU">Otro</option>
             </select>
         </div>
-        <span class="error-msg hidden" id="tipo_documento-error">Selecciona un tipo de documento.</span>
+        {% if form.tipo_documento.errors %}
+                <span class="error-msg text-red-500 text-xs mt-1 block">{{ form.tipo_documento.errors.0 }}</span>
+        {% endif %}
     </div>
 
     <div class="form-group">
@@ -69,7 +74,9 @@
             <i class="fa-solid fa-hashtag input-icon"></i>
             <input type="text" id="numero_documento" name="numero_documento" placeholder="Ej: 1012345678" class="border-slate-700">
         </div>
-        <span class="error-msg hidden" id="numero_documento-error">Ingresa tu número de documento.</span>
+        {% if form.numero_documento.errors %}
+                <span class="error-msg text-red-500 text-xs mt-1 block">{{ form.numero_documento.errors.0 }}</span>
+        {% endif %}
     </div>
 
     <!-- Correo y Teléfono (Dos columnas) -->
@@ -79,7 +86,9 @@
             <i class="fa-solid fa-envelope input-icon"></i>
             <input type="email" id="email" name="email" placeholder="correo@ejemplo.com" class="border-slate-700">
         </div>
-        <span class="error-msg hidden" id="email-error">El correo electrónico es obligatorio.</span>
+        {% if form.numero_documento.errors %}
+                <span class="error-msg text-red-500 text-xs mt-1 block">{{ form.numero_documento.errors.0 }}</span>
+        {% endif %}
     </div>
 
     <div class="form-group">
@@ -88,7 +97,11 @@
             <i class="fa-solid fa-phone input-icon"></i>
             <input type="tel" id="phone" name="phone" placeholder="3001234567" maxlength="10" class="border-slate-700">
         </div>
-        <span class="error-msg hidden" id="phone-error">El teléfono es obligatorio.</span>
+        {% if form.telefono.errors %}
+        <span class="error-msg text-red-500 text-xs mt-1 block">
+            {{ form.telefono.errors.0 }}
+        </span>
+    {% endif %}
     </div>
 
     <!-- Ciudad y Fecha de Nacimiento (Dos columnas) -->
@@ -143,20 +156,4 @@
 <p class="terms-text">
     Al registrarte, aceptas nuestros términos y condiciones
 </p>
-
-<!-- ALERTA FLOTANTE (MODAL CENTRADO EN PANTALLA) -->
-<div id="success-alert" class="modal-overlay hidden">
-    <div class="modal-card">
-        <div class="modal-icon">
-            <i class="fa-solid fa-circle-check"></i>
-        </div>
-        <h3 class="modal-title">¡REGISTRO EXITOSO!</h3>
-        <p class="modal-text">Tu cuenta en <strong>Beyond Go</strong> ha sido creada correctamente.</p>
-        <button type="button" id="close-modal-btn" class="btn btn-primary btn-modal" data-url="{% url 'login' %}">CONTINUAR</button>
-    </div>
-</div>
-
-<!-- Carga del archivo JavaScript -->
-<script src="{% static 'js/form-validation.js' %}"></script>
-
 {% endblock %}

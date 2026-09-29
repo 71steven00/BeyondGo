@@ -36,7 +36,6 @@ class Usuario(AbstractUser):
         ('CE', 'Cédula de Extranjería'),
         ('PA', 'Pasaporte'),
         ('PPT', 'Permiso de Permanecia Temporal'),
-        ('TI', 'Tarjeta de Identidad'),
         ('RC', 'Registro Civil'),
         ('NU', 'Otro')
     )
