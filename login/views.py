@@ -1,3 +1,4 @@
+from django.contrib.auth import login as auth_login
 from django.urls import reverse, reverse_lazy
 from django.conf import settings
 from django.shortcuts import render
@@ -26,45 +27,64 @@ def limpiar_mensajes_previos(request):
         )  # Borra los mensajes añadidos en la petición actual
     
 class CustomLoginView(LoginView):
-  template_name = 'inicio_sesion.html'
-  
-  def get_success_url(self):
-        user = self.request.user
-        # Redirige al panel administrativo si es superusuario o miembro del staff
-        if user.is_superuser or user.is_staff:
-            return reverse('dashboard_admin')
+    template_name = 'inicio_sesion.html'
+    
+    def get_success_url(self):
+            user = self.request.user
+            # Redirige al panel administrativo si es superusuario o miembro del staff
+            if user.is_authenticated and (user.is_superuser or user.is_staff):
+                return reverse('dashboard_admin')
+            # Para usuarios normales, redirige a la URL configurada por defecto
+            return super().get_success_url()
+        
 
-        # Para usuarios normales, redirige a la URL configurada por defecto
-        return super().get_success_url()
-  
-  def form_invalid(self, form):
-        # Capturar el correo ingresado en el campo username
-        email = form.cleaned_data.get('username') or self.request.POST.get('username')
+    def form_valid(self, form):
+            # limpiar mensajes de error o intentos previos al momento de iniciar sesion
+            limpiar_mensajes_previos(self.request)
+            
+            auth_login(self.request, form.get_user())
+            
+            # 2. Iniciar sesión formalmente (aquí se llena request.user)
+            user = form.get_user()
+            auth_login(self.request, user)
+
+            # 3. Crear el mensaje de bienvenida para que se muestre tras la redirección
+            nombre = getattr(user, 'nombre', None) or getattr(user, 'first_name', None) or user.username
+            messages.success(self.request, f'Bienvenido, {nombre}.')
+
+            # 4. Redirigir a la URL correspondiente según el rol del usuario autenticado
+            return redirect(self.get_success_url())
         
-        limpiar_mensajes_previos(self.request)
-        
-        # 1. Validar si el correo no existe en la BD
-        if not Usuario.objects.filter(email=email).exists():
-            messages.error(self.request, 'El correo electrónico no coincide con ninguna cuenta.')
-        else:
-            # 2. Si existe, consultar los intentos en django-axes
-            attempt = AccessAttempt.objects.filter(username=email).first()
-            intentos_realizados = attempt.failures_since_start if attempt else 1
-            max_intentos = getattr(settings, 'AXES_FAILURE_LIMIT', 3)
-            intentos_restantes = max(0, max_intentos - intentos_realizados)
-        
-            if intentos_restantes <= 0:
-                messages.error(
-                    self.request,
-                    'Has superado los 3 intentos permitidos. Tu cuenta ha sido bloqueada. Contacta al administrador.',
-                )
+    def form_invalid(self, form):
+            # Capturar el correo ingresado en el campo username
+            email = form.cleaned_data.get('username') or self.request.POST.get('username')
+            
+            limpiar_mensajes_previos(self.request)
+            
+            # 1. Validar si el correo no existe en la BD
+            if not Usuario.objects.filter(email=email).exists():
+                messages.error(self.request, 'El correo electrónico no coincide con ninguna cuenta.')
             else:
-                messages.error(
-                    self.request,
-                    f'Contraseña incorrecta.',
-                )
+                # 2. Si existe, consultar los intentos en django-axes
+                attempt = AccessAttempt.objects.filter(username=email).first()
+                intentos_realizados = attempt.failures_since_start if attempt else 1
+                max_intentos = getattr(settings, 'AXES_FAILURE_LIMIT', 3)
+                intentos_restantes = max(0, max_intentos - intentos_realizados)
+            
+                if intentos_restantes <= 0:
+                    messages.error(
+                        self.request,
+                        'Has superado los 3 intentos permitidos. Tu cuenta ha sido bloqueada. Contacta al administrador.',
+                    )
+                else:
+                    messages.error(
+                        self.request,
+                        f'Contraseña incorrecta.',
+                    )
 
-        return super().form_invalid(form)
+            return super().form_invalid(form)
+    
+    
     
 def lockout_respuesta_personalizada(request, credentials, *args, **kwargs):
   limpiar_mensajes_previos(request)
@@ -204,10 +224,12 @@ class CustomRegisterView(FormView):
     def form_invalid(self, form):
         # 1. Limpiar mensajes previos en la sesión
         limpiar_mensajes_previos(self.request)
-
-        # 2. Recorrer los errores devueltos por el formulario y generar las alertas rojas
-        for field, errors in form.errors.items():
-            for error in errors:
-                messages.error(self.request, error)
-
+        primer_error = 'Por favor, corrige los errores del formulario.'
+        
+        if form.errors:
+            for field, errors in form.errors.items():
+                if errors:
+                    primer_error = errors[0]
+                    break
+        messages.error(self.request, primer_error)
         return super().form_invalid(form)

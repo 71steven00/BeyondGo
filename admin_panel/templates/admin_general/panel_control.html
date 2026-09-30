@@ -6,7 +6,10 @@
 {% block header_title %}Informacion de ventas{% endblock %}
 {% block header_subtitle %}Métricas de rendimiento en tiempo real para Aquitania{% endblock %}
 
+
 {% block content %}
+{% include 'components/server_alert.html' %}
+
 <div class="space-y-6">
     
     <!-- Tarjeta Principal: Paquetes más vendidos -->
@@ -111,4 +114,8 @@
     </div>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/animaciones_alertas.js' %}"></script>
 {% endblock %}
