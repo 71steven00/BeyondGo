@@ -36,8 +36,7 @@ class Usuario(AbstractUser):
         ('CE', 'Cédula de Extranjería'),
         ('PA', 'Pasaporte'),
         ('PPT', 'Permiso de Permanecia Temporal'),
-        ('RC', 'Registro Civil'),
-        ('NU', 'Otro')
+        ('RC', 'Registro Civil')
     )
     username= None
     first_name = models.CharField(max_length=50,blank=False,verbose_name="Nombre")
@@ -145,7 +144,7 @@ class Admin(models.Model):
         return f"Admin: {self.usuario.first_name} {self.usuario.last_name} ({self.numero_documento})"
     
 class Cliente(Usuario):
-    tipo_documento = models.CharField(max_length=5, choices=Usuario.TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento')
+    tipo_documento = models.CharField(max_length=5, choices=Usuario.TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento', blank=False)
     numero_documento = models.CharField(max_length=20, unique=True, blank=False, verbose_name='Numero de documento')
     fecha_nacimiento = models.DateField(blank=False, null=False, verbose_name='Fecha de nacimiento')
 
