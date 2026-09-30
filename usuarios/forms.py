@@ -3,6 +3,14 @@ from django.core.exceptions import ValidationError
 from .models import Cliente, Usuario
 
 class RegistroClienteForm(forms.ModelForm):
+    last_name = forms.CharField(
+        max_length=150,
+        required=True,
+        error_messages={
+            'required': 'Este campo es obligatorio.'
+        }
+    )
+    
     password = forms.CharField(min_length=8, max_length=14)
     confirmar_contrasena = forms.CharField()
 
@@ -38,7 +46,11 @@ class RegistroClienteForm(forms.ModelForm):
 
         if password and confirmar_contrasena and password != confirmar_contrasena:
             self.add_error('confirmar_contrasena', 'Las contraseñas no coinciden.')
-
+        elif not password or not confirmar_contrasena:
+            if not password:
+                self.add_error('password', 'la contraseña es requerida.')
+            if not confirmar_contrasena:
+                self.add_error('confirmar_contrasena', 'Debes confirmar la contraseña')
         return cleaned_data
 
     def save(self, commit=True):
