@@ -1,3 +1,4 @@
+from django.http import HttpResponseRedirect
 from django.contrib.auth import login as auth_login
 from django.urls import reverse, reverse_lazy
 from django.conf import settings
@@ -39,76 +40,78 @@ class CustomLoginView(LoginView):
         
 
     def form_valid(self, form):
-            # limpiar mensajes de error o intentos previos al momento de iniciar sesion
-            limpiar_mensajes_previos(self.request)
-            
-            auth_login(self.request, form.get_user())
-            
-            # 2. Iniciar sesión formalmente (aquí se llena request.user)
-            user = form.get_user()
-            auth_login(self.request, user)
-
-            # 3. Crear el mensaje de bienvenida para que se muestre tras la redirección
-            nombre = getattr(user, 'nombre', None) or getattr(user, 'first_name', None) or user.username
-            messages.success(self.request, f'Bienvenido, {nombre}.')
-
-            # 4. Redirigir a la URL correspondiente según el rol del usuario autenticado
-            return redirect(self.get_success_url())
+        user = form.get_user() # obtenemos la instancia del usuario que intenta autenticarse
         
-    def form_invalid(self, form):
-            # Capturar el correo ingresado en el campo username
-            email = form.cleaned_data.get('username') or self.request.POST.get('username')
-            
+        #verificacion de seguridad: si la cuenta esta bloqueada o inactiva
+        if user and not user.is_active:
             limpiar_mensajes_previos(self.request)
-            
-            # 1. Validar si el correo no existe en la BD
-            if not Usuario.objects.filter(email=email).exists():
-                messages.error(self.request, 'El correo electrónico no coincide con ninguna cuenta.')
-            else:
-                # 2. Si existe, consultar los intentos en django-axes
-                attempt = AccessAttempt.objects.filter(username=email).first()
-                intentos_realizados = attempt.failures_since_start if attempt else 1
-                max_intentos = getattr(settings, 'AXES_FAILURE_LIMIT', 3)
-                intentos_restantes = max(0, max_intentos - intentos_realizados)
-            
-                if intentos_restantes <= 0:
-                    messages.error(
-                        self.request,
-                        'Has superado los 3 intentos permitidos. Tu cuenta ha sido bloqueada. Contacta al administrador.',
-                    )
-                else:
-                    messages.error(
-                        self.request,
-                        f'Contraseña incorrecta.',
-                    )
+            messages.error(self.request, 'Tu cuenta ha sido bloqueada por superar el límite de intentos. Contacta al administrador.')
+            return redirect('login')
+        
+        
+        
+        limpiar_mensajes_previos(self.request)
+        auth_login(self.request, user) # Iniciar sesión formalmente (aquí se llena request.user)
+        
+        session_key = f'intentos_login_{user.pk}'
+        self.request.session.pop(session_key, None)
+        
+        # Crear el mensaje de bienvenida para que se muestre tras la redirección
+        nombre = getattr(user, 'nombre', None) or getattr(user, 'first_name', None) or user.username
+        messages.success(self.request, f'Bienvenido, {nombre}.')
 
+        # Redirigir a la URL correspondiente según el rol del usuario autenticado
+        return HttpResponseRedirect(self.get_success_url())
+    
+    
+    
+    def form_invalid(self, form):
+        email = form.cleaned_data.get('username') or self.request.POST.get('username')
+        limpiar_mensajes_previos(self.request)
+
+        user_obj = Usuario.objects.filter(email=email).first()
+
+        # 1. Si el correo no existe en la BD
+        if not user_obj:
+            messages.error(self.request, 'El correo electrónico no coincide con ninguna cuenta.')
             return super().form_invalid(form)
+
+        # 2. Si la cuenta ya está desactivada/bloqueada
+        if not user_obj.is_active:
+            messages.error(
+                self.request,
+                'Tu cuenta ha sido bloqueada por superar el límite de intentos. Contacta al administrador.'
+            )
+            return super().form_invalid(form)
+        
+        session_key = f'intentos_login_{user_obj.pk}'
+        # Se usará una variable en sesión para contar las fallas del usuario actual
+        intentos = self.request.session.get(session_key, 0) + 1
+        self.request.session[session_key] = intentos
+        self.request.session.modified = True
+
+        max_intentos = getattr(settings, 'AXES_FAILURE_LIMIT', 3)
+        intentos_restantes = max_intentos - intentos
+
+        if intentos_restantes <= 0:
+            user_obj.is_active = False
+            user_obj.save()
+            # Limpiamos el contador de la sesión
+            self.request.session.pop(f'intentos_{user_obj.pk}', None)
+
+            messages.error(
+                self.request,
+                'Has superado los 3 intentos permitidos. Tu cuenta ha sido bloqueada. Contacta al administrador.'
+            )
+        else:
+            messages.error(
+                self.request,
+                f'Contraseña incorrecta. Te quedan {intentos_restantes} intento(s).'
+            )
+
+        return super().form_invalid(form)
     
     
-    
-def lockout_respuesta_personalizada(request, credentials, *args, **kwargs):
-  limpiar_mensajes_previos(request)
-
-  email = ''
-  if credentials and isinstance(credentials, dict):
-    email = credentials.get('username') or credentials.get('email') or ''
-  if not email:
-    email = request.POST.get('username') or ''
-  email = email.strip()
-
-  # Validar si el correo existía en la base de datos
-  if email and not Usuario.objects.filter(email__iexact=email).exists():
-    messages.error(
-        request, 'El correo electrónico no coincide con ninguna cuenta.'
-    )
-    return render(request, 'inicio_sesion.html', status=200)
-
-  messages.error(
-      request,
-      'Has superado los 3 intentos permitidos. Tu cuenta ha sido bloqueada.'
-      ' Contacta al administrador.',
-  )
-  return render(request, 'inicio_sesion.html', status=403)
 
 
 
