@@ -1,5 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.contrib.auth import login as auth_login
+from django.http import request
 from django.urls import reverse, reverse_lazy
 from django.conf import settings
 from django.shortcuts import render
@@ -127,6 +128,8 @@ class PerfilUsuarioView(DetailView):
 def registro(request):
     return render(request, 'registro.html')
 
+"""Parte de recuperación de contraseña"""
+"""Logica de 3 pasos: 1. Solicitar correo """
 class PasswordResetEmailView(TemplateView):
     # Paso 1: Solicitar correo electrónico
         template_name = 'reset_password/email_form.html'
@@ -138,8 +141,7 @@ class PasswordResetEmailView(TemplateView):
         # Validar si el correo existe en la base de datos
             if not Usuario.objects.filter(email=email).exists():
                 messages.error(self.request, 'El correo electrónico no coincide con ninguna cuenta.')
-            return self.render_to_response(self.get_context_data())
-        
+                return self.render_to_response(self.get_context_data())
             # Guardar el correo en sesión para los siguientes pasos
             self.request.session['email_recuperacion'] = email
         
@@ -149,36 +151,57 @@ class PasswordResetEmailView(TemplateView):
             messages.success(self.request, 'Se ha enviado un código de verificación a tu correo.')
             return redirect('password_request')
 
-
+"""2. Verificar código,"""
 class PasswordResetCodeView(TemplateView):
-    """Paso 2: Verificar el código de 6 dígitos"""
-    template_name = 'reset_password/codigo_verif.html'
+        """Paso 2: Verificar o reenviar el código de 6 dígitos"""
+        template_name = 'reset_password/codigo_verif.html'
 
-    def post(self, request, *args, **kwargs):
-        limpiar_mensajes_previos(self.request)
+        def get(self, request, *args, **kwargs):
+            """Maneja el clic en 'Reenviar código'"""
+            email = request.session.get('email_recuperacion')
         
-        # Captura directa del input de 6 dígitos del HTML
-        codigo_ingresado = self.request.POST.get('codigo', '').strip()
-        codigo_valido_en_sesion = self.request.session.get('codigo_recuperacion')
+            if not email:
+                messages.error(request, 'No hay un proceso de recuperación activo. Inicia de nuevo.')
+                return redirect('password_reset')
         
-        if not codigo_ingresado or codigo_ingresado != codigo_valido_en_sesion:
-            messages.error(self.request, 'El código de verificación es incorrecto.')
+            limpiar_mensajes_previos(request)
+        
+        # Generar o actualizar el código de recuperación en sesión
+            request.session['codigo_recuperacion'] = '123456'  # O tu lógica de código aleatorio
+        
+            messages.success(request, 'Se ha reenviado un nuevo código de verificación a tu correo.')
             return self.render_to_response(self.get_context_data())
+
+        def post(self, request, *args, **kwargs):
+            limpiar_mensajes_previos(self.request)
+        
+        # Captura directa del input oculto de 6 dígitos del HTML
+            codigo_ingresado = self.request.POST.get('codigo', '').strip()
+            codigo_valido_en_sesion = self.request.session.get('codigo_recuperacion')
+        
+            if not codigo_ingresado or codigo_ingresado != codigo_valido_en_sesion:
+                messages.error(self.request, 'El código de verificación es incorrecto.')
+                return self.render_to_response(self.get_context_data())
             
-        messages.success(self.request, 'Código verificado correctamente.')
-        return redirect('nueva_contraseña')
+            messages.success(self.request, 'Código verificado correctamente.')
+            return redirect('nueva_contraseña')
 
-
+"""3. Ingresar nueva contraseña"""
 class PasswordResetNewView(TemplateView):
     """Paso 3: Ingresar la nueva contraseña"""
     template_name = 'reset_password/nueva_contraseña.html'
 
     def post(self, request, *args, **kwargs):
+        limpiar_mensajes_previos(self.request)
         nueva_password = self.request.POST.get('new_password')
         confirmar_password = self.request.POST.get('confirm_password')
-        
-        limpiar_mensajes_previos(self.request)
-        
+
+        # 1. Validar que los campos obligatorios no estén vacíos
+        if not nueva_password or not confirmar_password:
+            messages.error(self.request, 'Por favor, completa todos los campos obligatorios.')
+            return self.render_to_response(self.get_context_data())
+
+        # 2. Validar que ambas contraseñas coincidan
         if nueva_password != confirmar_password:
             messages.error(self.request, 'Las contraseñas no coinciden.')
             return self.render_to_response(self.get_context_data())
