@@ -14,40 +14,43 @@
     <form method="post" action="" novalidate id="login-form">
         {% csrf_token %}
         
-        <div class="form-group">
-            <label for="new_password" class="form-label">Nueva contraseña</label>
-            <div class="input-wrapper">
-                <span class="input-icon-left text-emerald-400">
-                    <i class="fa-solid fa-lock"></i>
-                </span>
-                <input type="password" name="new_password" id="new_password" required placeholder="••••••••" class="form-input">
-                <span class="input-icon-right">
-                    <i class="fa-solid fa-eye"></i>
-                </span>
-            </div>
-        </div>
+        <!-- Campo: Nueva Contraseña -->
+<div class="form-group mb-4">
+    <label for="new_password" class="form-label block text-xs text-slate-300 font-medium mb-2 text-left">Nueva contraseña</label>
+    <div class="input-wrapper relative">
+        <span class="input-icon-left absolute inset-y-0 left-0 flex items-center pl-3 text-emerald-400">
+            <i class="fa-solid fa-lock"></i>
+        </span>
+        <input type="password" name="new_password" id="new_password" required placeholder="••••••••" class="form-input w-full pl-10 pr-10 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+        
+        <!-- Botón limpio sin onclick -->
+        <button type="button" class="toggle-password absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-white transition z-10" data-target="new_password">
+            <i class="fa-solid fa-eye-slash"></i>
+        </button>
+    </div>
+</div>
 
-        <div class="form-group">
-            <label for="confirm_password" class="form-label">Confirmar nueva contraseña</label>
-            <div class="input-wrapper">
-                <span class="input-icon-left text-emerald-400">
-                    <i class="fa-solid fa-lock"></i>
-                </span>
-                <input type="password" name="confirm_password" id="confirm_password" required placeholder="••••••••" class="form-input">
-                <span class="input-icon-right">
-                    <i class="fa-solid fa-eye"></i>
-                </span>
-            </div>
-        </div>
+<!-- Campo: Confirmar Contraseña -->
+<div class="form-group mb-4">
+    <label for="confirm_password" class="form-label block text-xs text-slate-300 font-medium mb-2 text-left">Confirmar contraseña</label>
+    <div class="input-wrapper relative">
+        <span class="input-icon-left absolute inset-y-0 left-0 flex items-center pl-3 text-emerald-400">
+            <i class="fa-solid fa-lock"></i>
+        </span>
+        <input type="password" name="confirm_password" id="confirm_password" required placeholder="••••••••" class="form-input w-full pl-10 pr-10 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+        
+        <button type="button" class="toggle-password absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-white transition z-10" data-target="confirm_password">
+            <i class="fa-solid fa-eye-slash"></i>
+        </button>
+    </div>
+</div>
 
         <button type="submit" class="btn-primary">
             ACTUALIZAR CONTRASEÑA
         </button>
+        {% include 'components/server_alert.html' %}
     </form>
-
-    <div class="auth-footer">
-        <a href="{% url 'password_request' %}" class="back-link">
-            <i class="fa-solid fa-arrow-left"></i> Volver a verificación
-        </a>
-    </div>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/form-validation.js' %}"></script>
 {% endblock %}
