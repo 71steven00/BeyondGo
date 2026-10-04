@@ -18,11 +18,11 @@
     <div class="form-group mb-4">
         <label for="email" class="block text-xs text-slate-300 font-medium mb-1 text-left">Correo electrónico</label>
         <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-                <i class="fa-solid fa-envelope text-xs"></i>
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-emerald-400">
+                <i class="fa-solid fa-envelope"></i>
             </span>
             <input type="email" name="username" id="id_email" required placeholder="admin@beyondgo.com" 
-                class="w-full pl-9 pr-3 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+                class="w-full pl-9 pr-3 py-4 bg-slate-800/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
         </div>
         {% if form.username.errors %}
             <span class="error-msg text-red-500 text-xs mt-1 block">
@@ -37,11 +37,13 @@
             <label for="password" class="block text-xs text-slate-300 font-medium text-left">Contraseña</label>
         </div>
         <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-                <i class="fa-solid fa-lock text-xs"></i>
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-emerald-400">
+                <i class="fa-solid fa-lock input-icon"></i>
             </span>
             <input type="password" name="password" id="id_password" required placeholder="••••••••" 
-                class="w-full pl-9 pr-3 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+                class="w-full pl-9 pr-10 py-4 bg-slate-800/80 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+            <button type="button" class=" toggle-password absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-white transition z-10" data-target="id_password">
+            <i class="fa-solid fa-eye-slash"></i> </button>
         </div>
         {% if form.password.errors %}
             <span class="error-msg text-red-500 text-xs mt-1 block">
@@ -53,7 +55,7 @@
 
     <!-- Botón de Envío -->
     <button type="submit" 
-        class="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold rounded-xl text-xs uppercase tracking-wider transition duration-200 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 mt-2">
+        class="w-full py-3 px-4 bg-[#84ff60] w-full py-3 px-4 bg-[#84ff60] text-slate-950 font-semibold rounded-xl text-xs uppercase flex items-center justify-center gap-2 transition-all duration-200 hover:bg-[#9aff7c] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(132,255,96,0.25)]">
         <span>Ingresar</span>
         <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
     </button>
@@ -70,5 +72,6 @@
 {% endblock %}
 
 {% block extra_js %}
+    <script src="{% static 'js/form-validation.js' %}"></script>
     <script src="{% static 'js/animaciones_alertas.js' %}"></script>
 {% endblock %}
