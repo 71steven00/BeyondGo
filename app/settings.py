@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
+from email.header import Header
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     #Apps o modulos agregados
-    'login',
     'usuarios',
     'admin_panel',
 
@@ -143,10 +143,19 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
 MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
+    "default": {
+        "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
+        "OPTIONS": {
+            "host": "sandbox.smtp.mailtrap.io",
+            "port": 2525,
+            "username": "8933a630d8fa34",
+            "password": "1cd01ab1738d66",
+            "use_tls": True,
+        },
+    }
 }
+DEFAULT_FROM_EMAIL = 'BeyondGo <soporte@beyondgo.com>'
+
 # indicarle a Django cuál es el modelo de usuario personalizado en el archivo de configuración principal.
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
@@ -159,3 +168,4 @@ AXES_LOCK_OUT_BY_USER_OR_FAIL = False
 AXES_LOCK_OUT_AT_FAILURE = False
 AXES_ENABLED = True
 AXES_FAILURE_LIMIT = 3
+
