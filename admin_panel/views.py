@@ -41,3 +41,6 @@ def dashboard_super_admin(request):
         'paquetes': paquetes_mas_vendidos,
     }
     return render(request, 'admin_general/panel_control.html', context)
+
+def solicitudes_miembros(request):
+    return render(request, 'admin_general/solicitudes_miembros.html')
