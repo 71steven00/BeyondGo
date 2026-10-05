@@ -3,6 +3,8 @@ from django.shortcuts import render
 # Create your views here.
 def visualizar_template(request):
     return render(request, 'admin_general/gestion_usuarios.html')
+def visualizar_template2(request):
+    return render(request, 'admin_general/solicitudes_miembros.html')
 
 
 def dashboard_super_admin(request):
@@ -41,5 +43,3 @@ def dashboard_super_admin(request):
         'paquetes': paquetes_mas_vendidos,
     }
     return render(request, 'admin_general/panel_control.html', context)
-
-    
