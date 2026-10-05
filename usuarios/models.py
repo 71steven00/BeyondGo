@@ -146,67 +146,7 @@ class Restaurante(models.Model):
         verbose_name_plural = 'Restaurantes'
 
     def __str__(self):
-        return f"Restaurante/Admin: {self.Usuario.first_name}"
-
-class Admin(models.Model):
-    usuario = models.OneToOneField(
-        Usuario,
-        on_delete=models.CASCADE,
-        related_name='perfil_admin',
-        verbose_name='Cuenta de usuario'
-    )
-    tipo_documento = models.CharField(max_length=5, choices=Usuario.TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento')
-    numero_documento = models.CharField(max_length=20, unique=True, blank=False, verbose_name='Número de documento')
-    fecha_nacimiento = models.DateField(blank=False, null=False, verbose_name='Fecha de nacimiento')
-
-    class Meta:
-        verbose_name = 'Administrador general'
-        verbose_name_plural = 'Administradores generales'
-
-    def save(self, *args, **kwargs):
-        # Asegura que al guardar el perfil, el rol del usuario base sea 'ADMIN'
-        with transaction.atomic():
-            self.usuario.rol = 'ADMIN'
-            self.usuario.save()
-            super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"Admin: {self.usuario.first_name} {self.usuario.last_name} ({self.numero_documento})"
-    
-class Cliente(Usuario):
-    tipo_documento = models.CharField(max_length=5, choices=Usuario.TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento', blank=False)
-    numero_documento = models.CharField(max_length=20, unique=True, blank=False, verbose_name='Numero de documento')
-    fecha_nacimiento = models.DateField(blank=False, null=False, verbose_name='Fecha de nacimiento')
-
-    class Meta:
-        verbose_name = 'Cliente'
-        verbose_name_plural = 'Clientes'
-
-    def save(self, *args, **kwargs):
-        # Asigna automáticamente el rol 'TURISTA' al guardarse
-        self.rol = 'TURISTA'
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"TURISTA: {self.first_name} {self.last_name} {self.numero_documento}"
-
-class Guia(Usuario):
-    tipo_documento = models.CharField(max_length=5, choices=Usuario.TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento')
-    numero_documento = models.CharField(max_length=20, unique=True, blank=False, verbose_name='Numero de documento')
-    fecha_nacimiento = models.DateField(blank=False, null=False, verbose_name='Fecha de nacimiento')
-    certificado_turismo = models.ImageField(upload_to='certificados_guias/', blank=True, null=True, verbose_name="Certificado de Turismo")
-    class Meta:
-        verbose_name = 'Guia'
-        verbose_name_plural = 'Guias'
-
-    def save(self, *args, **kwargs):
-        # Asigna automáticamente el rol 'TURISTA' al guardarse
-        self.rol = 'GUIA'
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"GUIA: {self.first_name} {self.last_name} {self.numero_documento}"
-
+        return self.nombre
 
 
 
