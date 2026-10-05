@@ -11,7 +11,6 @@ def rol_requerido(*roles_permitidos):
     """
 
     def decorator(view_func): # def decorator(view_func):: Es la función interna que recibe como parámetro view_func, la cual representa la función de tu vista en views.py que estás intentando proteger.
-
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
             # 1. Verifica si el usuario inició sesión
@@ -26,8 +25,7 @@ def rol_requerido(*roles_permitidos):
             # 3. Si no cumple los requisitos, rechaza el acceso y redirige
             messages.error(request, "No tienes permisos para acceder a esta página.")
             # Intenta regresar a la página previa; si no existe, redirige al inicio
-            return redirect(request.META.get('HTTP_REFERER', 'index_usuario'))
-            
+            return redirect('home')
         return wrapper
     return decorator
 

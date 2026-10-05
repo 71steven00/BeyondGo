@@ -1,13 +1,15 @@
 {% extends 'base_login.html' %}
 {% load static %}
 
-{% block title %}Verificar Código{% endblock %}
+{% block title %}BeyondGo | Verificar Código{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/codigo_verif.css' %}">
 {% endblock %}
-
+{% block home_url %}{% url 'login'%}{% endblock %}
+{%block home_title%}Volver al inicio de sesion{% endblock %}
 {% block content %}
+{% include 'components/server_alert.html' %}
     <div class="icon-lock-container">
         <i class="fa-solid fa-lock"></i>
     </div>
@@ -38,11 +40,18 @@
         <button type="submit" class="btn-primary mt-4">
             VERIFICAR <i class="fa-solid fa-arrow-right"></i>
         </button>
-        {% include 'components/server_alert.html' %}
     </form>
 
     <div class="resend-container">
-        <a href="{% url 'password_request' %}" id="resend-code-btn" class="resend-link">REENVIAR CÓDIGO</a>
-    </div>
+        <a href="{% url 'password_request' %}?resend=true" 
+        class="text-emerald-400 hover:text-emerald-300 font-semibold text-xs transition-colors duration-200 hover:underline inline-flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate-right text-xs"></i>
+            <span>Reenviar código</span>
+        </a>
+</div>
+{% block extra_js %}
+    <script src="{% static 'js/form-validation.js' %}"></script>
+    <script src="{% static 'js/animaciones_alertas.js' %}"></script>
+{% endblock %}
 {% endblock %}
 

@@ -86,8 +86,8 @@
             <i class="fa-solid fa-envelope input-icon"></i>
             <input value="{{ form.email.value|default:'' }}" type="email" id="email" name="email" placeholder="correo@ejemplo.com" class="border-slate-700">
         </div>
-        {% if form.numero_documento.errors %}
-                <span class="error-msg text-red-500 text-xs mt-1 block">{{ form.numero_documento.errors.0 }}</span>
+        {% if form.email.errors %}
+            <span class="error-msg text-red-500 text-xs mt-1 block">{{ form.email.errors.0 }}</span>
         {% endif %}
     </div>
 
@@ -125,11 +125,12 @@
         <div class="input-container">
             <i class="fa-solid fa-lock input-icon"></i>
             <input type="password" id="password" name="password" placeholder="••••••••" maxlength="14" class="border-slate-700">
-            <i class="fa-solid fa-eye toggle-password"></i>
+            <button type="button" class="top-1/2 -translate-y-1/2 toggle-password absolute right-0 flex items-center pr-3 text-slate-400 hover:text-white transition z-10" data-target="password">
+            <i class="fa-solid fa-eye-slash"></i> </button>
         </div>
-        {% if form.telefono.errors %}
+        {% if form.password.errors %}
             <span class="error-msg text-red-500 text-xs mt-1 block">
-                {{ form.telefono.errors.0 }}
+                {{ form.password.errors.0 }}
             </span>
         {% endif %}
     </div>
@@ -139,11 +140,12 @@
         <div class="input-container">
             <i class="fa-solid fa-lock input-icon"></i>
             <input type="password" id="confirmar_contrasena" name="confirmar_contrasena" placeholder="••••••••" maxlength="14" class="border-slate-700">
-            <i class="fa-solid fa-eye toggle-password"></i>
+            <button type="button" class="top-1/2 -translate-y-1/2 toggle-password absolute right-0 flex items-center pr-3 text-slate-400 hover:text-white transition z-10" data-target="confirmar_contrasena">
+            <i class="fa-solid fa-eye-slash"></i> </button>
         </div>
-        {% if form.telefono.errors %}
+        {% if form.password.errors %}
             <span class="error-msg text-red-500 text-xs mt-1 block">
-                {{ form.telefono.errors.0 }}
+                {{ form.password.errors.0 }}
             </span>
         {% endif %}
     </div>
@@ -165,5 +167,7 @@
 
 {% block extra_js %}
     <script src="{%static 'js/animaciones_alertas.js'%}"></script>
+    <script src="{%static 'js/form-validation.js'%}"></script>
+
 
 {% endblock %}
