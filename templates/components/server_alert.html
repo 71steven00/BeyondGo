@@ -1,25 +1,22 @@
 {% if messages %}
-<!-- Contenedor flotante en la parte superior central con transición de opacidad -->
-<div id="alert-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4 transition-opacity duration-500 opacity-100">
+<!-- Contenedor flotante en la parte superior central -->
+<div id="alert-container" class="fixed top-6 right-14 z-50 w-full max-w-sm px-4 transition-opacity duration-500 opacity-100">
     {% for message in messages %}
-    <div class="bg-red-100/95 border border-red-200 text-red-600 rounded-2xl p-3 shadow-xl flex items-center gap-3 text-xs font-semibold mb-2">
-        <!-- Ícono de admiración rojo -->
-        <div class="w-6 h-6 rounded-full bg-red-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">
-            !
+        <div class="rounded-2xl p-3 shadow-xl flex items-center gap-3 text-xs font-semibold mb-2
+            {% if message.tags == 'success' %}
+                bg-green-100/95 border border-green-200 text-green-700
+            {% else %}
+                bg-red-100/95 border border-red-200 text-red-600
+            {% endif %}">
+            
+            <!-- Ícono dinámico según el tipo de mensaje -->
+            <div class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-xs font-bold text-white
+                {% if message.tags == 'success' %} bg-green-600 {% else %} bg-red-600 {% endif %}">
+                {% if message.tags == 'success' %} ✓ {% else %} ! {% endif %}
+            </div>
+
+            <span>{{ message }}</span>
         </div>
-        <span>{{ message }}</span>
-    </div>
     {% endfor %}
 </div>
-
-<!-- Script para desvanecer y eliminar la alerta a los 2 segundos -->
-<script>
-  setTimeout(function() {
-    const alertBox = document.getElementById('alert-container');
-    if (alertBox) {
-      alertBox.style.opacity = '0'; // Efecto de desvanecimiento
-      setTimeout(() => alertBox.remove(), 500); // Elimina el elemento del HTML tras la animación
-    }
-  }, 2000); // 2000 ms = 2 segundos
-</script>
 {% endif %}

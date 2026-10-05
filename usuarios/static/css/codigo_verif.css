@@ -1,0 +1,124 @@
+/* Estilos para la vista de Verificación de Código OTP - Sincronizado con Registro */
+.icon-lock-container {
+    width: 3.5rem;
+    height: 3.5rem;
+    background-color: #252b40;
+    border: 1px solid #50566b;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #84ff60;
+    font-size: 1.25rem;
+    margin: 0 auto 1.5rem auto;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+.auth-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #fcfcfc;
+    text-align: center;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.auth-subtitle {
+    font-size: 0.85rem;
+    color: #d7d9e0;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.otp-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.otp-input {
+    width: 3rem !important;
+    height: 3rem !important;
+    background-color: #252b40 !important;
+    border: 1px solid #50566b !important;
+    border-radius: 0.75rem !important;
+    text-align: center;
+    font-size: 1.125rem !important;
+    font-weight: bold !important;
+    color: #ffffff !important;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.otp-input:focus {
+    border-color: #84ff60 !important;
+    background-color: #292f45;
+    box-shadow: 0 0 0 2px rgba(132, 255, 96, 0.15) !important;
+}
+
+.btn-primary {
+    width: 100%;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: #84ff60;
+    color: #10151f;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(132, 255, 96, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    margin-top: 5px;
+    margin-bottom: 1.25rem;
+}
+
+.btn-primary:hover {
+    background-color: #9aff7c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(132, 255, 96, 0.25);
+}
+
+.resend-container {
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.resend-link {
+    font-size: 12px;
+    font-weight: 800;
+    color: #84ff60;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+}
+
+.resend-link:hover {
+    text-decoration: underline;
+}
+
+.auth-footer {
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 1.25rem;
+}
+
+.back-link {
+    font-size: 12px;
+    color: #858b9d;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.back-link:hover {
+    color: #ffffff;
+}

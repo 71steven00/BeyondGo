@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 def visualizar_template(request):
-    return render(request, '')
+    return render(request, 'admin_general/gestion_usuarios.html')
 
 
 def dashboard_super_admin(request):
@@ -42,5 +42,4 @@ def dashboard_super_admin(request):
     }
     return render(request, 'admin_general/panel_control.html', context)
 
-def solicitudes_miembros(request):
-    return render(request, 'admin_general/solicitudes_miembros.html')
+    

@@ -1,0 +1,122 @@
+/* Estilos para la vista de Enviar Correo - Sincronizado con Registro */
+.auth-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #fcfcfc;
+    text-align: center;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.auth-subtitle {
+    font-size: 0.85rem;
+    color: #d7d9e0;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.input-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.form-input {
+    width: 100%;
+    height: 48px;
+    box-sizing: border-box;
+    padding: 0 16px 0 42px;
+    background-color: #252b40;
+    border: 1px solid #50566b;
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.form-input:focus {
+    border-color: #84ff60 !important;
+    background-color: #292f45;
+    box-shadow: 0 0 0 2px rgba(132, 255, 96, 0.15);
+}
+
+.form-input::placeholder {
+    color: #858b9d;
+}
+
+.input-icon-left {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #84ff60;
+    font-size: 15px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.btn-primary {
+    width: 100%;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: #84ff60;
+    color: #10151f;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(132, 255, 96, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    margin-top: 5px;
+    margin-bottom: 1.5rem;
+}
+
+.btn-primary:hover {
+    background-color: #9aff7c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(132, 255, 96, 0.25);
+}
+
+.auth-footer {
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 1.25rem;
+}
+
+.back-link {
+    font-size: 12px;
+    color: #858b9d;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.back-link:hover {
+    color: #ffffff;
+}

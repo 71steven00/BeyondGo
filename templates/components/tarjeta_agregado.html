@@ -1,0 +1,58 @@
+<!-- Modal / Tarjeta Base Reutilizable -->
+<div id="{{ modal_id|default:'modalAgregar' }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
+  
+  <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 md:p-8 my-8">
+    
+    <!-- Header del Modal -->
+    <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+      <div>
+        <h3 class="text-xl font-bold text-slate-900">{{ modal_titulo|default:"Nuevo Registro" }}</h3>
+        <p class="text-xs text-slate-400 mt-1">{{ modal_subtitulo|default:"Completa la información requerida." }}</p>
+      </div>
+      <button type="button" onclick="cerrarModal('{{ modal_id|default:'modalAgregar' }}')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Formulario Dinámico -->
+    <form method="POST" action="{{ form_action }}" enctype="multipart/form-data" class="space-y-4">
+      {% csrf_token %}
+
+      <!-- Aquí se inyecta el contenido específico de cada modelo -->
+      {% block modal_body %}
+      {% endblock %}
+
+      <!-- Botones de Acción -->
+      <div class="flex items-center gap-3 pt-4 mt-6">
+        <button type="button" onclick="cerrarModal('{{ modal_id|default:'modalAgregar' }}')"
+          class="w-1/2 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition text-center">
+          Cancelar
+        </button>
+        <button type="submit"
+          class="w-1/2 py-2.5 px-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold transition shadow-sm text-center">
+          {{ btn_texto|default:"Guardar" }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- Scripts genéricos para controlar cualquier modal por su ID -->
+<script>
+  function abrirModal(idModal) {
+    const modal = document.getElementById(idModal);
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+  }
+
+  function cerrarModal(idModal) {
+    const modal = document.getElementById(idModal);
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  }
+</script>

@@ -18,6 +18,7 @@ class UsuarioManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('rol', 'ADMIN')
         return self.create_user(email, password, **extra_fields) 
     
 # 1. MODELO DE USUARIO PRINCIPAL
@@ -36,16 +37,17 @@ class Usuario(AbstractUser):
         ('CE', 'Cédula de Extranjería'),
         ('PA', 'Pasaporte'),
         ('PPT', 'Permiso de Permanecia Temporal'),
-        ('TI', 'Tarjeta de Identidad'),
-        ('RC', 'Registro Civil'),
-        ('NU', 'Otro')
+        ('RC', 'Registro Civil')
     )
     username= None
     first_name = models.CharField(max_length=50,blank=False,verbose_name="Nombre")
     telefono = PhoneNumberField(blank=False, region="CO")
     email = models.EmailField(max_length=254, unique= True, blank= False)
     rol = models.CharField(max_length=10,choices=ROL_CHOICES,default='TURISTA',verbose_name="Rol")
-
+    tipo_documento = models.CharField(max_length=5, choices=TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento')
+    numero_documento = models.CharField(max_length=20, unique=True, null=True, blank=True, verbose_name='Número de documento')
+    fecha_nacimiento = models.DateField(null=True, blank=True, verbose_name='Fecha de nacimiento')
+    
     # CONFIGURACIÓN PARA INICIO DE SESIÓN CON EMAIL
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'telefono']  # Solo los campos obligatorios al usar 'createsuperuser'
@@ -54,15 +56,41 @@ class Usuario(AbstractUser):
     # Campos para el control de intentos fallidos de autentificacion.
     AXES_FAILURE_LIMIT = 5
     AXES_LOCKOUT_TEMPLATE = None
+    
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.get_rol_display()})"
+    
+    
+class Guia(models.Model):
+    usuario = models.OneToOneField(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='perfil_guia',
+        verbose_name='Cuenta de usuario'
+    )
+    certificado_turismo = models.ImageField(upload_to='certificados_guias/', blank=True, null=True, verbose_name="Certificado de Turismo")
+
+    class Meta:
+        verbose_name = 'Perfil Guía'
+        verbose_name_plural = 'Perfiles Guías'
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            self.usuario.rol = 'GUIA'
+            self.usuario.save()
+            super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Guía: {self.usuario.first_name}"
 
 
 
 # 2. CATÁLOGO GLOBAL DE SERVICIOS (Reutilizable para Hoteles y Restaurantes)
-class servicios(models.Model):
+class Servicio(models.Model):
     nombre = models.CharField(max_length=50, unique=True, verbose_name="Nombre de Servicio")
 
     class Meta:
-        verbose_name = "Servicios"
+        verbose_name = "Servicio"
         verbose_name_plural = "Servicios"
 
     def __str__(self):
@@ -70,112 +98,56 @@ class servicios(models.Model):
 
 
 # 3. PERFIL DE ADMINISTRADOR DE HOTEL
-class hoteles(models.Model):
+class Hotel(models.Model):
     usuario = models.OneToOneField(
         Usuario,
         on_delete=models.CASCADE,
         related_name= 'perfil_admin_hotel',
-        verbose_name= 'Cuenta de Usuario'
+        verbose_name= 'Administrador del Hotel'
     )
+    nombre = models.CharField(max_length=150, verbose_name='Nombre del Hotel')
     descripcion = models.TextField(blank=True, null = True, verbose_name= 'Detalles')
     direccion = models.CharField(max_length=200, verbose_name='Dirección') 
     ciudad = models.CharField(max_length=100, verbose_name='Ciudad') 
     pais = models.CharField(max_length=100, default='Colombia', verbose_name='País')  
     url_img = models.ImageField(upload_to='hoteles/', blank=True, null=True, verbose_name='Imagen del Hotel')
     rtn = models.CharField(max_length=50, unique=True, verbose_name='Registro Nacional de Turismo (RNT/RTN)') 
-    registro_sanitario = models.CharField(max_length=50, blank=True, null=True, verbose_name='Registro Sanitario')
-    
+    licencia_sanitaria = models.CharField(max_length=50, blank=True, null=True, verbose_name='Registro Sanitario')
     # servicios = esta en una clase aparte. Unión ManyToMany con el modelo Servicio
-    servicios = models.ManyToManyField('servicios', blank=True, related_name="Hoteles", verbose_name="Servicios Ofrecidos")
+    servicios = models.ManyToManyField('Servicio', blank=True, related_name="servicios_hotel", verbose_name="Servicios Ofrecidos")
 
     class Meta:
-        verbose_name = "Administrador de Hotel"
-        verbose_name_plural = "Administradores de Hoteles" 
+        verbose_name = "Hotel"
+        verbose_name_plural = "Hoteles" 
 
     def __str__(self):
-        return f"Hotel/Admin: {self.usuario.first_name}"
+        return self.nombre
 
 
 # 4. PERFIL DE ADMINISTRADOR DE RESTAURANTE
-class restaurantes (models.Model):
-    Usuario = models.OneToOneField(
+class Restaurante(models.Model):
+    usuario = models.OneToOneField(
         Usuario,
         on_delete = models.CASCADE,
-        related_name = 'perfil_admin_restaurante',
-        verbose_name = 'Cuenta de usuario'
+        related_name = 'restaurantes',
+        verbose_name = 'Administrador del Restaurante'
     )
+    nombre = models.CharField(max_length=150, verbose_name='Nombre del Restaurante')
     descripcion = models.TextField(blank=True, null=True, verbose_name= 'Detalles')
     direccion = models.CharField(max_length=200, verbose_name='Direccion')  
     ciudad = models.CharField(max_length=100, verbose_name='Ciudad')  
     pais = models.CharField(max_length=100, default='Colombia', verbose_name='Pais')     
     url_img = models.ImageField(upload_to='restaurantes/', blank=True, null=True, verbose_name='Imagen del Restaurante')
-
     # servicios = esta en una clase aparte. Unión ManyToMany con el modelo Servicio
-    servicios = models.ManyToManyField('servicios', blank=True, related_name='Restaurantes', verbose_name='Servicios Ofrecidos')
+    servicios = models.ManyToManyField('Servicio', blank=True, related_name='servicios_restaurante', verbose_name='Servicios Ofrecidos')
 
     class Meta:
-        verbose_name = 'Administrador de Restaurante'
-        verbose_name_plural = 'Administradores de Restaurantes'
+        verbose_name = 'Restaurante'
+        verbose_name_plural = 'Restaurantes'
 
     def __str__(self):
-        return f"Restaurante/Admin: {self.Usuario.first_name}"
+        return self.nombre
 
-class Admin(models.Model):
-    usuario = models.OneToOneField(
-        Usuario,
-        on_delete=models.CASCADE,
-        related_name='perfil_admin',
-        verbose_name='Cuenta de usuario'
-    )
-    tipo_documento = models.CharField(max_length=5, choices=Usuario.TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento')
-    numero_documento = models.CharField(max_length=20, unique=True, blank=False, verbose_name='Número de documento')
-    fecha_nacimiento = models.DateField(blank=False, null=False, verbose_name='Fecha de nacimiento')
 
-    class Meta:
-        verbose_name = 'Administrador general'
-        verbose_name_plural = 'Administradores generales'
 
-    def save(self, *args, **kwargs):
-        # Asegura que al guardar el perfil, el rol del usuario base sea 'ADMIN'
-        with transaction.atomic():
-            self.usuario.rol = 'ADMIN'
-            self.usuario.save()
-            super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"Admin: {self.usuario.first_name} {self.usuario.last_name} ({self.numero_documento})"
-    
-class Cliente(Usuario):
-    tipo_documento = models.CharField(max_length=5, choices=Usuario.TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento')
-    numero_documento = models.CharField(max_length=20, unique=True, blank=False, verbose_name='Numero de documento')
-    fecha_nacimiento = models.DateField(blank=False, null=False, verbose_name='Fecha de nacimiento')
-
-    class Meta:
-        verbose_name = 'Cliente'
-        verbose_name_plural = 'Clientes'
-
-    def save(self, *args, **kwargs):
-        # Asigna automáticamente el rol 'TURISTA' al guardarse
-        self.rol = 'TURISTA'
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"TURISTA: {self.first_name} {self.last_name} {self.numero_documento}"
-
-class Guia(Usuario):
-    tipo_documento = models.CharField(max_length=5, choices=Usuario.TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento')
-    numero_documento = models.CharField(max_length=20, unique=True, blank=False, verbose_name='Numero de documento')
-    fecha_nacimiento = models.DateField(blank=False, null=False, verbose_name='Fecha de nacimiento')
-    certificado_turismo = models.ImageField(upload_to='certificados_guias/', blank=True, null=True, verbose_name="Certificado de Turismo")
-    class Meta:
-        verbose_name = 'Guia'
-        verbose_name_plural = 'Guias'
-
-    def save(self, *args, **kwargs):
-        # Asigna automáticamente el rol 'TURISTA' al guardarse
-        self.rol = 'GUIA'
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"GUIA: {self.first_name} {self.last_name} {self.numero_documento}"
 
