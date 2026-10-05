@@ -1,0 +1,58 @@
+{% extends 'base_login.html' %}
+{% load static %}
+
+{% block title %}BeyondGo | Nueva Contraseña{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/nueva_contraseña.css' %}">
+{% endblock %}
+{% block home_url %}{% url 'login'%}{% endblock %}
+{%block home_title%}Volver al inicio de sesion{% endblock %}
+{% block content %}
+    <h2 class="auth-title">NUEVA CONTRASEÑA</h2>
+    <p class="auth-subtitle">Ingresa tu nueva contraseña para acceder a tu cuenta.</p>
+
+    <form method="post" action="" novalidate id="login-form">
+        {% csrf_token %}
+        
+        <!-- Campo: Nueva Contraseña -->
+<div class="form-group mb-4">
+    <label for="new_password" class="form-label block text-xs text-slate-300 font-medium mb-2 text-left">Nueva contraseña</label>
+    <div class="input-wrapper relative flex items-center">
+        <span class="pt-12 input-icon-left absolute inset-y-0 left-1 flex items-center pl-3 text-emerald-400 pointer-events-none">
+            <i class="fa-solid fa-lock"></i>
+        </span>
+        <input type="password" name="new_password" id="new_password" required placeholder="••••••••" class="form-input w-full pl-10 pr-10 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+        
+        <!-- Botón del ojo con sus IDs, data-target y clases intactas -->
+        <button type="button" class="pt-12 toggle-password absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-white transition z-10" data-target="new_password">
+            <i class="fa-solid fa-eye-slash"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Campo: Confirmar Contraseña -->
+<div class="form-group mb-4">
+    <label for="confirm_password" class="form-label block text-xs text-slate-300 font-medium mb-2 text-left">Confirmar contraseña</label>
+    <div class="input-wrapper relative">
+        <span class="pt-12 input-icon-left absolute inset-y-0 left-1 flex items-center pl-3 text-emerald-400">
+            <i class="fa-solid fa-lock"></i>
+        </span>
+        <input type="password" name="confirm_password" id="confirm_password" required placeholder="••••••••" class="form-input w-full pl-10 pr-10 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+        
+        <button type="button" class="pt-12 toggle-password absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-white transition z-10" data-target="confirm_password">
+            <i class="fa-solid fa-eye-slash"></i>
+        </button>
+    </div>
+</div>
+
+        <button type="submit" class="btn-primary">
+            ACTUALIZAR CONTRASEÑA
+        </button>
+        {% include 'components/server_alert.html' %}
+    </form>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/form-validation.js' %}"></script>
+<script src="{% static 'js/animaciones_alertas.js' %}"></script>
+{% endblock %}

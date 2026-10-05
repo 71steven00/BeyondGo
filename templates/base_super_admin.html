@@ -35,7 +35,7 @@
 
             <!-- Enlaces de Navegación Principal -->
             <nav class="space-y-1">
-                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-emerald-600 text-white font-medium text-sm transition">
+                <a href="{%url 'dashboard_admin'%}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-emerald-600 text-white font-medium text-sm transition">
                     <i class="fa-solid fa-folder-open w-5"></i> Panel de control
                 </a>
                 <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white text-slate-400 text-sm transition justify-between">
@@ -50,7 +50,7 @@
                 <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white text-slate-400 text-sm transition">
                     <i class="fa-solid fa-calendar-days w-5"></i> Calendario
                 </a>
-                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white text-slate-400 text-sm transition">
+                <a href="{% url 'gestion_usuarios'%}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white text-slate-400 text-sm transition">
                     <i class="fa-solid fa-user-group w-5"></i> Usuarios
                 </a>
                 <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white text-slate-400 text-sm transition">
@@ -108,6 +108,8 @@
         </main>
     </div>
 
-    {% block extra_js %}{% endblock %}
+    {% block extra_js %}
+    <script src="{% static 'js/form-validation.js' %}"></script>
+    {% endblock %}
 </body>
 </html>

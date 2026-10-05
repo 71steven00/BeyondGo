@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Cliente, Usuario
+from .models import Usuario
 
 class RegistroClienteForm(forms.ModelForm):
     last_name = forms.CharField(
@@ -15,7 +15,7 @@ class RegistroClienteForm(forms.ModelForm):
     confirmar_contrasena = forms.CharField()
 
     class Meta:
-        model = Cliente
+        model = Usuario
         fields = [
             'first_name',
             'last_name',
@@ -35,7 +35,7 @@ class RegistroClienteForm(forms.ModelForm):
 
     def clean_numero_documento(self):
         numero_documento = self.cleaned_data.get('numero_documento')
-        if Cliente.objects.filter(numero_documento=numero_documento).exists():
+        if Usuario.objects.filter(numero_documento=numero_documento).exists():
             raise ValidationError('Este número de documento ya está registrado.')
         return numero_documento
 
@@ -54,8 +54,10 @@ class RegistroClienteForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
-        cliente = super().save(commit=False)
-        cliente.set_password(self.cleaned_data['password'])
+        usuario = super().save(commit=False)
+        usuario.set_password(self.cleaned_data['password'])
+        usuario.rol = 'TURISTA'
+        
         if commit:
-            cliente.save()
-        return cliente
+            usuario.save()
+        return usuario
