@@ -1,15 +1,4 @@
 /* Estilos para la vista de Nueva Contraseña - Sincronizado con Registro */
-.auth-card {
-    background-color: #171d2b;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 1rem;
-    padding: 2.5rem 2rem;
-    width: 100%;
-    max-width: 440px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
-    margin: 0 auto;
-}
-
 .auth-title {
     font-size: 1.25rem;
     font-weight: 800;
