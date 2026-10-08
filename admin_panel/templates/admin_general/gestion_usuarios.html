@@ -33,12 +33,13 @@
         </div>
       </div>
       <div>
-        <div class="text-3xl font-extrabold text-slate-900 mb-3">4</div>
+        <div class="text-3xl font-extrabold text-slate-900 mb-3">{{ total_usuarios }}</div>
         <div class="flex flex-wrap gap-1.5">
-          <span class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold">1 Turista</span>
-          <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-bold">1 Guía</span>
-          <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-bold">1 Operador</span>
-          <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold">1 Administrador</span>
+          <span class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold">{{cant_turistas}} Turista</span>
+          <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-bold">{{cant_guias}} Guía</span>
+          <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-bold">{{cant_restaurantes}} Restaurantes</span>
+          <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-bold">{{cant_hoteles}} Hoteles</span>
+          <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold">{{cant_admins}} Administrador</span>
         </div>
       </div>
     </div>
@@ -52,10 +53,10 @@
         </div>
       </div>
       <div>
-        <div class="text-3xl font-extrabold text-slate-900 mb-2">3</div>
+        <div class="text-3xl font-extrabold text-slate-900 mb-2">{{usuarios_activos}}</div>
         <div class="text-emerald-500 text-xs font-semibold flex items-center gap-1">
           <i class="fa-solid fa-arrow-trend-up"></i>
-          <span>+5% este mes</span>
+          <span>+{{ porcentaje_crecimiento }}% este mes</span>
         </div>
       </div>
     </div>
@@ -69,7 +70,7 @@
         </div>
       </div>
       <div>
-        <div class="text-3xl font-extrabold text-slate-900 mb-2">1</div>
+        <div class="text-3xl font-extrabold text-slate-900 mb-2">{{pendiente_usuarios}}</div>
         <div class="text-amber-500 text-xs font-semibold">
           Requiere acción
         </div>
@@ -79,156 +80,133 @@
   </div>
 
   <!-- Tabla de Usuarios -->
-  <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+  <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-visible">
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead>
-          <tr class="border-b border-slate-100 text-[11px] font-bold tracking-wider text-slate-400 uppercase bg-slate-50/50">
-            <th class="py-4 px-6">Usuario</th>
-            <th class="py-4 px-6">Rol</th>
-            <th class="py-4 px-6">Estado</th>
-            <th class="py-4 px-6">Fecha de Registro</th>
-            <th class="py-4 px-6 text-right">Acciones</th>
-          </tr>
+            <tr class="text-xs font-bold text-slate-400 uppercase border-b border-slate-100">
+                <th class="py-4 px-6">Usuario</th>
+                <th class="py-4 px-6">Rol</th>
+                <th class="py-4 px-6">Estado</th>
+                <th class="py-4 px-6">Fecha de Registro</th>
+                <th class="py-4 px-6 text-right">Acciones</th>
+            </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100 text-xs">
-          
-          <!-- Fila 1: Mateo Rivera -->
-          <tr class="hover:bg-slate-50/60 transition">
-            <td class="py-4 px-6">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-slate-500 text-white font-bold flex items-center justify-center text-xs">
-                  MR
-                </div>
-                <div>
-                  <div class="font-bold text-slate-900">Mateo Rivera</div>
-                  <div class="text-slate-400 text-[11px]">mateo.r@example.com</div>
-                </div>
-              </div>
-            </td>
-            <td class="py-4 px-6">
-              <span class="px-3 py-1 bg-blue-50 text-blue-600 font-bold rounded-full text-[11px]">Turista</span>
-            </td>
-            <td class="py-4 px-6">
-              <span class="inline-flex items-center gap-1.5 font-medium text-slate-700">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Activo
-              </span>
-            </td>
-            <td class="py-4 px-6 text-slate-500">12 de Octubre, 2023</td>
-            <td class="py-4 px-6 text-right">
-              <button class="text-slate-400 hover:text-slate-600 p-1">
-                <i class="fa-solid fa-ellipsis"></i>
-              </button>
-            </td>
-          </tr>
+        <tbody class="divide-y divide-slate-100 text-sm">
+            {% for usuario in page_obj%}
+            <tr class="hover:bg-slate-50/50 transition">
+                <!-- Usuario (Iniciales + Nombre + Correo) -->
+                <td class="py-4 px-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-500 text-white font-bold flex items-center justify-center text-xs uppercase">
+                            {{ usuario.first_name|slice:":1" }}{{ usuario.last_name|slice:":1" }}
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-800">{{ usuario.get_full_name|default:usuario.username }}</div>
+                            <div class="text-xs text-slate-400">{{ usuario.email }}</div>
+                        </div>
+                    </div>
+                </td>
 
-          <!-- Fila 2: Elena Vargas -->
-          <tr class="hover:bg-slate-50/60 transition">
-            <td class="py-4 px-6">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-slate-400 text-white font-bold flex items-center justify-center text-xs">
-                  EV
-                </div>
-                <div>
-                  <div class="font-bold text-slate-900">Elena Vargas</div>
-                  <div class="text-slate-400 text-[11px]">elena.guia@boyaca.co</div>
-                </div>
-              </div>
-            </td>
-            <td class="py-4 px-6">
-              <span class="px-3 py-1 bg-emerald-50 text-emerald-600 font-bold rounded-full text-[11px]">Guía Turístico</span>
-            </td>
-            <td class="py-4 px-6">
-              <span class="inline-flex items-center gap-1.5 font-medium text-slate-700">
-                <span class="w-2 h-2 rounded-full bg-amber-500"></span> Pendiente de verificación
-              </span>
-            </td>
-            <td class="py-4 px-6 text-slate-500">04 de Junio, 2024</td>
-            <td class="py-4 px-6 text-right">
-              <button class="text-slate-400 hover:text-slate-600 p-1">
-                <i class="fa-solid fa-ellipsis"></i>
-              </button>
-            </td>
-          </tr>
+                <!-- Rol con insignias de colores dinámicas -->
+                <td class="py-4 px-6">
+                    {% if usuario.rol == 'TURISTA' %}
+                        <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-semibold">Turista</span>
+                    {% elif usuario.rol == 'GUIA' %}
+                        <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-semibold">Guía Turístico</span>
+                    {% elif usuario.rol == 'OPERADOR' %}
+                        <span class="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-xs font-semibold">Operador Local</span>
+                    {% else %}
+                        <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold">{{ usuario.get_rol_display|default:usuario.rol }}</span>
+                    {% endif %}
+                </td>
 
-          <!-- Fila 3: Carlos Mendoza -->
-          <tr class="hover:bg-slate-50/60 transition">
-            <td class="py-4 px-6">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-slate-600 text-white font-bold flex items-center justify-center text-xs">
-                  CM
-                </div>
-                <div>
-                  <div class="font-bold text-slate-900">Carlos Mendoza</div>
-                  <div class="text-slate-400 text-[11px]">carlos@aventurasaquitania.com</div>
-                </div>
-              </div>
-            </td>
-            <td class="py-4 px-6">
-              <span class="px-3 py-1 bg-indigo-50 text-indigo-600 font-bold rounded-full text-[11px]">Operador Local</span>
-            </td>
-            <td class="py-4 px-6">
-              <span class="inline-flex items-center gap-1.5 font-medium text-slate-700">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Activo
-              </span>
-            </td>
-            <td class="py-4 px-6 text-slate-500">15 de Febrero, 2024</td>
-            <td class="py-4 px-6 text-right">
-              <button class="text-slate-400 hover:text-slate-600 p-1">
-                <i class="fa-solid fa-ellipsis"></i>
-              </button>
-            </td>
-          </tr>
+                <!-- Estado -->
+                <td class="py-4 px-6">
+                    {% if usuario.is_active %}
+                        <span class="flex items-center gap-2 text-xs font-medium text-slate-700">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Activo
+                        </span>
+                    {% else %}
+                        <span class="flex items-center gap-2 text-xs font-medium text-amber-600">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span> Pendiente de verificación
+                        </span>
+                    {% endif %}
+                </td>
 
-          <!-- Fila 4: Sofia Gomez -->
-          <tr class="hover:bg-slate-50/60 transition">
-            <td class="py-4 px-6">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-[#0d1527] text-white font-bold flex items-center justify-center text-xs">
-                  SG
-                </div>
-                <div>
-                  <div class="font-bold text-slate-900">Sofia Gomez</div>
-                  <div class="text-slate-400 text-[11px]">admin@beyondgo.com</div>
-                </div>
-              </div>
-            </td>
-            <td class="py-4 px-6">
-              <span class="px-3 py-1 bg-slate-100 text-slate-700 font-bold rounded-full text-[11px]">Administrador</span>
-            </td>
-            <td class="py-4 px-6">
-              <span class="inline-flex items-center gap-1.5 font-medium text-slate-700">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Activo
-              </span>
-            </td>
-            <td class="py-4 px-6 text-slate-500">01 de Enero, 2023</td>
-            <td class="py-4 px-6 text-right">
-              <button class="text-slate-400 hover:text-slate-600 p-1">
-                <i class="fa-solid fa-ellipsis"></i>
-              </button>
-            </td>
-          </tr>
+                <!-- Fecha de registro formateada -->
+                <td class="py-4 px-6 text-slate-500">
+                    {{ usuario.date_joined|date:"d \d\e F, Y" }}
+                </td>
+                <!-- Seccion de Acciones -->
+                    {% url 'gestion_usuarios_accion' usuario.pk 'ver' as url_ver_val %}
+                    {% url 'gestion_usuarios_accion' usuario.pk 'editar' as url_edit_val %}
+                    {% url 'gestion_usuarios_accion' usuario.pk 'estado' as url_status_val %}
+                    {% url 'gestion_usuarios_accion' usuario.pk 'eliminar' as url_del_val %}
 
+                    {% include 'components/dropdown_acciones.html' with usuario=usuario url_ver=url_ver_val url_editar=url_edit_val url_estado=url_status_val url_eliminar=url_del_val texto_ver="Ver perfil" %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="py-8 text-center text-slate-400">
+                    No se encontraron usuarios registrados.
+                </td>
+            </tr>
+            {% endfor %}
         </tbody>
       </table>
     </div>
 
-    <!-- Paginación Footer -->
-    <div class="py-4 px-6 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-      <div>Mostrando 1–4 de 4 usuarios</div>
-      <div class="flex items-center gap-2">
-        <button disabled class="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-300 cursor-not-allowed">
-          <i class="fa-solid fa-chevron-left text-[10px]"></i>
-        </button>
-        <button class="w-7 h-7 rounded-lg bg-[#0d1527] text-white font-bold flex items-center justify-center text-xs">
-          1
-        </button>
-        <button disabled class="w-7 h-7 rounded-lg border border-slate-200 flex items-center justify-center text-slate-300 cursor-not-allowed">
-          <i class="fa-solid fa-chevron-right text-[10px]"></i>
-        </button>
+    <!-- Pie de página con Paginación -->
+  <div class="flex items-center justify-between px-6 py-4 bg-white border-t border-slate-100 rounded-b-2xl">
+      <!-- Texto con la cantidad total de registros -->
+      <div class="text-xs text-slate-500 font-medium">
+          Mostrando {{ page_obj.start_index }}–{{ page_obj.end_index }} de {{ page_obj.paginator.count }} usuarios
       </div>
-    </div>
+
+      <!-- Botones de Navegación -->
+      <div class="flex items-center gap-1.5">
+          <!-- Botón Flecha Izquierda (<) -->
+          {% if page_obj.has_previous %}
+              <a href="?page={{ page_obj.previous_page_number }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+                  <i class="fa-solid fa-chevron-left text-xs"></i>
+              </a>
+          {% else %}
+              <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-300 cursor-not-allowed">
+                  <i class="fa-solid fa-chevron-left text-xs"></i>
+              </span>
+          {% endif %}
+
+          <!-- Botones Numéricos (1, 2, 3...) -->
+          {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+                  <!-- Página activa (fondo oscuro) -->
+                  <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-900 text-white font-bold text-xs shadow-sm">
+                      {{ num }}
+                  </span>
+              {% else %}
+                  <!-- Otras páginas (fondo claro) -->
+                  <a href="?page={{ num }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-semibold transition-colors">
+                      {{ num }}
+                  </a>
+              {% endif %}
+          {% endfor %}
+
+          <!-- Botón Flecha Derecha (>) -->
+          {% if page_obj.has_next %}
+              <a href="?page={{ page_obj.next_page_number }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+                  <i class="fa-solid fa-chevron-right text-xs"></i>
+              </a>
+          {% else %}
+              <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-300 cursor-not-allowed">
+                  <i class="fa-solid fa-chevron-right text-xs"></i>
+              </span>
+          {% endif %}
+      </div>
   </div>
 
 </div>
+{% if mostrar_modal %}
+  {% include 'modales/modal_usuario.html' %}
+{% endif %}
 {% endblock %}

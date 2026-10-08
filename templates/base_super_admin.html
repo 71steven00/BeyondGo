@@ -13,9 +13,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Tu archivo CSS externo -->
-    <link rel="stylesheet" href="{% static 'css/admin-styles.css' %}">
+     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     {% block extra_head %}{% endblock %}
+
+    {% block bloque_alertas %}
+        {% include 'components/server_alert.html' %}
+    {% endblock bloque_alertas %}
 </head>
 <body class="bg-slate-100 text-slate-800 flex h-screen overflow-hidden">
 
@@ -48,7 +52,7 @@
                 <a href="{%url 'dashboard_admin'%}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if request.resolver_match.url_name == 'dashboard_admin' %}bg-emerald-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %} font-medium text-sm transition">
                     <i class="fa-solid fa-folder-open w-5"></i> Panel de control
                 </a>
-                <a href="{% url 'solicitudes_miembros' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if request.resolver_match.url_name == 'solicitudes_miembros' %}bg-emerald-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %} font-medium text-sm transition"">
+                <a href="{% url 'solicitudes_miembros' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if request.resolver_match.url_name == 'solicitudes_miembros' %}bg-emerald-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %} font-medium text-sm transition">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-users w-5"></i> Solicitudes Miembros
                     </div>
@@ -80,9 +84,12 @@
             <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white text-sm transition">
                 <i class="fa-solid fa-user w-5"></i> Mi Perfil
             </a>
-            <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-rose-500/10 text-rose-400 text-sm transition">
-                <i class="fa-solid fa-right-from-bracket w-5"></i> Cerrar sesión
-            </a>
+            <form action="{% url 'logout' %}" method="post" class="w-full">
+                {% csrf_token %}
+                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-rose-500/10 text-rose-400 text-sm transition">
+                    <i class="fa-solid fa-right-from-bracket w-5"></i> Cerrar sesión
+                </button>
+            </form>
         </div>
     </aside>
 
@@ -151,7 +158,8 @@
     </script>
     
     {% block extra_js %}
-    <script src="{% static 'js/form-validation.js' %}"></script>
+        <script src="{% static 'js/form-validation.js' %}"></script>
+        <script src="{% static 'js/form-animaciones_alertas.js' %}"></script>
     {% endblock %}
 </body>
 </html>

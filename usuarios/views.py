@@ -31,7 +31,7 @@ from usuarios.forms import RegistroClienteForm
 @rol_requerido('ADMIN')
 def dashboard_admin(request):
     # Retorna la plantilla HTML del panel general
-    return render(request, 'ruta/del/archivo.html')
+    return render(request, 'admin_general/panel_control.html')
 
 
 # 2. Interfaz para Administrador de Hotel
@@ -62,14 +62,6 @@ def inicio_turista(request):
     return render(request, 'ruta/del/archivo.html')
 
 
-
-#{% if messages %}                                      {Esto va en el HTML de cada rol (ADMIN, ADMIN_HOTEL, ADMIN_RESTAURANTE, GUIA, TURISTA O CLIENTE)}
-#   {% for message in messages %}                       {Esto va en el HTML de cada rol (ADMIN, ADMIN_HOTEL, ADMIN_RESTAURANTE, GUIA, TURISTA O CLIENTE)}
-#     <div class="alert alert-{{ message.tags }}">      {Esto va en el HTML de cada rol (ADMIN, ADMIN_HOTEL, ADMIN_RESTAURANTE, GUIA, TURISTA O CLIENTE)}    
-#       {{ message }}                                   {Esto va en el HTML de cada rol (ADMIN, ADMIN_HOTEL, ADMIN_RESTAURANTE, GUIA, TURISTA O CLIENTE)}
-#     </div>                                            {Esto va en el HTML de cada rol (ADMIN, ADMIN_HOTEL, ADMIN_RESTAURANTE, GUIA, TURISTA O CLIENTE)}
-#   {% endfor %}                                        {Esto va en el HTML de cada rol (ADMIN, ADMIN_HOTEL, ADMIN_RESTAURANTE, GUIA, TURISTA O CLIENTE)}
-# {% endif %}                                           {Esto va en el HTML de cada rol (ADMIN, ADMIN_HOTEL, ADMIN_RESTAURANTE, GUIA, TURISTA O CLIENTE)}
 
 
 def limpiar_mensajes_previos(request):

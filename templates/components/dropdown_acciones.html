@@ -1,0 +1,55 @@
+<!-- Componente Reutilizable para Menú de Acciones -->
+<td class="px-6 py-4 text-right relative" x-data="{ open: false }">
+    <!-- Botón Tres Puntos -->
+    <button @click="open = !open" 
+            @click.away="open = false" 
+            type="button"
+            class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors">
+        <i class="fa-solid fa-ellipsis-vertical"></i>
+    </button>
+
+    <!-- Menú Flotante -->
+    <div x-show="open" 
+         x-cloak
+         x-transition
+         class="absolute right-6 top-10 w-44 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50 text-left">
+        
+        {% if url_ver %}
+            <a href="{{ url_ver }}" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                <i class="fa-regular fa-eye text-slate-400 w-4"></i>
+                <span>{{ texto_ver|default:"Ver perfil" }}</span>
+            </a>
+        {% endif %}
+
+        {% if url_editar %}
+            <a href="{{ url_editar }}" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                <i class="fa-regular fa-pen-to-square text-slate-400 w-4"></i>
+                <span>{{ texto_editar|default:"Editar" }}</span>
+            </a>
+        {% endif %}
+
+        {% if url_estado %}
+            {% if not usuario.is_active %}
+                <a href="{{ url_estado }}" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors">
+                    <i class="fa-regular fa-circle-check w-4"></i>
+                    <span>Activar</span>
+                </a>
+            {% else %}
+                <a href="{{ url_estado }}" class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-amber-600 hover:bg-amber-50 transition-colors">
+                    <i class="fa-regular fa-circle-pause w-4"></i>
+                    <span>Desactivar</span>
+                </a>
+            {% endif %}
+        {% endif %}
+
+        {% if url_eliminar %}
+            <div class="my-1 border-t border-slate-100"></div>
+            <!-- Se retira el confirm(...) nativo del navegador porque el modal autónomo de confirmación se encargará -->
+            <a href="{{ url_eliminar }}" 
+               class="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
+                <i class="fa-regular fa-trash-can w-4"></i>
+                <span>{{ texto_eliminar|default:"Eliminar" }}</span>
+            </a>
+        {% endif %}
+    </div>
+</td>
