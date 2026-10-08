@@ -1,0 +1,170 @@
+<!-- OVERLAY / FONDO OSCURO DEL MODAL -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
+  
+  <!-- TARJETA DEL MODAL -->
+  <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+    
+    <!-- HEADER / CABECERA -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+      <div>
+        <h3 class="text-base font-bold text-slate-800">
+          {% if accion == 'ver' %}Detalle del Usuario
+          {% elif accion == 'crear' %}Nuevo Usuario
+          {% elif accion == 'editar' %}Editar Usuario
+          {% elif accion == 'estado' %}Cambiar Estado
+          {% elif accion == 'eliminar' %}Eliminar Usuario
+          {% endif %}
+        </h3>
+        <p class="text-xs text-slate-400">
+          {% if accion == 'ver' %}Información registrada
+          {% elif accion == 'crear' %}Ingresa los datos para registrar un usuario
+          {% elif accion == 'editar' %}Modifica la información requerida
+          {% elif accion == 'estado' %}Confirmación de cambio de estado
+          {% elif accion == 'eliminar' %}Esta acción no se puede deshacer
+          {% endif %}
+        </p>
+      </div>
+
+      <!-- Botón Cerrar (X) -->
+      <a href="{% url 'gestion_usuarios' %}" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- FORMULARIO / CONTENIDO DE LA ACCIÓN -->
+    <form method="POST" action="{% if accion == 'crear' %}{% url 'gestion_usuarios' %}?a=crear{% elif user %}{% url 'gestion_usuarios_accion' user.id accion %}{% endif %}">
+      {% csrf_token %}
+
+      <div class="p-6">
+        
+        {% if accion == 'ver' %}
+          <!-- 1. DETALLE DE USUARIO -->
+          <div class="space-y-3 text-xs">
+            <div class="p-3 bg-slate-50 rounded-xl">
+              <span class="text-slate-400 font-medium block">Nombre completo</span>
+              <span class="text-slate-800 font-bold text-sm">{{ user.first_name }} {{ user.last_name }}</span>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-xl">
+              <span class="text-slate-400 font-medium block">Correo Electrónico</span>
+              <span class="text-slate-800 font-semibold">{{ user.email }}</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-3 bg-slate-50 rounded-xl">
+                <span class="text-slate-400 font-medium block">Teléfono</span>
+                <span class="text-slate-800 font-semibold">{{ user.telefono|default:"No registrado" }}</span>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-xl">
+                <span class="text-slate-400 font-medium block">Rol</span>
+                <span class="text-slate-800 font-semibold">{{ user.get_rol_display }}</span>
+              </div>
+            </div>
+          </div>
+
+
+        {% elif accion == 'crear' or accion == 'editar' %}
+          <!-- 2. FORMULARIO CREAR / EDITAR -->
+          <div class="space-y-4 text-xs">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-semibold text-slate-600 mb-1">Nombre</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.first_name.errors.0 }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-600 mb-1">Apellido</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.last_name.errors.0 }}</p>{% endif %}
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Correo Electrónico</label>
+              {{ form.email }}
+              {% if form.email.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-semibold text-slate-600 mb-1">Teléfono</label>
+                {{ form.telefono }}
+                {% if form.telefono.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.telefono.errors.0 }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-600 mb-1">Rol</label>
+                {{ form.rol }}
+                {% if form.rol.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.rol.errors.0 }}</p>{% endif %}
+              </div>
+            </div>
+
+            {% if accion == 'crear'%}
+            <div class="grid grid-cols-2 gap-3 border-t border-slate-100 pt-3">
+              <div>
+                <label class="block font-semibold text-slate-600 mb-1">Contraseña</label>
+                {{ form.password }}
+                {% if form.password.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.password.errors.0 }}</p>{% endif %}
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-600 mb-1">Confirmar Contraseña</label>
+                {{ form.confirm_password }}
+                {% if form.confirm_password.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.confirm_password.errors.0 }}</p>{% endif %}
+              </div>
+            </div>
+            {% endif %}
+
+            <div class="flex items-center gap-2 pt-1">
+              {{ form.is_active }}
+              <label for="{{ form.is_active.id_for_label }}" class="font-medium text-slate-700 cursor-pointer">
+                Usuario Activo
+              </label>
+            </div>
+          </div>
+
+
+        {% elif accion == 'estado' %}
+          <!-- 3. CAMBIAR ESTADO -->
+          <div class="text-center py-2 space-y-2">
+            <p class="text-xs text-slate-600">
+              ¿Deseas cambiar el estado de <strong>{{ user.first_name }} {{ user.last_name }}</strong> a 
+              <strong class="{% if user.is_active %}text-amber-600{% else %}text-emerald-600{% endif %}">
+                {% if user.is_active %}Inactivo{% else %}Activo{% endif %}
+              </strong>?
+            </p>
+          </div>
+
+
+        {% elif accion == 'eliminar' %}
+          <!-- 4. ELIMINAR -->
+          <div class="text-center py-2 space-y-2">
+            <p class="text-xs text-slate-600">
+              ¿Estás seguro de eliminar permanentemente a <strong>{{ user.first_name }} {{ user.last_name }}</strong>?
+            </p>
+          </div>
+
+        {% endif %}
+
+      </div>
+
+      <!-- FOOTER / BOTONES DE ACCIÓN -->
+      <div class="flex items-center justify-end gap-2 px-6 py-4 bg-slate-50/50 border-t border-slate-100">
+        <a href="{% url 'gestion_usuarios' %}" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+          Cancelar
+        </a>
+
+        {% if accion != 'ver' %}
+          <button type="submit" class="px-4 py-2 text-xs font-semibold text-white rounded-xl transition 
+          {% if accion == 'eliminar' %}bg-rose-600 hover:bg-rose-700{% else %}bg-emerald-600 hover:bg-emerald-700{% endif %}">
+            {% if accion == 'crear' %}Guardar Usuario
+            {% elif accion == 'editar' %}Guardar Cambios
+            {% elif accion == 'estado' %}Confirmar Cambio
+            {% elif accion == 'eliminar' %}Eliminar
+            {% endif %}
+          </button>
+        {% endif %}
+      </div>
+
+    </form>
+
+  </div>
+</div>
