@@ -109,10 +109,10 @@ class Hotel(models.Model):
     descripcion = models.TextField(blank=True, null = True, verbose_name= 'Detalles')
     direccion = models.CharField(max_length=200, verbose_name='Dirección') 
     ciudad = models.CharField(max_length=100, verbose_name='Ciudad') 
-    pais = models.CharField(max_length=100, default='Colombia', verbose_name='País')  
+    pais = models.CharField(max_length=100, blank=True, default='Colombia', verbose_name='País')  
     url_img = models.ImageField(upload_to='hoteles/', blank=True, null=True, verbose_name='Imagen del Hotel')
-    rtn = models.CharField(max_length=50, unique=True, verbose_name='Registro Nacional de Turismo (RNT/RTN)') 
-    licencia_sanitaria = models.CharField(max_length=50, blank=True, null=True, verbose_name='Registro Sanitario')
+    rtn = models.FileField(max_length=50, unique=True, verbose_name='Registro Nacional de Turismo (RNT/RTN)') 
+    licencia_sanitaria = models.FileField(max_length=50, blank=True, null=True, verbose_name='Registro Sanitario')
     # servicios = esta en una clase aparte. Unión ManyToMany con el modelo Servicio
     servicios = models.ManyToManyField('Servicio', blank=True, related_name="servicios_hotel", verbose_name="Servicios Ofrecidos")
 
@@ -138,6 +138,7 @@ class Restaurante(models.Model):
     ciudad = models.CharField(max_length=100, verbose_name='Ciudad')  
     pais = models.CharField(max_length=100, default='Colombia', verbose_name='Pais')     
     url_img = models.ImageField(upload_to='restaurantes/', blank=True, null=True, verbose_name='Imagen del Restaurante')
+    licencia_sanitaria = models.FileField(max_length=50, blank=True, null=True, verbose_name='Registro Sanitario')
     # servicios = esta en una clase aparte. Unión ManyToMany con el modelo Servicio
     servicios = models.ManyToManyField('Servicio', blank=True, related_name='servicios_restaurante', verbose_name='Servicios Ofrecidos')
 

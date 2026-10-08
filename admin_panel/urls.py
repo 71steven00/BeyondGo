@@ -8,4 +8,5 @@ urlpatterns = [
     path('gestion_usuarios/',views.gestion_usuarios , name='gestion_usuarios'),
     path('gestion_usuarios/<str:a>/', views.gestion_usuarios, name='gestion_usuarios_crear'),
     path('gestion_usuarios/<int:pk>/<str:a>/', views.gestion_usuarios, name='gestion_usuarios_accion'),
+    path('establecimientos/', views.gestion_establecimientos, name='establecimientos'),
 ]

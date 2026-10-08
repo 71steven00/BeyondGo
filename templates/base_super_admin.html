@@ -67,7 +67,7 @@
                 <a href="{% url 'gestion_usuarios'%}" class="flex items-center {% if request.resolver_match.url_name == 'gestion_usuarios' %}bg-emerald-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %} gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white text-slate-400 text-sm transition">
                     <i class="fa-solid fa-user-group w-5"></i> Usuarios
                 </a>
-                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white text-slate-400 text-sm transition">
+                <a href="{% url 'establecimientos' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if request.resolver_match.url_name == 'establecimientos' %}bg-emerald-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %} font-medium text-sm transition">
                     <i class="fa-solid fa-house-chimney w-5"></i> Establecimientos
                 </a>
                 <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white text-slate-400 text-sm transition">
