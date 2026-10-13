@@ -35,7 +35,10 @@ class RegistroClienteForm(forms.ModelForm):
 
     def clean_numero_documento(self):
         numero_documento = self.cleaned_data.get('numero_documento')
-        if Usuario.objects.filter(numero_documento=numero_documento).exists():
+        if numero_documento is None:
+            raise ValidationError('El campo no puede estar vacio')
+            return numero_documento
+        elif Usuario.objects.filter(numero_documento=numero_documento).exists():
             raise ValidationError('Este número de documento ya está registrado.')
         return numero_documento
 
@@ -78,6 +81,7 @@ class Editar_usuario(forms.ModelForm):
             'groups',
             'is_superuser',
             'is_staff',
+            'date_joined',
         ]
         widgets = {
             'first_name': forms.TextInput(attrs={
@@ -121,6 +125,13 @@ class UsuarioForm(forms.ModelForm):
         required=False,
         label="Confirmar contraseña"
     )
+    certificado_turismo = forms.ImageField(
+        required=False,
+        label="Certificado de Turismo (Solo Guías)",
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100'
+        })
+    )  
     class Meta: 
         model = Usuario
         fields = ['first_name', 'last_name', 'email', 'telefono', 'rol', 'is_active']

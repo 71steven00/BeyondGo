@@ -69,9 +69,12 @@
                 <span class="text-slate-400 font-normal">(1)</span>
             </div>
             
-            <button class="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-semibold bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition">
-                <i class="fa-regular fa-pen-to-square"></i> Editar estado
-            </button>
+            <!--Seccion de acciones reutilizando el componenete de forma generica-->
+            {% url 'gestion_establecimientos_accion' establecimiento.pk 'ver' as url_ver_val%}
+            {% url 'gestion_establecimientos_accion' establecimiento.pk 'editar' as url_edit_val%}
+            {% url 'gestion_establecimientos_accion' establecimiento.pk 'estado' as url_status_val%}
+            {% url 'gestion_establecimientos_accion' establecimiento.pk 'eliminar' as url_del_val%}
+            {% include 'componenets/dropdown_establecimientos.html' with establecimiento=establecimiento url_ver=url_ver_val url_editar=url_edit_val url_estado=url_status_val url_eliminar=url_del_val texto_ver="Ver establecimiento" %}
         </div>
     </div>
     {% empty %}
@@ -87,7 +90,8 @@
 <!-- Modal / Tarjeta para Nuevo Establecimiento -->
 <div id="{{ modal_id|default:'modalAgregarEstablecimiento' }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
   
-  <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 md:p-8 my-8">
+  {% comment %} <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 md:p-8 my-8"> {% endcomment %}
+  <div class="relative w-full max-w-lg "
     
     <!-- Header del Modal -->
     <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
@@ -99,9 +103,8 @@
         <i class="fa-solid fa-xmark text-sm"></i>
       </button>
     </div>
-
     <!-- Formulario -->
-    <form method="POST" action="{% url 'establecimientos' %}" enctype="multipart/form-data" class="space-y-4">
+    <form method="POST" action="{% url 'establecimientos' %}" enctype="multipart/form-data" class="space
       {% csrf_token %}
 
       {% block modal_body %}

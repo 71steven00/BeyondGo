@@ -15,10 +15,11 @@
       <i class="fa-solid fa-sliders text-slate-400"></i>
       Filtros
     </button>
-    <button class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold shadow-sm transition">
-      <i class="fa-solid fa-plus text-xs"></i>
-      Crear usuario
-    </button>
+    <a href="{% url 'gestion_usuarios_crear' 'crear' %}" 
+          class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-xl transition">
+            <i class="fa-solid fa-plus text-xs"></i>
+            Crear usuario
+      </a>
   </div>
 
   <!-- Tarjetas de Métricas / Estadísticas -->
@@ -204,9 +205,12 @@
           {% endif %}
       </div>
   </div>
-
+  {% if mostrar_modal %}
+    {% include 'modales/modal_usuario.html' %}
+  {% endif %}
 </div>
-{% if mostrar_modal %}
-  {% include 'modales/modal_usuario.html' %}
-{% endif %}
+
+{% endblock %}
+{% block extra_js %}
+    <script src="{% static 'js/animaciones_alertas.js' %}"></script>
 {% endblock %}

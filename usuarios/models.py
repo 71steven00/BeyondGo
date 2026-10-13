@@ -3,7 +3,9 @@ from django.db import transaction
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
-
+from django.core.validators import RegexValidator
+from datetime import date
+from django.core.exceptions import ValidationError
 
 class UsuarioManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -40,13 +42,28 @@ class Usuario(AbstractUser):
         ('RC', 'Registro Civil')
     )
     username= None
-    first_name = models.CharField(max_length=50,blank=False,verbose_name="Nombre")
+    solo_letras = RegexValidator(
+        regex=r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$',
+        message='El campo solo debe contener letras y espacios.'
+    )
+    def validar_mayoria_edad(fecha_nacimiento):
+        if fecha_nacimiento is None:
+            return
+        
+        hoy = date.today()
+        # Calcular edad exacta teniendo en cuenta el mes y el día
+        edad = hoy.year - fecha_nacimiento.year - ((hoy.month, hoy.day) < (fecha_nacimiento.month, fecha_nacimiento.day))
+        
+        if edad < 18:
+            raise ValidationError('Debes ser mayor de 18 años para registrarte.')
+        
+    first_name = models.CharField(max_length=50,blank=False, verbose_name="Nombre", validators=[solo_letras])
     telefono = PhoneNumberField(blank=False, region="CO")
     email = models.EmailField(max_length=254, unique= True, blank= False)
     rol = models.CharField(max_length=10,choices=ROL_CHOICES,default='TURISTA',verbose_name="Rol")
     tipo_documento = models.CharField(max_length=5, choices=TIPO_DOCUMENTO_CHOICES, default='CC', verbose_name='Tipo de documento')
-    numero_documento = models.CharField(max_length=20, unique=True, null=True, blank=True, verbose_name='Número de documento')
-    fecha_nacimiento = models.DateField(null=True, blank=True, verbose_name='Fecha de nacimiento')
+    numero_documento = models.CharField(max_length=20, unique=True, null=True, blank=False, verbose_name='Número de documento')
+    fecha_nacimiento = models.DateField(null=True, blank=False, verbose_name='Fecha de nacimiento', validators=[validar_mayoria_edad])
     
     # CONFIGURACIÓN PARA INICIO DE SESIÓN CON EMAIL
     USERNAME_FIELD = 'email'
