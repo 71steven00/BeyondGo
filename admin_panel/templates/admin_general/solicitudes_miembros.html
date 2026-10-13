@@ -1,7 +1,7 @@
 {% extends 'base_super_admin.html' %}
+{% load static %}
 
 {% block title %}Solicitudes de Nuevos Miembros - Beyond Go{% endblock %}
-
 {% block header_title %}Solicitudes de Nuevos Miembros{% endblock %}
 {% block header_subtitle %}Revisa, aprueba o rechaza los registros de establecimientos comerciales.{% endblock %}
 
@@ -9,21 +9,21 @@
 <div class="space-y-6">
     <!-- Pestañas de Filtro -->
     <div class="flex items-center gap-2">
-        <button class="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium text-sm transition">
-            Pendientes <span class="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">3</span>
+        <button id="tab-pendientes" class="filter-tab flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium text-sm transition" data-estado="pendiente">
+            Pendientes <span id="counter-pendientes" class="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">3</span>
         </button>
-        <button class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg font-medium text-sm transition">
+        <button id="tab-aprobadas" class="filter-tab bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg font-medium text-sm transition" data-estado="aprobada">
             Aprobadas
         </button>
-        <button class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg font-medium text-sm transition">
+        <button id="tab-rechazadas" class="filter-tab bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg font-medium text-sm transition" data-estado="rechazada">
             Rechazadas
         </button>
     </div>
 
-    <!-- Layout Principal (Tabla + Detalle Lateral) -->
+    <!-- Layout Principal -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         
-        <!-- Tabla de Solicitudes (Ocupa 2 Columnas en pantallas grandes) -->
+        <!-- Tabla de Solicitudes -->
         <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs text-slate-600">
@@ -36,154 +36,52 @@
                             <th class="py-3.5 px-4 text-center">Acción</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        <!-- Fila 1 (Seleccionada) -->
-                        <tr class="hover:bg-slate-50/80 transition cursor-pointer bg-slate-50/50">
-                            <td class="py-4 px-4 font-semibold text-slate-900">
-                                Eco-Hotel Refugio del Sol
-                                <div class="mt-0.5">
-                                    <span class="inline-block bg-blue-100 text-blue-700 text-[10px] font-semibold px-2 py-0.5 rounded">Hotel</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-slate-500">Hace 2 horas</td>
-                            <td class="py-4 px-4">
-                                <span class="inline-flex items-center gap-1.5 text-emerald-600 font-medium">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                    Completos
-                                </span>
-                            </td>
-                            <td class="py-4 px-4">
-                                <span class="inline-block bg-amber-100 text-amber-700 font-semibold px-2.5 py-1 rounded-full text-[11px]">
-                                    Pendiente de Revisión
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 text-center">
-                                <button class="text-slate-400 hover:text-slate-600 px-2 py-1 rounded">
-                                    <i class="fa-solid fa-ellipsis"></i>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Fila 2 -->
-                        <tr class="hover:bg-slate-50/80 transition cursor-pointer">
-                            <td class="py-4 px-4 font-semibold text-slate-900">
-                                Restaurante La Trucha de Oro
-                                <div class="mt-0.5">
-                                    <span class="inline-block bg-amber-100 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded">Restaurante</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-slate-500">Ayer, 4:15 PM</td>
-                            <td class="py-4 px-4">
-                                <span class="inline-flex items-center gap-1.5 text-amber-600 font-medium">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                    Incompletos
-                                </span>
-                            </td>
-                            <td class="py-4 px-4">
-                                <span class="inline-block bg-amber-100 text-amber-700 font-semibold px-2.5 py-1 rounded-full text-[11px]">
-                                    Pendiente de Revisión
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 text-center">
-                                <button class="text-slate-400 hover:text-slate-600 px-2 py-1 rounded">
-                                    <i class="fa-solid fa-ellipsis"></i>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Fila 3 -->
-                        <tr class="hover:bg-slate-50/80 transition cursor-pointer">
-                            <td class="py-4 px-4 font-semibold text-slate-900">
-                                Aventuras del Tota Kitesurf
-                                <div class="mt-0.5">
-                                    <span class="inline-block bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded">Experiencia</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-4 text-slate-500">08 Nov, 10:30 AM</td>
-                            <td class="py-4 px-4">
-                                <span class="inline-flex items-center gap-1.5 text-emerald-600 font-medium">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                    Completos
-                                </span>
-                            </td>
-                            <td class="py-4 px-4">
-                                <span class="inline-block bg-amber-100 text-amber-700 font-semibold px-2.5 py-1 rounded-full text-[11px]">
-                                    Pendiente de Revisión
-                                </span>
-                            </td>
-                            <td class="py-4 px-4 text-center">
-                                <button class="text-slate-400 hover:text-slate-600 px-2 py-1 rounded">
-                                    <i class="fa-solid fa-ellipsis"></i>
-                                </button>
-                            </td>
-                        </tr>
+                    <tbody id="tabla-solicitudes-body" class="divide-y divide-slate-100">
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Panel Lateral de Detalle del Establecimiento -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
-            <!-- Encabezado del Detalle -->
+        <!-- Panel Lateral de Detalle -->
+        <div id="panel-detalle" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
             <div class="border-b border-slate-100 pb-4">
                 <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-                    <span class="text-blue-600 font-semibold">Hotel</span>
-                    <span>Enviado hace 2 horas</span>
+                    <span id="detail-tipo" class="text-blue-600 font-semibold">--</span>
+                    <span id="detail-fecha">--</span>
                 </div>
-                <h3 class="text-lg font-bold text-slate-900">Eco-Hotel Refugio del Sol</h3>
-                <p class="text-xs text-slate-500 mt-1">Cabañas ecológicas frente al Lago de Tota.</p>
+                <h3 id="detail-nombre" class="text-lg font-bold text-slate-900">Selecciona un registro</h3>
+                <p id="detail-descripcion" class="text-xs text-slate-500 mt-1">Información general del establecimiento.</p>
             </div>
 
-            <!-- Datos de Contacto y Dirección -->
             <div class="space-y-4 text-xs">
                 <div>
                     <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Propietario / Representante</span>
-                    <span class="font-semibold text-slate-800">Carlos Mendoza</span>
+                    <span id="detail-propietario" class="font-semibold text-slate-800">--</span>
                 </div>
                 <div>
                     <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email</span>
-                    <span class="font-semibold text-slate-800">contacto@refugiodelsol.com</span>
+                    <span id="detail-email" class="font-semibold text-slate-800">--</span>
                 </div>
                 <div>
                     <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Dirección</span>
-                    <span class="font-semibold text-slate-800">Vereda Llano Alarcón, Km 12 Vía Aquitania</span>
+                    <span id="detail-direccion" class="font-semibold text-slate-800">--</span>
                 </div>
             </div>
 
-            <!-- Documentos Adjuntos -->
             <div class="space-y-2 border-t border-slate-100 pt-4">
                 <span class="block text-xs font-bold text-slate-700 mb-2">Documentos Adjuntos:</span>
-                
-                <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-                    <div class="flex items-center gap-2 truncate">
-                        <i class="fa-regular fa-file-lines text-slate-500"></i>
-                        <span class="truncate font-medium text-slate-700">RNT_RefugioDelSol_2024.pdf</span>
-                    </div>
-                    <a href="#" class="text-slate-400 hover:text-slate-600 ml-2">
-                        <i class="fa-regular fa-eye"></i>
-                    </a>
-                </div>
-
-                <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-                    <div class="flex items-center gap-2 truncate">
-                        <i class="fa-regular fa-file-lines text-slate-500"></i>
-                        <span class="truncate font-medium text-slate-700">Certificado_Sanidad_Sugamuxi.pdf</span>
-                    </div>
-                    <a href="#" class="text-slate-400 hover:text-slate-600 ml-2">
-                        <i class="fa-regular fa-eye"></i>
-                    </a>
+                <div id="detail-documentos" class="space-y-2">
                 </div>
             </div>
 
-            <!-- Botones de Acción -->
-            <div class="space-y-2 border-t border-slate-100 pt-4">
-                <button class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium text-xs py-2.5 px-4 rounded-xl transition shadow-sm">
+            <div id="panel-acciones" class="space-y-2 border-t border-slate-100 pt-4">
+                <button id="btn-aprobar" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium text-xs py-2.5 px-4 rounded-xl transition shadow-sm">
                     Aprobar y Enviar Credenciales
                 </button>
-                <button class="w-full bg-rose-500 hover:bg-rose-600 text-white font-medium text-xs py-2.5 px-4 rounded-xl transition shadow-sm">
+                <button id="btn-rechazar" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-medium text-xs py-2.5 px-4 rounded-xl transition shadow-sm">
                     Rechazar
                 </button>
-                <button class="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-medium text-xs py-2.5 px-4 rounded-xl transition">
+                <button id="btn-solicitar-info" class="w-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-medium text-xs py-2.5 px-4 rounded-xl transition">
                     Solicitar Más Información
                 </button>
             </div>
@@ -191,4 +89,213 @@
 
     </div>
 </div>
+
+<!-- ================= MODAL RECHAZAR SOLICITUD ================= -->
+<div id="modalRechazar" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
+  <div class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 md:p-8 my-8">
+    
+    <!-- Header Modal -->
+    <div class="flex items-start justify-between pb-4 mb-4 border-b border-slate-100">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-full bg-rose-100/80 text-rose-500 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">Rechazar Solicitud</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Indica el motivo del rechazo. Se notificará al solicitante por correo.</p>
+        </div>
+      </div>
+      <button type="button" onclick="cerrarModal('modalRechazar')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Info del Establecimiento -->
+    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 flex items-center gap-3 mb-5">
+      <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0">
+        <i class="fa-solid fa-store text-sm"></i>
+      </div>
+      <div class="truncate">
+        <h4 id="rechazar-modal-nombre" class="text-xs font-bold text-slate-900 truncate">--</h4>
+        <p id="rechazar-modal-sub" class="text-[11px] text-slate-400 truncate">--</p>
+      </div>
+    </div>
+
+    <!-- Opciones de Motivo -->
+    <form id="form-rechazar-solicitud" class="space-y-4">
+      <div>
+        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Motivo del rechazo</label>
+        <div class="space-y-2">
+          <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100/60 cursor-pointer text-xs text-slate-700 transition">
+            <input type="radio" name="motivo_rechazo" value="Documentación incompleta o incorrecta" class="accent-rose-500" checked>
+            <span>Documentación incompleta o incorrecta</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100/60 cursor-pointer text-xs text-slate-700 transition">
+            <input type="radio" name="motivo_rechazo" value="El establecimiento no cumple los requisitos mínimos" class="accent-rose-500">
+            <span>El establecimiento no cumple los requisitos mínimos</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100/60 cursor-pointer text-xs text-slate-700 transition">
+            <input type="radio" name="motivo_rechazo" value="Información del representante no verificable" class="accent-rose-500">
+            <span>Información del representante no verificable</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100/60 cursor-pointer text-xs text-slate-700 transition">
+            <input type="radio" name="motivo_rechazo" value="Duplicado de solicitud existente" class="accent-rose-500">
+            <span>Duplicado de solicitud existente</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100/60 cursor-pointer text-xs text-slate-700 transition">
+            <input type="radio" name="motivo_rechazo" value="Otro motivo" class="accent-rose-500">
+            <span>Otro motivo</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Comentario Adicional -->
+      <div>
+        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Comentario adicional (Opcional)</label>
+        <textarea id="comentario-rechazo" rows="3" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 resize-none" placeholder="Agrega detalles adicionales para el solicitante..."></textarea>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="flex items-center gap-3 pt-2">
+        <button type="button" onclick="cerrarModal('modalRechazar')" class="w-1/2 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition text-center">
+          Cancelar
+        </button>
+        <button type="submit" class="w-1/2 py-2.5 px-4 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-semibold transition shadow-sm text-center">
+          Confirmar Rechazo
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= MODAL APROBAR SOLICITUD ================= -->
+<div id="modalAprobar" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
+  <div class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 md:p-8 my-8">
+    <div class="flex items-start justify-between pb-4 mb-4 border-b border-slate-100">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-check text-lg"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">Aprobar Solicitud</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Se darán credenciales de acceso al representante comercial.</p>
+        </div>
+      </div>
+      <button type="button" onclick="cerrarModal('modalAprobar')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+
+    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 flex items-center gap-3 mb-5">
+      <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0">
+        <i class="fa-solid fa-store text-sm"></i>
+      </div>
+      <div class="truncate">
+        <h4 id="aprobar-modal-nombre" class="text-xs font-bold text-slate-900 truncate">--</h4>
+        <p id="aprobar-modal-sub" class="text-[11px] text-slate-400 truncate">--</p>
+      </div>
+    </div>
+
+    <form id="form-aprobar-solicitud" class="space-y-4">
+      <p class="text-xs text-slate-600 leading-relaxed">
+        ¿Estás seguro de aprobar este registro? Se creará el perfil comercial activo y se enviará un enlace de bienvenida a <strong id="aprobar-modal-email" class="text-slate-900">--</strong>.
+      </p>
+
+      <div class="flex items-center gap-3 pt-2">
+        <button type="button" onclick="cerrarModal('modalAprobar')" class="w-1/2 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition text-center">
+          Cancelar
+        </button>
+        <button type="submit" class="w-1/2 py-2.5 px-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold transition shadow-sm text-center">
+          Aprobar Registro
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= MODAL PREVISUALIZAR DOCUMENTO ================= -->
+<div id="modalDocumento" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
+  <div class="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 md:p-8 my-8">
+    
+    <!-- Header del Modal -->
+    <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+          <i class="fa-regular fa-file-pdf text-lg text-rose-500"></i>
+        </div>
+        <div>
+          <h3 id="doc-modal-titulo" class="text-base font-bold text-slate-900 truncate max-w-xs md:max-w-md">Documento.pdf</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Vista previa del archivo adjunto</p>
+        </div>
+      </div>
+      <button type="button" onclick="cerrarModal('modalDocumento')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Visor de Documento simulado / contenedor -->
+    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center my-4 min-h-[220px]">
+      <div class="w-16 h-16 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 mb-3">
+        <i class="fa-solid fa-file-pdf text-3xl"></i>
+      </div>
+      <h4 id="doc-modal-nombre-archivo" class="text-sm font-bold text-slate-800 mb-1">--</h4>
+      <p class="text-xs text-slate-400 max-w-sm mb-4">El documento ha sido verificado en la plataforma y se encuentra listo para descargar o revisar a detalle.</p>
+      
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-semibold">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Archivo Válido
+        </span>
+      </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="flex items-center gap-3 pt-2">
+      <button type="button" onclick="cerrarModal('modalDocumento')" class="w-1/2 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition text-center">
+        Cerrar
+      </button>
+      <a id="doc-modal-download" href="#" target="_blank" class="w-1/2 py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition shadow-sm text-center flex items-center justify-center gap-2">
+        <i class="fa-solid fa-download text-xs"></i> Descargar Archivo
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= MODAL SOLICITAR MÁS INFORMACIÓN ================= -->
+<div id="modalInfo" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
+  <div class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 md:p-8 my-8">
+    <div class="flex items-start justify-between pb-4 mb-4 border-b border-slate-100">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-circle-info text-lg"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">Solicitar Información</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Pide documentos o aclaraciones adicionales al usuario.</p>
+        </div>
+      </div>
+      <button type="button" onclick="cerrarModal('modalInfo')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+
+    <form id="form-info-solicitud" class="space-y-4">
+      <div>
+        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Mensaje para el solicitante</label>
+        <textarea id="comentario-info" rows="4" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none" placeholder="Especifica los documentos faltantes o aclaraciones necesarias..."></textarea>
+      </div>
+
+      <div class="flex items-center gap-3 pt-2">
+        <button type="button" onclick="cerrarModal('modalInfo')" class="w-1/2 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition text-center">
+          Cancelar
+        </button>
+        <button type="submit" class="w-1/2 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold transition shadow-sm text-center">
+          Enviar Requerimiento
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="{% static 'solicitudes_miembros.js' %}"></script>
 {% endblock %}
