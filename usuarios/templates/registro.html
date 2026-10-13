@@ -112,9 +112,9 @@
             <i class="fa-solid fa-calendar-days input-icon"></i>
             <input value="{{ form.fecha_nacimiento.value|default:'' }}" type="text" id="fecha_nacimiento" name="fecha_nacimiento" placeholder="dd/mm/aaaa" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" class="border-slate-700">
         </div>
-        {% if form.telefono.errors %}
+        {% if form.fecha_nacimiento.errors %}
             <span class="error-msg text-red-500 text-xs mt-1 block">
-                {{ form.telefono.errors.0 }}
+                {{ form.fecha_nacimiento.errors.0 }}
             </span>
         {% endif %}
     </div>
