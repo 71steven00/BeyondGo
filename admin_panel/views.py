@@ -8,6 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from usuarios.forms import Editar_usuario, UsuarioForm
 
 # Create your views here.
+@rol_requerido('ADMIN')
 def visualizar_template2(request):
     return render(request, 'admin_general/solicitudes_miembros.html')
 
