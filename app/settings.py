@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     #Apps o modulos agregados
     'usuarios',
     'admin_panel',
+    'inicio',
 
     # librerias añadidas 
     "phonenumber_field",

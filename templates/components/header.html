@@ -1,0 +1,25 @@
+{% load static %}
+<header class="relative w-full h-[100vh] lg:h-[100vh] flex items-center justify-between px-6 lg:px-16 overflow-hidden bg-slate-900">
+  
+  <!-- Imagen de fondo dinámica -->
+  <div class="absolute inset-0 z-0">
+    <img src="{{ header_bg_image|default:'/static/images/default-hero.jpg' }}" alt="Fondo Hero" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-transparent"></div>
+  </div>
+
+  <!-- Contenido de Texto Dinámico (Izquierda) -->
+  <div class="relative z-10 max-w-2xl text-white space-y-4">
+    <h1 class="text-3xl lg:text-5xl font-extrabold tracking-tight leading-tight">
+      {{ header_title|default:"El lugar del, majestuoso Lago de Tota." }}
+    </h1>
+    <p class="text-xs lg:text-sm text-slate-300 font-medium max-w-lg">
+      {{ header_subtitle|default:"Explora la riqueza cultural, gastronómica y natural de nuestro hermoso municipio." }}
+    </p>
+  </div>
+
+  <!-- Bloque lateral derecho (Tarjetas y Redes Sociales) -->
+  <div class="relative z-10 hidden lg:flex items-center gap-4">
+    {{ header_aside|safe }}
+  </div>
+
+</header>
