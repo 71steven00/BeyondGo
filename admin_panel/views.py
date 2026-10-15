@@ -1,8 +1,9 @@
+from usuarios.views import limpiar_mensajes_previos
 from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
 from usuarios.decorators import rol_requerido
-from usuarios.models import Usuario
+from usuarios.models import Usuario, Guia
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from usuarios.forms import Editar_usuario, UsuarioForm
@@ -12,7 +13,7 @@ from usuarios.forms import Editar_usuario, UsuarioForm
 def visualizar_template2(request):
     return render(request, 'admin_general/solicitudes_miembros.html')
 
-
+@rol_requerido('ADMIN')
 def dashboard_super_admin(request):
     # Datos de prueba simulando lo que vendrá de la base de datos
     paquetes_mas_vendidos = [
@@ -67,7 +68,15 @@ def gestion_usuarios(request, pk=None, a= None):
                 form = UsuarioForm(request.POST, request.FILES)
                 if form.is_valid():
                     form.save()
-
+                    
+                    if user.rol == 'GUIA':
+                        certificado = form.cleaned_data.get('certificado_turismo')
+                        if certificado:
+                            Guia.objects.update_or_create(
+                                usuario=user,
+                                defaults={'certificado_turismo': certificado}
+                            )
+                    limpiar_mensajes_previos(request)
                     messages.success(request, 'Usuario creado con éxito.')
                     return redirect('gestion_usuarios')
             else:
@@ -78,6 +87,7 @@ def gestion_usuarios(request, pk=None, a= None):
                 form = Editar_usuario(request.POST, request.FILES, instance=user)
                 if form.is_valid():
                     form.save()
+                    limpiar_mensajes_previos(request)
                     messages.success(request, 'Usuario actualizado con éxito.')
                     return redirect('gestion_usuarios')
             else:
@@ -87,12 +97,14 @@ def gestion_usuarios(request, pk=None, a= None):
             if request.method == 'POST':
                 user.is_active = not user.is_active
                 user.save()
+                limpiar_mensajes_previos(request)
                 messages.info(request, f'Estado de {user.first_name} actualizado.')
                 return redirect('gestion_usuarios')
 
         elif a == 'eliminar' and user:
             if request.method == 'POST':
                 user.delete()
+                limpiar_mensajes_previos(request)
                 messages.warning(request, 'Usuario eliminado correctamente.')
                 return redirect('gestion_usuarios')
             
