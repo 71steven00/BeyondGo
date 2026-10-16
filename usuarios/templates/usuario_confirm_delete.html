@@ -1,0 +1,30 @@
+{% extends 'base_inicio.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-16">
+    <!-- Alertas flotantes del sistema -->
+    {% include 'components/server_alert.html' %}
+
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 text-center">
+        <h2 class="text-lg font-bold text-slate-800 mb-2">{{ titulo }}</h2>
+        <p class="text-xs text-slate-600 mb-6">
+            ¿Estás seguro de que deseas eliminar al usuario <span class="font-semibold text-slate-800">"{{ object.first_name }} {{ object.last_name }}"</span>? Esta acción no se puede deshacer.
+        </p>
+
+        <form method="post" class="flex justify-center space-x-3">
+            {% csrf_token %}
+            <a href="{% url 'usuario_list' %}" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-50 transition-all">
+                Cancelar
+            </a>
+            <button type="submit" class="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold hover:bg-rose-700 transition-all">
+                Sí, eliminar
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/animaciones_alertas.js' %}"></script>
+{% endblock %}

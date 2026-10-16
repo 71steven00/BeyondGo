@@ -1,0 +1,97 @@
+{% extends 'base_inicio.html' %}
+{% load static %}
+
+{% block extra_css %}
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <!-- Alertas flotantes del sistema -->
+    {% include 'components/server_alert.html' %}
+    
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-slate-800">{{ titulo }}</h2>
+        <a href="{% url 'usuario_create' %}" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold hover:bg-emerald-700 transition-all">
+            + Nuevo Usuario
+        </a>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 overflow-hidden">
+        <table id="tabla-usuarios" class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase">
+                    <th class="py-3 px-4">Nombre y Apellido</th>
+                    <th class="py-3 px-4">Correo</th>
+                    <th class="py-3 px-4">Teléfono</th>
+                    <th class="py-3 px-4">Rol</th>
+                    <th class="py-3 px-4">Estado</th>
+                    <th class="py-3 px-4 text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-xs text-slate-700">
+                {% for usuario in usuarios %}
+                <tr class="hover:bg-slate-50/50 transition-all">
+                    <td class="py-3 px-4 font-medium text-slate-900">{{ usuario.first_name }} {{ usuario.last_name }}</td>
+                    <td class="py-3 px-4">{{ usuario.email }}</td>
+                    <td class="py-3 px-4">{{ usuario.telefono }}</td>
+                    <td class="py-3 px-4"><span class="px-2.5 py-1 bg-slate-100 rounded-full font-semibold">{{ usuario.get_rol_display }}</span></td>
+                    <td class="py-3 px-4">
+                        {% if usuario.is_active %}
+                            <span class="text-emerald-600 font-semibold">Activo</span>
+                        {% else %}
+                            <span class="text-rose-600 font-semibold">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-4 text-center space-x-2">
+                        <a href="{% url 'usuario_update' usuario.pk %}" class="text-indigo-600 hover:underline font-semibold">Editar</a>
+                        <a href="{% url 'usuario_delete' usuario.pk %}" class="text-rose-600 hover:underline font-semibold">Eliminar</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="py-6 text-center text-slate-400">No hay usuarios registrados en este momento.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="{% static 'js/animaciones_alertas.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+            $('#tabla-usuarios').DataTable({
+                language: {
+                    "decimal": "",
+                    "emptyTable": "No hay datos disponibles en la tabla",
+                    "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                    "infoEmpty": "Mostrando 0 a 0 de 0 registros",
+                    "infoFiltered": "(filtrado de _MAX_ registros totales)",
+                    "infoPostFix": "",
+                    "thousands": ",",
+                    "lengthMenu": "Mostrar _MENU_ registros",
+                    "loadingRecords": "Cargando...",
+                    "processing": "Procesando...",
+                    "search": "Buscar:",
+                    "zeroRecords": "No se encontraron registros coincidentes",
+                    "paginate": {
+                        "first": "Primero",
+                        "last": "Último",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                    "aria": {
+                        "sortAscending": ": activar para ordenar la columna ascendente",
+                        "sortDescending": ": activar para ordenar la columna descendente"
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}

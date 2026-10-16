@@ -16,7 +16,11 @@ from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect
 # Importamos el formulario desde el módulo de usuarios
 from usuarios.forms import RegistroClienteForm
-
+#------------------------------------------
+from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from usuarios.forms import UsuarioForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 
@@ -362,3 +366,77 @@ class CustomRegisterView(FormView):
                     break
         messages.error(self.request, primer_error)
         return super().form_invalid(form)
+
+#------------------------------------------
+class UsuarioListView(LoginRequiredMixin, ListView):
+    model = Usuario
+    template_name = 'usuario_list.html'  
+    context_object_name = 'usuarios'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Lista de Usuarios'
+        return context
+
+
+class UsuarioCreateView(LoginRequiredMixin, CreateView):
+    model = Usuario
+    form_class = UsuarioForm
+    template_name = 'usuario_form.html'
+    success_url = reverse_lazy('usuario_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Registrar Nuevo Usuario'
+        return context
+    #------------------------------------------
+    def form_valid(self, form):
+        messages.success(self.request, "¡Usuario creado exitosamente!")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Registrar Nuevo Usuario'
+        return context
+    
+
+class UsuarioUpdateView(LoginRequiredMixin, UpdateView):
+    model = Usuario
+    form_class = UsuarioForm
+    template_name = 'usuario_form.html'
+    success_url = reverse_lazy('usuario_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Actualizar Usuario'
+        return context
+    #--------------FUNCION DE ALERTAS-----------------------------
+    def form_valid(self, form):
+        messages.success(self.request, "¡Usuario actualizado exitosamente!")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Actualizar Usuario'
+        return context
+
+class UsuarioDeleteView(LoginRequiredMixin, DeleteView):
+    model = Usuario
+    template_name = 'usuario_confirm_delete.html'
+    success_url = reverse_lazy('usuario_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Eliminar Usuario'
+        return context
+    #---------------------------------------------------
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, "¡Usuario eliminado exitosamente!")
+        return super().delete(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Eliminar Usuario'
+        return context
+    
+
