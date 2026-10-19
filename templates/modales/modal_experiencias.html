@@ -1,0 +1,167 @@
+<!-- OVERLAY / FONDO OSCURO DEL MODAL -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
+  
+  <!-- TARJETA DEL MODAL -->
+  <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+    
+    {% if accion == 'ver' %}
+      <!-- 1. VISTA DETALLE (Imagen superior con estado) -->
+      <div class="relative h-48 w-full bg-slate-100">
+        {% if experiencia.imagen %}
+          <img src="{{ experiencia.imagen.url }}" alt="{{ experiencia.titulo }}" class="w-full h-full object-cover">
+        {% else %}
+          <div class="w-full h-full flex items-center justify-center text-slate-400 bg-slate-100">
+            <i class="fa-regular fa-image text-3xl"></i>
+          </div>
+        {% endif %}
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent"></div>
+        
+        <div class="absolute bottom-4 left-6">
+          <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold shadow-sm">
+            {{ experiencia.estado }}
+          </span>
+        </div>
+
+        <a href="{% url 'gestion_experiencias' %}" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center text-slate-600 transition shadow-md">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </a>
+      </div>
+    {% else %}
+      <!-- HEADER / CABECERA PARA CREAR / EDITAR / ELIMINAR -->
+      <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">
+            {% if accion == 'crear' %}Nueva Experiencia
+            {% elif accion == 'editar' %}Editar Experiencia
+            {% elif accion == 'eliminar' %}Eliminar Experiencia
+            {% endif %}
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">
+            {% if accion == 'crear' %}Completa los datos para registrar una nueva experiencia.
+            {% elif accion == 'editar' %}Actualiza los datos de la experiencia.
+            {% elif accion == 'eliminar' %}Esta acción no se puede deshacer.
+            {% endif %}
+          </p>
+        </div>
+
+        <a href="{% url 'gestion_experiencias' %}" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </a>
+      </div>
+    {% endif %}
+
+    <!-- FORMULARIO / CONTENIDO -->
+    <form method="POST" action="{% if accion == 'crear' %}{% url 'gestion_experiencias_crear' 'crear' %}{% else %}{% url 'gestion_experiencias_accion' experiencia.id accion %}{% endif %}" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="p-6">
+        
+        {% if accion == 'ver' %}
+          <!-- CONTENIDO DETALLE -->
+          <div class="space-y-4">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900">{{ experiencia.titulo }}</h2>
+              <p class="text-xs text-slate-500 font-medium mt-0.5">{{ experiencia.tipo }}</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 flex flex-col justify-between">
+                <div class="flex items-center gap-2 text-emerald-600 mb-1">
+                  <i class="fa-regular fa-clock text-xs"></i>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Duración</span>
+                </div>
+                <span class="text-sm font-bold text-slate-800">{{ experiencia.duracion }}</span>
+              </div>
+
+              <div class="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 flex flex-col justify-between">
+                <div class="flex items-center gap-2 text-emerald-600 mb-1">
+                  <i class="fa-solid fa-dollar-sign text-xs"></i>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Precio / Persona</span>
+                </div>
+                <span class="text-sm font-bold text-slate-800">{{ experiencia.precio }}</span>
+              </div>
+            </div>
+          </div>
+
+        {% elif accion == 'crear' or accion == 'editar' %}
+          <!-- CONTENIDO FORMULARIO CREAR / EDITAR -->
+          <div class="space-y-4 text-xs">
+            
+            {% if accion == 'crear' %}
+            <div>
+                <label class="block font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-1">Imagen de Portada</label>
+                <label class="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-2xl p-5 text-center cursor-pointer transition bg-slate-50/50 flex flex-col items-center justify-center block">
+                    <i class="fa-regular fa-image text-slate-400 text-lg mb-1"></i>
+                    <span class="text-xs text-slate-500 font-medium">Haz clic para subir imagen</span>
+                    {{ form.imagen }}
+                </label>
+            </div>
+            {% endif %}
+
+            <div>
+              <label class="block font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-1">Nombre</label>
+              {{ form.titulo }}
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-1">Duración</label>
+                {{ form.duracion }}
+              </div>
+              <div>
+                <label class="block font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-1">Precio / Persona</label>
+                {{ form.precio }}
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-1">Tipo</label>
+                {{ form.tipo }}
+              </div>
+              <div>
+                <label class="block font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-1">Estado</label>
+                {{ form.estado }}
+              </div>
+            </div>
+
+          </div>
+
+        {% elif accion == 'eliminar' %}
+          <!-- CONTENIDO ELIMINAR -->
+          <div class="text-center py-4 space-y-2">
+            <p class="text-xs text-slate-600">
+              ¿Estás seguro de eliminar permanentemente la experiencia <strong>{{ experiencia.titulo }}</strong>?
+            </p>
+          </div>
+        {% endif %}
+
+      </div>
+
+      <!-- FOOTER / BOTONES DE ACCIÓN -->
+      <div class="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50 border-t border-slate-100">
+        {% if accion == 'ver' %}
+          <a href="{% url 'gestion_experiencias' %}" class="w-1/2 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition text-center">
+            Cerrar
+          </a>
+          <a href="{% url 'gestion_experiencias_accion' experiencia.id 'editar' %}" class="w-1/2 py-2.5 px-4 bg-[#1e293b] hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition shadow-sm text-center">
+            Editar
+          </a>
+        {% else %}
+          <a href="{% url 'gestion_experiencias' %}" class="w-1/2 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition text-center">
+            Cancelar
+          </a>
+          <button type="submit" class="w-1/2 py-2.5 px-4 rounded-xl text-xs font-semibold transition shadow-sm text-white 
+            {% if accion == 'eliminar' %}bg-rose-600 hover:bg-rose-700{% else %}bg-[#22c55e] hover:bg-emerald-600{% endif %}">
+            {% if accion == 'crear' %}Crear Experiencia
+            {% elif accion == 'editar' %}Guardar Cambios
+            {% elif accion == 'eliminar' %}Eliminar
+            {% endif %}
+          </button>
+        {% endif %}
+      </div>
+
+    </form>
+
+  </div>
+</div>
