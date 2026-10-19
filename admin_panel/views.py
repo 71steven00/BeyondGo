@@ -13,8 +13,6 @@ from .forms import ExperienciaForm
 # Create your views here.
 def visualizar_template2(request):
     return render(request, 'admin_general/solicitudes_miembros.html')
-def visualizar_template3(request):
-    return render(request, 'admin_general/experiencias.html')
 
 @never_cache # Se utiliza para que el navegador no guarde cache cuando se haga logout.
 @rol_requerido('ADMIN')
@@ -207,9 +205,6 @@ def experiencias(request, pk=None, a=None):
             messages.error(request, 'Experiencia eliminada correctamente.')
             return redirect('gestion_experiencias')
 
-    # =========================================================================
-    # ESTAS LÍNEAS DEBEN IR FUERA DEL "if a is not None:" (Alineadas al margen izq)
-    # =========================================================================
     experiencias_list = Experiencia.objects.all().order_by('-id')
     # Paginación
     paginator = Paginator(experiencias_list, 5)
@@ -223,7 +218,7 @@ def experiencias(request, pk=None, a=None):
         'experiencia': experiencia,
         'form': form,
         'accion': a,
-        'mostrar_modal': bool(a in ['ver', 'crear', 'editar', 'eliminar']),
+        'mostrar_modal': bool(a in ['ver', 'crear', 'editar', 'eliminar','estado']),
         'experiencias': page_obj,
         'experiencias_destacadas': experiencias_destacadas,
     }

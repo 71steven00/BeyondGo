@@ -6,7 +6,6 @@
 {% block content %}
 
 <div class="p-6 space-y-6 bg-slate-50 min-h-screen">
-    {% include 'components/server_alert.html' %}
     
     <!-- Título superior de la página -->
     <div class="flex justify-between items-center">
@@ -110,8 +109,12 @@
 </div>
 
 <!-- RENDERIZADO CONDICIONAL DEL MODAL DINÁMICO -->
-{% if mostrar_modal %}
-  {% include 'modales/modal_experiencias.html' %}
-{% endif %}
 
-{% endblock content %}
+    {% if mostrar_modal %}
+        {% include 'modales/modal_experiencias.html' %}
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/animaciones_alertas.js' %}"></script>
+{% endblock %}
