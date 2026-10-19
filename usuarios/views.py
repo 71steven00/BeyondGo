@@ -184,7 +184,6 @@ def registro(request):
 class PasswordResetEmailView(TemplateView):
     # Paso 1: Solicitar correo electrónico
         template_name = 'reset_password/email_form.html'
-        
         def post(self, request, *args, **kwargs):
             email = self.request.POST.get('email')
             limpiar_mensajes_previos(self.request)
@@ -274,6 +273,8 @@ class PasswordResetCodeView(TemplateView):
             messages.error(self.request, 'El código de verificación es incorrecto.')
             return self.render_to_response(self.get_context_data())
 
+        self.request.session['reset_verified'] = True
+        
         messages.success(self.request, 'Código verificado correctamente.')
         return redirect('nueva_contraseña')
     
@@ -283,16 +284,17 @@ class PasswordResetNewView(TemplateView):
     """Paso 3: Ingresar la nueva contraseña"""
     template_name = 'reset_password/nueva_contraseña.html'
     
-    def get(self, request, *args, **kwargs):
-        # Limpiar alertas anteriores si utilizas tu función auxiliar
-        limpiar_mensajes_previos(request)
+    def dispatch(self, request, *args, **kwargs):
+        """Restringe el acceso si no se ha verificado el código previamente"""
+        if not request.session.get('reset_verified'):
+            messages.error(request, 'Debes verificar el código de recuperación antes de ingresar aquí.')
+            return redirect('password_request')
+        return super().dispatch(request, *args, **kwargs)
+        
 
-        # Validar si el usuario completó el paso previo de verificación
-        if not request.session.get('email_recuperacion'):
-            messages.error(request, 'Acceso no permitido. Por favor inicia el proceso de recuperación.')
-            return redirect('password_reset')  # O la ruta que prefieras, ej. 'login'
 
-        return super().get(request, *args, **kwargs)
+        
+    
 
     def post(self, request, *args, **kwargs):
         limpiar_mensajes_previos(self.request)

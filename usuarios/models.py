@@ -71,7 +71,6 @@ class Usuario(AbstractUser):
     
     objects = UsuarioManager()
     # Campos para el control de intentos fallidos de autentificacion.
-    AXES_FAILURE_LIMIT = 5
     AXES_LOCKOUT_TEMPLATE = None
     
     def __str__(self):
