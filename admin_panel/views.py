@@ -1,3 +1,4 @@
+from django.views.decorators.cache import never_cache
 from usuarios.views import limpiar_mensajes_previos
 from django.contrib import messages
 from django.utils import timezone
@@ -12,6 +13,7 @@ from usuarios.forms import Editar_usuario, UsuarioForm
 def visualizar_template2(request):
     return render(request, 'admin_general/solicitudes_miembros.html')
 
+@never_cache # Se utiliza para que el navegador no guarde cache cuando se haga logout.
 @rol_requerido('ADMIN')
 def dashboard_super_admin(request):
     # Datos de prueba simulando lo que vendrá de la base de datos
@@ -50,6 +52,7 @@ def dashboard_super_admin(request):
     }
     return render(request, 'admin_general/panel_control.html', context)
 
+@never_cache # Se utiliza para que el navegador no guarde cache cuando se haga logout.
 @rol_requerido('ADMIN')
 def gestion_usuarios(request, pk=None, a= None):
 
@@ -109,7 +112,7 @@ def gestion_usuarios(request, pk=None, a= None):
             
         
         
-    #LISTAMOS LOS DATOS QUE SE ENCUEnTRAN EN LA BASE DE DATOS
+    #LISTAMOS LOS DATOS QUE SE ENCUENTRAN EN LA BASE DE DATOS
     usuarios = Usuario.objects.all().order_by('-date_joined')
     
     #METRICAS Y CONTADORES 
