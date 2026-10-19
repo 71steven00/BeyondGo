@@ -8,10 +8,13 @@ from usuarios.models import Usuario, Guia
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from usuarios.forms import Editar_usuario, UsuarioForm
-
+from .models import Experiencia        # <--- Importa tu modelo
+from .forms import ExperienciaForm
 # Create your views here.
 def visualizar_template2(request):
     return render(request, 'admin_general/solicitudes_miembros.html')
+def visualizar_template3(request):
+    return render(request, 'admin_general/experiencias.html')
 
 @never_cache # Se utiliza para que el navegador no guarde cache cuando se haga logout.
 @rol_requerido('ADMIN')
@@ -167,3 +170,61 @@ def gestion_usuarios(request, pk=None, a= None):
         'page_obj': page_obj,
     }
     return render(request, 'admin_general/gestion_usuarios.html', context)
+@rol_requerido('ADMIN')
+def experiencias(request, pk=None, a=None):
+    # Validación para consultar un dato específico si viene el pk
+    if pk is not None:
+        experiencia = get_object_or_404(Experiencia, id=pk)
+    else:
+        experiencia = None
+        
+    form = None
+    
+    # Validación para las acciones de los modales
+    if a is not None:
+        if a == 'crear':
+            if request.method == 'POST':
+                form = ExperienciaForm(request.POST, request.FILES)
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, 'Experiencia creada con éxito.')
+                    return redirect('gestion_experiencias')
+            else:
+                form = ExperienciaForm()
+
+        elif a == 'editar' and experiencia:
+            if request.method == 'POST':
+                form = ExperienciaForm(request.POST, request.FILES, instance=experiencia)
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, 'Experiencia actualizada con éxito.')
+                    return redirect('gestion_experiencias')
+            else:
+                form = ExperienciaForm(instance=experiencia)
+
+        elif a == 'eliminar' and experiencia and request.method == 'POST':
+            experiencia.delete()
+            messages.error(request, 'Experiencia eliminada correctamente.')
+            return redirect('gestion_experiencias')
+
+    # =========================================================================
+    # ESTAS LÍNEAS DEBEN IR FUERA DEL "if a is not None:" (Alineadas al margen izq)
+    # =========================================================================
+    experiencias_list = Experiencia.objects.all().order_by('-id')
+    # Paginación
+    paginator = Paginator(experiencias_list, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Tarjetas superiores o destacadas
+    experiencias_destacadas = experiencias_list[:2]
+
+    context = {
+        'experiencia': experiencia,
+        'form': form,
+        'accion': a,
+        'mostrar_modal': bool(a in ['ver', 'crear', 'editar', 'eliminar']),
+        'experiencias': page_obj,
+        'experiencias_destacadas': experiencias_destacadas,
+    }
+    return render(request, 'admin_general/experiencias.html', context)
