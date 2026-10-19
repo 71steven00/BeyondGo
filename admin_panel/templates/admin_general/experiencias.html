@@ -1,0 +1,120 @@
+{% extends "base_super_admin.html" %}
+{% load static %}
+
+{% block title %}Beyond Go | Gestión de Experiencias{% endblock %}
+
+{% block content %}
+
+<div class="p-6 space-y-6 bg-slate-50 min-h-screen">
+    
+    <!-- Título superior de la página -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-xl font-bold text-slate-900">Gestión de Experiencias Turísticas</h1>
+            <p class="text-xs text-slate-500">Listado completo de tours, actividades y paquetes en Aquitania.</p>
+        </div>
+    </div>
+
+    <!-- Tarjetas Superiores (Resumen dinámicas) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for dest in experiencias_destacadas %}
+        <div class="bg-white border border-slate-200/80 p-4 rounded-2xl flex items-center gap-4 shadow-sm">
+            <div class="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
+                {% if dest.imagen %}
+                    <img src="{{ dest.imagen.url }}" alt="{{ dest.titulo }}" class="w-full h-full object-cover">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-slate-300"><i class="fa-regular fa-image"></i></div>
+                {% endif %}
+            </div>
+            <div class="flex-1 min-w-0">
+                <h4 class="text-xs font-bold text-slate-800 truncate">{{ dest.titulo }}</h4>
+                <div class="flex items-center gap-2 my-1">
+                    <span class="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md font-bold uppercase">{{ dest.estado }}</span>
+                    <span class="text-[11px] text-slate-400">450 Res.</span>
+                </div>
+            </div>
+            <span class="text-xs font-bold text-emerald-600">+12.5M</span>
+        </div>
+        {% empty %}
+        <p class="text-xs text-slate-400">No hay experiencias destacadas disponibles.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Sección de la Tabla de Gestión (TODO DENTRO DE ESTE CONTENEDOR) -->
+    <div class="bg-white border border-slate-200/80 rounded-2xl p-6 space-y-4 shadow-sm">
+        
+        <!-- Cabecera de la sección con el título y el botón "Nueva" -->
+        <div class="flex justify-between items-center">
+            <h2 class="text-sm font-bold text-slate-900">Gestión de Experiencias</h2>
+            <a href="{% url 'gestion_experiencias_crear' 'crear' %}" class="bg-[#22c55e] hover:bg-emerald-600 text-white font-semibold px-4 py-2 rounded-xl text-xs transition flex items-center gap-2 shadow-sm cursor-pointer">
+                <i class="fa-solid fa-plus text-[10px]"></i> Nueva
+            </a>
+        </div>  
+
+        <!-- Tabla movida correctamente AQUÍ ADENTRO -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100 text-slate-600 text-[10px] uppercase tracking-wider">
+                        <th class="py-3 px-4 font-bold">Experiencia</th>
+                        <th class="py-3 px-4 font-bold">Tipo</th>
+                        <th class="py-3 px-4 font-bold">Duración</th>
+                        <th class="py-3 px-4 font-bold">Precio / Persona</th>
+                        <th class="py-3 px-4 font-bold">Estado</th>
+                        <th class="py-3 px-4 text-right font-bold">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs text-slate-600">
+                    {% for exp in experiencias %}
+                    <tr class="hover:bg-slate-50/60 transition">
+                        <td class="py-3.5 px-4 flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
+                                {% if exp.imagen %}
+                                    <img src="{{ exp.imagen.url }}" alt="{{ exp.titulo }}" class="w-full h-full object-cover">
+                                {% else %}
+                                    <div class="w-full h-full flex items-center justify-center text-slate-300"><i class="fa-regular fa-image"></i></div>
+                                {% endif %}
+                            </div>
+                            <span class="font-bold text-slate-800">{{ exp.titulo }}</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-slate-500">{{ exp.tipo }}</td>
+                        <td class="py-3.5 px-4 text-slate-500">{{ exp.duracion }}</td>
+                        <td class="py-3.5 px-4 font-bold text-slate-900">{{ exp.precio }}</td>
+                        <td class="py-3.5 px-4">
+                            {% if exp.estado == 'Activo' %}
+                                <span class="bg-emerald-50 text-emerald-600 text-[10px] px-3 py-1 rounded-full font-bold">Activo</span>
+                            {% elif exp.estado == 'Pausado' %}
+                                <span class="bg-slate-100 text-slate-500 text-[10px] px-3 py-1 rounded-full font-bold">Pausado</span>
+                            {% else %}
+                                <span class="bg-rose-50 text-rose-500 text-[10px] px-3 py-1 rounded-full font-bold">Agotado</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3.5 px-4 text-right space-x-3 text-slate-400">
+                            <a href="{% url 'gestion_experiencias_accion' exp.id 'ver' %}" title="Ver detalle" class="hover:text-slate-600 transition"><i class="fa-regular fa-eye"></i></a>
+                            <a href="{% url 'gestion_experiencias_accion' exp.id 'editar' %}" title="Editar" class="hover:text-emerald-600 transition"><i class="fa-regular fa-pen-to-square"></i></a>
+                            <a href="{% url 'gestion_experiencias_accion' exp.id 'eliminar' %}" title="Eliminar" class="hover:text-rose-500 transition"><i class="fa-regular fa-trash-can"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-6 text-slate-400">No hay experiencias registradas.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div> <!-- Cierre correcto de la tarjeta principal -->
+
+</div>
+
+<!-- RENDERIZADO CONDICIONAL DEL MODAL DINÁMICO -->
+
+    {% if mostrar_modal %}
+        {% include 'modales/modal_experiencias.html' %}
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/animaciones_alertas.js' %}"></script>
+{% endblock %}
