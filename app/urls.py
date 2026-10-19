@@ -19,6 +19,7 @@ from usuarios.views import CustomLoginView
 from django.urls import path, include
 
 urlpatterns = [
+    path('', include('inicio.urls')), #ruta para administradores.urls
     path('admin/login/', CustomLoginView.as_view()),
     path('admin/', admin.site.urls),
     #Rutas principales gestionadas por usuarios y admin panel
