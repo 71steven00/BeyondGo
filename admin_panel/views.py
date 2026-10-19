@@ -1,3 +1,4 @@
+from django.views.decorators.cache import never_cache
 from usuarios.views import limpiar_mensajes_previos
 from django.contrib import messages
 from django.utils import timezone
@@ -8,11 +9,14 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from usuarios.forms import Editar_usuario, UsuarioForm
 from usuarios.models import Hotel
+from .models import Experiencia        # <--- Importa tu modelo
+from .forms import ExperienciaForm
 
 # Create your views here.
 def visualizar_template2(request):
     return render(request, 'admin_general/solicitudes_miembros.html')
 
+@never_cache # Se utiliza para que el navegador no guarde cache cuando se haga logout.
 @rol_requerido('ADMIN')
 def dashboard_super_admin(request):
     # Datos de prueba simulando lo que vendrá de la base de datos
@@ -51,6 +55,7 @@ def dashboard_super_admin(request):
     }
     return render(request, 'admin_general/panel_control.html', context)
 
+@never_cache # Se utiliza para que el navegador no guarde cache cuando se haga logout.
 @rol_requerido('ADMIN')
 def gestion_usuarios(request, pk=None, a= None):
 
@@ -110,7 +115,7 @@ def gestion_usuarios(request, pk=None, a= None):
             
         
         
-    #LISTAMOS LOS DATOS QUE SE ENCUEnTRAN EN LA BASE DE DATOS
+    #LISTAMOS LOS DATOS QUE SE ENCUENTRAN EN LA BASE DE DATOS
     usuarios = Usuario.objects.all().order_by('-date_joined')
     
     #METRICAS Y CONTADORES 
@@ -165,7 +170,7 @@ def gestion_usuarios(request, pk=None, a= None):
         'page_obj': page_obj,
     }
     return render(request, 'admin_general/gestion_usuarios.html', context)
-
+@rol_requerido('ADMIN')
 def gestion_establecimientos(request):
     if request.method == 'POST':
         # Guardar el establecimiento con sus archivos
@@ -185,3 +190,59 @@ def gestion_establecimientos(request):
 
     hoteles = Hotel.objects.all() # Django consulta la base de datos automáticamente
     return render(request, 'admin_general/establecimientos.html', {'hoteles': hoteles})
+
+@rol_requerido('ADMIN')
+def experiencias(request, pk=None, a=None):
+    # Validación para consultar un dato específico si viene el pk
+    if pk is not None:
+        experiencia = get_object_or_404(Experiencia, id=pk)
+    else:
+        experiencia = None
+        
+    form = None
+    
+    # Validación para las acciones de los modales
+    if a is not None:
+        if a == 'crear':
+            if request.method == 'POST':
+                form = ExperienciaForm(request.POST, request.FILES)
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, 'Experiencia creada con éxito.')
+                    return redirect('gestion_experiencias')
+            else:
+                form = ExperienciaForm()
+
+        elif a == 'editar' and experiencia:
+            if request.method == 'POST':
+                form = ExperienciaForm(request.POST, request.FILES, instance=experiencia)
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, 'Experiencia actualizada con éxito.')
+                    return redirect('gestion_experiencias')
+            else:
+                form = ExperienciaForm(instance=experiencia)
+
+        elif a == 'eliminar' and experiencia and request.method == 'POST':
+            experiencia.delete()
+            messages.error(request, 'Experiencia eliminada correctamente.')
+            return redirect('gestion_experiencias')
+
+    experiencias_list = Experiencia.objects.all().order_by('-id')
+    # Paginación
+    paginator = Paginator(experiencias_list, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Tarjetas superiores o destacadas
+    experiencias_destacadas = experiencias_list[:2]
+
+    context = {
+        'experiencia': experiencia,
+        'form': form,
+        'accion': a,
+        'mostrar_modal': bool(a in ['ver', 'crear', 'editar', 'eliminar','estado']),
+        'experiencias': page_obj,
+        'experiencias_destacadas': experiencias_destacadas,
+    }
+    return render(request, 'admin_general/experiencias.html', context)
