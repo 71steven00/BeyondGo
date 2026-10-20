@@ -1,13 +1,13 @@
 {% load static %}
 
 <nav id="main-nav"
-    class="w-full fixed top-0 left-0 z-50 px-8 py-5 flex justify-between items-center pointer-events-none transition-all duration-300">
+    class="w-full fixed top-0 left-0 z-50 px-8 py-4 flex justify-between items-center pointer-events-none transition-all duration-300">
 
     <!-- 1. Botón izquierdo: Inicio de sesión -->
-    <div class="pointer-events-auto">
+    <div class="pointer-events-auto flex items-center">
         <a href="{% url 'login' %}"
-            class="flex items-center gap-3 px-6 py-3 rounded-full border border-white/30 bg-black/40 backdrop-blur-md text-white text-xs font-medium hover:bg-black/60 transition shadow-lg">
-            <i class="fa-regular fa-user text-sm"></i>
+            class="flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-white/80 bg-black/50 backdrop-blur-md text-white text-sm font-semibold hover:text-white hover:bg-white/10 transition">
+            <i class="fa-regular fa-user text-base"></i>
             <span>Inicio de sesión</span>
         </a>
     </div>
@@ -15,7 +15,7 @@
     <!-- 2. Píldora de navegación central -->
     <div class="pointer-events-auto">
         <div
-            class="flex items-center gap-1.5 p-1 rounded-full border border-white/30 bg-black/40 backdrop-blur-md shadow-xl text-white text-sm">
+            class="flex items-center gap-1.5 p-1 rounded-full border border-white/80 bg-black/40 backdrop-blur-md shadow-xl text-white text-sm">
 
             <!-- Inicio -->
             <a href="{% url 'inicio' %}"
@@ -25,28 +25,28 @@
             </a>
 
             <!-- Hospedaje -->
-            <a href="{% url 'inicio' %}"
+            <a href="{% url 'hospedaje' %}"
                 class="flex items-center gap-2 px-5 py-2.5 rounded-full transition {% if request.resolver_match.url_name == 'hospedaje' %}bg-white/20 font-semibold text-white shadow-sm{% else %}text-white/80 hover:text-white hover:bg-white/10{% endif %}">
                 <i class="fa-solid fa-hotel text-xs"></i>
                 <span>Hospedaje</span>
             </a>
 
             <!-- Restaurantes -->
-            <a href="{% url 'inicio' %}"
+            <a href="{% url 'restaurantes' %}"
                 class="flex items-center gap-2 px-5 py-2.5 rounded-full transition {% if request.resolver_match.url_name == 'restaurantes' %}bg-white/20 font-semibold text-white shadow-sm{% else %}text-white/80 hover:text-white hover:bg-white/10{% endif %}">
                 <i class="fa-solid fa-utensils text-xs"></i>
                 <span>Restaurantes</span>
             </a>
 
             <!-- Experiencias -->
-            <a href="{% url 'inicio' %}"
+            <a href="{% url 'experiencias' %}"
                 class="flex items-center gap-2 px-5 py-2.5 rounded-full transition {% if request.resolver_match.url_name == 'experiencias' %}bg-white/20 font-semibold text-white shadow-sm{% else %}text-white/80 hover:text-white hover:bg-white/10{% endif %}">
                 <i class="fa-solid fa-person-hiking text-xs"></i>
                 <span>Experiencias</span>
             </a>
 
             <!-- Hazte Miembro -->
-            <a href="{% url 'inicio' %}"
+            <a href="{% url 'hazte_miembro' %}"
                 class="flex items-center gap-2 px-5 py-2.5 rounded-full transition {% if request.resolver_match.url_name == 'hazte_miembro' %}bg-white/20 font-semibold text-white shadow-sm{% else %}text-white/80 hover:text-white hover:bg-white/10{% endif %}">
                 <span>Hazte Miembro</span>
             </a>
@@ -55,8 +55,8 @@
     </div>
 
     <!-- 3. Logotipo derecho -->
-    <div class="pointer-events-auto">
-        <img src="'#'" alt="BeyondGo" class="h-10 w-auto object-contain">
+    <div class="pointer-events-auto flex items-center">
+        <img src="{% static 'icons/logo.ico' %}" alt="BeyondGo" class="h-16 md:h-20 w-auto object-contain">
     </div>
 
 </nav>
