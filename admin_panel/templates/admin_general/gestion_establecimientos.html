@@ -90,8 +90,7 @@
 <!-- Modal / Tarjeta para Nuevo Establecimiento -->
 <div id="{{ modal_id|default:'modalAgregarEstablecimiento' }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
   
-  {% comment %} <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 md:p-8 my-8"> {% endcomment %}
-  <div class="relative w-full max-w-lg "
+  <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 md:p-8 my-8">
     
     <!-- Header del Modal -->
     <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
@@ -104,7 +103,7 @@
       </button>
     </div>
     <!-- Formulario -->
-    <form method="POST" action="{% url 'establecimientos' %}" enctype="multipart/form-data" class="space
+    <form method="POST" action="{% url 'establecimientos' %}" enctype="multipart/form-data" class="space-y-4">
       {% csrf_token %}
 
       {% block modal_body %}
@@ -181,10 +180,10 @@
           {{ btn_texto|default:"Crear Establecimiento" }}
         </button>
       </div>
-
     </form>
   </div>
 </div>
+
 <script>
   function abrirModal(idModal) {
     const modal = document.getElementById(idModal);
