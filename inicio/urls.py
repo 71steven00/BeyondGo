@@ -1,6 +1,11 @@
-from .views import visualizar_template_header
+from .views import pagina_inicio
 from django.urls import path 
 
 urlpatterns = [
-    path('', visualizar_template_header, name='inicio_sesion'),
+    path('', pagina_inicio, name='inicio'),
+    path('experiencias/', pagina_inicio, name='experiencias'),
+    path('hospedaje/', pagina_inicio, name='hospedaje'),
+    path('restaurantes/', pagina_inicio, name='restaurantes'),
+    path('hazte_miembro/', pagina_inicio, name='hazte_miembro'),
+    
 ]
