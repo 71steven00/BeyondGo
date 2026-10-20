@@ -170,6 +170,7 @@ def gestion_usuarios(request, pk=None, a= None):
         'page_obj': page_obj,
     }
     return render(request, 'admin_general/gestion_usuarios.html', context)
+
 @rol_requerido('ADMIN')
 def gestion_establecimientos(request):
     if request.method == 'POST':
@@ -186,10 +187,10 @@ def gestion_establecimientos(request):
             licencia_sanitaria=request.FILES.get('licencia_sanitaria')
         )
         nuevo_hotel.save()
-        return redirect('establecimientos')
+        return redirect('gestion_establecimientos')
 
     hoteles = Hotel.objects.all() # Django consulta la base de datos automáticamente
-    return render(request, 'admin_general/establecimientos.html', {'hoteles': hoteles})
+    return render(request, 'admin_general/gestion_establecimientos.html', {'hoteles': hoteles})
 
 @rol_requerido('ADMIN')
 def experiencias(request, pk=None, a=None):

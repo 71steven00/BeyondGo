@@ -74,7 +74,7 @@
             {% url 'gestion_establecimientos_accion' establecimiento.pk 'editar' as url_edit_val%}
             {% url 'gestion_establecimientos_accion' establecimiento.pk 'estado' as url_status_val%}
             {% url 'gestion_establecimientos_accion' establecimiento.pk 'eliminar' as url_del_val%}
-            {% include 'componenets/dropdown_establecimientos.html' with establecimiento=establecimiento url_ver=url_ver_val url_editar=url_edit_val url_estado=url_status_val url_eliminar=url_del_val texto_ver="Ver establecimiento" %}
+            {% include 'components/dropdown_acciones.html' with establecimiento=establecimiento url_ver=url_ver_val url_editar=url_edit_val url_estado=url_status_val url_eliminar=url_del_val texto_ver="Ver establecimiento" %}
         </div>
     </div>
     {% empty %}
@@ -103,7 +103,7 @@
       </button>
     </div>
     <!-- Formulario -->
-    <form method="POST" action="{% url 'establecimientos' %}" enctype="multipart/form-data" class="space-y-4">
+    <form method="POST" action="{% url 'gestion_establecimientos' %}" enctype="multipart/form-data" class="space-y-4">
       {% csrf_token %}
 
       {% block modal_body %}
