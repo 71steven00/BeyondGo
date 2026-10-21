@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Beyond Go{% endblock %}</title>
-
+    <link rel="shortcut icon" href="{% static 'icons/logitoo.ico' %}" type="image/x-icon">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -17,7 +17,7 @@
     {% block extra_css %}
     {% endblock %}
 </head>
-<body class="min-h-screen flex flex-col justify-center items-center p-4 antialiased">
+<body class="min-h-screen flex flex-col justify-center items-center p-4 antialiased bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white">
 
     <!-- Enlace Volver -->
     <div class="w-full max-w-md mb-4 text-left">
@@ -37,12 +37,12 @@
                 {% endblock %}
             </div>
             <h1 class="text-3xl font-brand uppercase tracking-wider text-white">{% block title_tarjeta %}BEYOND GO{% endblock %}</h1>
-            <p class="text-accent text-xs font-medium tracking-wide mt-1">{% block subtitle_tarjeta %}Descubre Aquitania{% endblock %}</p>
+            <p class="text-accent text-xs font-medium tracking-wide mt-1">{% block subtitle_tarjeta %}Descubre lo que ofrecemos para tí{% endblock %}</p>
         </div>
     {% endblock %}
 
     <!-- Tarjeta Formulario -->
-    <main class="w-full max-w-md auth-card rounded-2xl p-6 md:p-8 shadow-2xl">
+    <main class="w-full max-w-md bg-white/10 backdrop-blur-md border border-white/250 rounded-2xl p-6 md:p-8 shadow-2xl">
         {% block content %}
         {% endblock %}
     </main>

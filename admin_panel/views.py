@@ -72,13 +72,13 @@ def gestion_usuarios(request, pk=None, a= None):
             if request.method == 'POST':
                 form = UsuarioForm(request.POST, request.FILES)
                 if form.is_valid():
-                    form.save()
+                    nuevo_usuario = form.save()
                     
-                    if user.rol == 'GUIA':
+                    if nuevo_usuario.rol == 'GUIA':
                         certificado = form.cleaned_data.get('certificado_turismo')
                         if certificado:
                             Guia.objects.update_or_create(
-                                usuario=user,
+                                usuario=nuevo_usuario,
                                 defaults={'certificado_turismo': certificado}
                             )
                     limpiar_mensajes_previos(request)
