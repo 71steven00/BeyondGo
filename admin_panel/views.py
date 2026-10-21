@@ -224,26 +224,37 @@ def experiencias(request, pk=None, a=None):
             else:
                 form = ExperienciaForm(instance=experiencia)
 
+        elif a == 'estado' and experiencia:
+            if request.method == 'POST':
+                # Alterna el estado de la experiencia (ej. de Activo a Pausado)
+                if experiencia.estado == 'Activo':
+                    experiencia.estado = 'Pausado'
+                else:
+                    experiencia.estado = 'Activo'
+                experiencia.save()
+                messages.info(request, f'Estado de la experiencia actualizado a {experiencia.estado}.')
+                return redirect('gestion_experiencias')
+
         elif a == 'eliminar' and experiencia and request.method == 'POST':
             experiencia.delete()
-            messages.error(request, 'Experiencia eliminada correctamente.')
+            messages.warning(request, 'Experiencia eliminada correctamente.')
             return redirect('gestion_experiencias')
 
     experiencias_list = Experiencia.objects.all().order_by('-id')
-    # Paginación
+    
+    # Paginación (opcional si usas page_obj como en usuarios)
     paginator = Paginator(experiencias_list, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Tarjetas superiores o destacadas
     experiencias_destacadas = experiencias_list[:2]
 
     context = {
         'experiencia': experiencia,
         'form': form,
         'accion': a,
-        'mostrar_modal': bool(a in ['ver', 'crear', 'editar', 'eliminar','estado']),
-        'experiencias': page_obj,
+        'mostrar_modal': bool(a in ['ver', 'crear', 'editar', 'eliminar', 'estado']),
+        'experiencias': page_obj,  # Usamos page_obj para la paginación consistente
         'experiencias_destacadas': experiencias_destacadas,
     }
-    return render(request, 'admin_general/experiencias.html', context)
+    return render(request, 'admin_general/gestion_experiencias.html', context)

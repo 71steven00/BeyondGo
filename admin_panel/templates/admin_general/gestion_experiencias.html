@@ -89,13 +89,17 @@
                                 <span class="bg-rose-50 text-rose-500 text-[10px] px-3 py-1 rounded-full font-bold">Agotado</span>
                             {% endif %}
                         </td>
-                        <td class="py-3.5 px-4 text-right space-x-3 text-slate-400">
-                            <a href="{% url 'gestion_experiencias_accion' exp.id 'ver' %}" title="Ver detalle" class="hover:text-slate-600 transition"><i class="fa-regular fa-eye"></i></a>
-                            <a href="{% url 'gestion_experiencias_accion' exp.id 'editar' %}" title="Editar" class="hover:text-emerald-600 transition"><i class="fa-regular fa-pen-to-square"></i></a>
-                            <a href="{% url 'gestion_experiencias_accion' exp.id 'eliminar' %}" title="Eliminar" class="hover:text-rose-500 transition"><i class="fa-regular fa-trash-can"></i></a>
-                        </td>
+                        <!-- Seccion de Acciones -->
+                            <td class="py-3.5 px-4 text-right">
+                                {% url 'gestion_experiencias_accion' exp.pk 'ver' as url_ver_val %}
+                                {% url 'gestion_experiencias_accion' exp.pk 'editar' as url_edit_val %}
+                                {% url 'gestion_experiencias_accion' exp.pk 'estado' as url_status_val %}
+                                {% url 'gestion_experiencias_accion' exp.pk 'eliminar' as url_del_val %}
+
+                                {% include 'components/dropdown_acciones.html' with usuario=exp url_ver=url_ver_val url_editar=url_edit_val url_estado=url_status_val url_eliminar=url_del_val texto_ver="Ver detalle" %}
+                            </td>
                     </tr>
-                    {% empty %}
+                        {% empty %}
                     <tr>
                         <td colspan="6" class="text-center py-6 text-slate-400">No hay experiencias registradas.</td>
                     </tr>
