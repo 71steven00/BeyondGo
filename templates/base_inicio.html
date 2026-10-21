@@ -1,14 +1,20 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Beyond Go</title>
+    <link rel="shortcut icon" href="{% static 'icons/logitoo.ico' %}" type="image/x-icon">
+    
     <!-- Tus estilos de Tailwind / CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 {% include 'components/nav.html' %}
-{% include 'components/header.html' with header_bg_image="/static/img/img.jpeg" header_title="EL LUGAR DEL, MAJESTUOSO LAGO DE TOTA." header_subtitle="Explora la riqueza cultural, gastronómica y natural de nuestro hermoso municipio."%}
+{% block header_content %}
+    {% include 'components/header.html' with header_bg_image="/static/img/img.jpeg" header_title="EL LUGAR DEL, MAJESTUOSO LAGO DE TOTA." header_subtitle="Explora la riqueza cultural, gastronómica y natural de nuestro hermoso municipio."%}
+{% endblock %}
+
 <body class="bg-slate-50">
 
     <!-- Aquí se inyecta todo lo de tus páginas hijas -->

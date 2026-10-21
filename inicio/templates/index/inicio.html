@@ -1,1 +1,37 @@
 {% extends 'base_inicio.html' %}
+
+{% block header_content %}
+
+    <!-- Contenedor relativo para poder sobreponer los botones -->
+    <div class="relative w-full">
+        
+        <!-- Tu header limpio y mantenible -->
+        {% include 'components/header.html' with header_bg_image="/static/img/Arca.avif" header_title="<span class='text-emerald-400'>EL LUGAR DEL</span>, MAJESTUOSO LAGO DE TOTA." header_subtitle="Explora la riqueza cultural, gastronómica y natural de nuestro hermoso municipio." header_aside_template="components/redes_sociales.html" %}
+
+        <!-- Botones sobrepuestos en la parte inferior central/izquierda del Header -->
+        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-4 w-full max-w-fit px-4">
+            <!-- Botón 1: Tours Populares -->
+            <a href="#" class="bg-white text-slate-900 font-semibold px-6 py-3 rounded-full shadow-xl hover:bg-slate-100 transition flex items-center gap-2 text-sm">
+                Tours Populares 
+                <span class="text-slate-900">→</span>
+            </a>
+
+            <!-- Divisor / Indicador central -->
+            <div class="text-white/80 text-sm font-medium flex items-center justify-center w-8 h-8 rounded-full border border-white/30 bg-white/10 backdrop-blur-md shadow-md">
+                v
+            </div>
+
+            <!-- Botón 2: Explorar Paquetes -->
+            <a href="#" class="bg-white text-slate-900 font-semibold px-6 py-3 rounded-full shadow-xl hover:bg-slate-100 transition flex items-center gap-2 text-sm">
+                Explorar Paquetes 
+                <span class="text-slate-900">→</span>
+            </a>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block content %}
+    <!-- Contenido principal de la página de inicio -->
+{% endblock %}

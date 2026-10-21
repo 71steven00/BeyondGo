@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Beyond Go Admin{% endblock %}</title>
-
+    <link rel="shortcut icon" href="{% static 'icons/logitoo.ico' %}" type="image/x-icon">
     <!-- Tailwind CSS (CDN o compilado) -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -31,14 +31,11 @@
     <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#0d1527] text-slate-300 flex flex-col justify-between p-4 border-r border-slate-800 transition-transform duration-300 ease-in-out -translate-x-full md:translate-x-0">
         <div>
             <!-- Logo / Encabezado -->
-            <div class="flex items-center justify-between px-2 mb-8">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-white font-bold tracking-wider text-sm">BEYOND GO</h1>
-                        <span class="text-[10px] text-emerald-400 font-semibold tracking-widest uppercase">Aquitania Admin</span>
+            <div class="flex items-center justify-between px-2 mb-4">
+                <div class="flex flex-col items-center justify-center w-full text-center">
+                    <div class="flex flex-col items-center">
+                        <img src="{% static 'icons/logo.ico' %}" alt="Logo" class="h-19 mb-2">
+                        <span class="text-[8px] text-white-400 font-semibold tracking-widest uppercase">"Innovación y control en un solo lugar."</span>
                     </div>
                 </div>
                 <!-- Botón de Cierre (Solo visible en pantallas pequeñas) -->
