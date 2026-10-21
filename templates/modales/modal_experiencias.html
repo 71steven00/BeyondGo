@@ -27,18 +27,20 @@
         </a>
       </div>
     {% else %}
-      <!-- HEADER / CABECERA PARA CREAR / EDITAR / ELIMINAR -->
+      <!-- HEADER / CABECERA PARA CREAR / EDITAR / ELIMINAR / ESTADO -->
       <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
         <div>
           <h3 class="text-lg font-bold text-slate-900">
             {% if accion == 'crear' %}Nueva Experiencia
             {% elif accion == 'editar' %}Editar Experiencia
+            {% elif accion == 'estado' %}Cambiar Estado
             {% elif accion == 'eliminar' %}Eliminar Experiencia
             {% endif %}
           </h3>
           <p class="text-xs text-slate-400 mt-0.5">
             {% if accion == 'crear' %}Completa los datos para registrar una nueva experiencia.
             {% elif accion == 'editar' %}Actualiza los datos de la experiencia.
+            {% elif accion == 'estado' %}Confirmación de cambio de estado de la experiencia.
             {% elif accion == 'eliminar' %}Esta acción no se puede deshacer.
             {% endif %}
           </p>
@@ -51,7 +53,7 @@
     {% endif %}
 
     <!-- FORMULARIO / CONTENIDO -->
-    <form method="POST" action="{% if accion == 'crear' %}{% url 'gestion_experiencias_crear' 'crear' %}{% else %}{% url 'gestion_experiencias_accion' experiencia.id accion %}{% endif %}" enctype="multipart/form-data">
+    <form method="POST" action="{% if accion == 'crear' %}{% url 'gestion_experiencias_crear' 'crear' %}{% else %}{% url 'gestion_experiencias_accion' experiencia.id accion %}{% endif %}">
       {% csrf_token %}
 
       <div class="p-6">
@@ -127,6 +129,17 @@
 
           </div>
 
+        {% elif accion == 'estado' %}
+          <!-- 3. CAMBIAR ESTADO EXPERIENCIA -->
+          <div class="text-center py-4 space-y-2">
+            <p class="text-xs text-slate-600">
+              ¿Deseas cambiar el estado de la experiencia <strong>{{ experiencia.titulo }}</strong> a 
+              <strong class="text-amber-600 font-bold">
+                {% if experiencia.estado == 'Activo' %}Pausado{% else %}Activo{% endif %}
+              </strong>?
+            </p>
+          </div>
+
         {% elif accion == 'eliminar' %}
           <!-- CONTENIDO ELIMINAR -->
           <div class="text-center py-4 space-y-2">
@@ -152,11 +165,14 @@
             Cancelar
           </a>
           <button type="submit" class="w-1/2 py-2.5 px-4 rounded-xl text-xs font-semibold transition shadow-sm text-white 
-            {% if accion == 'eliminar' %}bg-rose-600 hover:bg-rose-700{% else %}bg-[#22c55e] hover:bg-emerald-600{% endif %}">
-            {% if accion == 'crear' %}Crear Experiencia
-            {% elif accion == 'editar' %}Guardar Cambios
-            {% elif accion == 'eliminar' %}Eliminar
-            {% endif %}
+            {% if accion == 'eliminar' %}bg-rose-600 hover:bg-rose-700
+            {% elif accion == 'estado' %}bg-amber-500 hover:bg-amber-600
+            {% else %}bg-[#22c55e] hover:bg-emerald-600{% endif %}">
+                {% if accion == 'crear' %}Crear Experiencia
+                {% elif accion == 'editar' %}Guardar Cambios
+                {% elif accion == 'estado' %}Confirmar Cambio
+                {% elif accion == 'eliminar' %}Eliminar
+                {% endif %}
           </button>
         {% endif %}
       </div>

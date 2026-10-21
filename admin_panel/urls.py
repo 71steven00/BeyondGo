@@ -11,7 +11,7 @@ urlpatterns = [
     path('gestion_usuarios/<int:pk>/<str:a>/', views.gestion_usuarios, name='gestion_usuarios_accion'),
     path('gestion_establecimientos/', views.gestion_establecimientos, name='gestion_establecimientos'),
     # Rutas de Gestión de Experiencias (siguiendo exactamente la misma estructura)
-    path('experiencias/', views.experiencias, name='gestion_experiencias'),
-    path('experiencias/accion/<str:a>/', views.experiencias, name='gestion_experiencias_crear'), # Añadimos 'accion/' para evitar choques
-    path('experiencias/<int:pk>/<str:a>/', views.experiencias, name='gestion_experiencias_accion'),
+    path('gestion-experiencias/', views.experiencias, name='gestion_experiencias'),
+    path('gestion-experiencias/<str:a>/', views.experiencias, name='gestion_experiencias_crear'),
+    path('gestion-experiencias/<int:pk>/<str:a>/', views.experiencias, name='gestion_experiencias_accion'),
 ]
