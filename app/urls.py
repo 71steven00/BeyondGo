@@ -17,6 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from usuarios.views import CustomLoginView
 from django.urls import path, include
+from django.conf import settings #Estas dos líneas de código en Django sirven para configurar y servir archivos multimedia
+
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('', include('inicio.urls')), #ruta para administradores.urls
@@ -25,5 +28,6 @@ urlpatterns = [
     #Rutas principales gestionadas por usuarios y admin panel
     path('', include('usuarios.urls')),  # rutas que incluye login, registro y perfil 
     path('administrador/', include('admin_panel.urls')), #ruta para administradores.urls
-    
 ]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
