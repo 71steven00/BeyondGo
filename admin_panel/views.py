@@ -8,9 +8,11 @@ from usuarios.models import Usuario, Guia
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from usuarios.forms import Editar_usuario, UsuarioForm
-from usuarios.models import Hotel
+from usuarios.models import Establecimiento
+from .forms import EstablecimientoForm, EstablecimientoForm
 from .models import Experiencia        # <--- Importa tu modelo
 from .forms import ExperienciaForm
+from django.db import models # para las consultas Q del buscador
 
 # Create your views here.
 def visualizar_template2(request):
@@ -172,25 +174,75 @@ def gestion_usuarios(request, pk=None, a= None):
     return render(request, 'admin_general/gestion_usuarios.html', context)
 
 @rol_requerido('ADMIN')
-def gestion_establecimientos(request):
+def gestion_establecimientos(request, pk=None, a=None):
+    if pk is not None and pk != 0:
+        establecimiento = get_object_or_404(Establecimiento, id=pk)
+    else:
+        establecimiento = None
+        
+    form = None
+    
+    # Manejo de peticiones POST (Crear / Editar)
     if request.method == 'POST':
-        # Guardar el establecimiento con sus archivos
-        nuevo_hotel = Hotel(
-            usuario=request.user,
-            nombre=request.POST.get('nombre'),
-            descripcion=request.POST.get('descripcion'),
-            direccion=request.POST.get('direccion'),
-            url_img=request.FILES.get('url_img'),
-            rtn=request.FILES.get('rtn'),
-            ciudad=request.POST.get('ciudad'),          
-            pais=request.POST.get('pais'),
-            licencia_sanitaria=request.FILES.get('licencia_sanitaria')
-        )
-        nuevo_hotel.save()
-        return redirect('gestion_establecimientos')
+        if a == 'editar' and establecimiento:
+            form = EstablecimientoForm(request.POST, request.FILES, instance=establecimiento)
+            mensaje = 'Establecimiento actualizado con éxito.'
+        else:
+            form = EstablecimientoForm(request.POST, request.FILES)
+            mensaje = 'Establecimiento creado con éxito.'
+            
+        if form.is_valid():
+            nuevo_est = form.save(commit=False)
+            nuevo_est.usuario = request.user
+            nuevo_est.save()
+            form.save_m2m()
+            messages.success(request, mensaje)
+            return redirect('gestion_establecimientos')
 
-    hoteles = Hotel.objects.all() # Django consulta la base de datos automáticamente
-    return render(request, 'admin_general/gestion_establecimientos.html', {'hoteles': hoteles})
+    # Manejo de acciones dinámicas (GET)
+    elif a is not None:
+        if a == 'crear':
+            form = EstablecimientoForm()
+        elif a == 'editar' and establecimiento:
+            form = EstablecimientoForm(instance=establecimiento)
+        elif a == 'estado' and establecimiento:
+            # Alterna el estado activo / inactivo
+            establecimiento.is_active = not establecimiento.is_active
+            establecimiento.save()
+            
+            estado_texto = "Disponible" if establecimiento.is_active else "No disponible"
+            messages.info(request, f'El establecimiento {establecimiento.nombre} ahora está {estado_texto}.')
+            return redirect('gestion_establecimientos')
+            
+        elif a == 'eliminar' and establecimiento:
+            establecimiento.delete()
+            messages.warning(request, 'Establecimiento eliminado correctamente.')
+            return redirect('gestion_establecimientos')
+
+    # Listado y Paginación
+    query = request.GET.get('q')
+    establecimientos_list = Establecimiento.objects.all().order_by('-id')
+    
+    if query:
+        establecimientos_list = establecimientos_list.filter(
+            models.Q(nombre__icontains=query) | 
+            models.Q(ciudad__icontains=query) |
+            models.Q(direccion__icontains=query)
+        )
+
+    paginator = Paginator(establecimientos_list, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'establecimiento_seleccionado': establecimiento,
+        'form': form,
+        'accion': a,
+        'mostrar_modal': bool(a in ['ver', 'crear', 'editar']),
+        'establecimientos': page_obj,
+        'query': query,
+    }
+    return render(request, 'admin_general/gestion_establecimientos.html', context)
 
 @rol_requerido('ADMIN')
 def experiencias(request, pk=None, a=None):
