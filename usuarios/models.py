@@ -113,58 +113,38 @@ class Servicio(models.Model):
         return self.nombre
 
 
-# 3. PERFIL DE ADMINISTRADOR DE HOTEL
-class Hotel(models.Model):
-    usuario = models.OneToOneField(
+# 3. ATRIBUTOS DE HOTEL / RESTAURANTE (ESTABLECIMIENTOS) - MODELO UNIFICADO
+class Establecimiento(models.Model):
+    TIPO_CHOICES = (
+        ('Hotel', 'Hotel'),
+        ('Restaurante', 'Restaurante'),
+    )
+    
+    usuario = models.ForeignKey(
         Usuario,
         on_delete=models.CASCADE,
-        related_name= 'perfil_admin_hotel',
-        verbose_name= 'Administrador del Hotel'
+        related_name='establecimientos',
+        verbose_name='Administrador del Establecimiento'
     )
-    nombre = models.CharField(max_length=150, verbose_name='Nombre del Hotel')
-    descripcion = models.TextField(blank=True, null = True, verbose_name= 'Detalles')
+    nombre = models.CharField(max_length=150, verbose_name='Nombre del Establecimiento')
+    descripcion = models.TextField(blank=True, null=True, verbose_name='Detalles')
+    
+    # Selector de tipo visible en el formulario
+    tipo = models.CharField(max_length=50, choices=TIPO_CHOICES, default='Hotel', verbose_name='Tipo de Establecimiento')
+    
     direccion = models.CharField(max_length=200, verbose_name='Dirección') 
     ciudad = models.CharField(max_length=100, verbose_name='Ciudad') 
     pais = models.CharField(max_length=100, blank=True, default='Colombia', verbose_name='País')  
-    url_img = models.ImageField(upload_to='hoteles/', blank=True, null=True, verbose_name='Imagen del Hotel')
+    url_img = models.ImageField(upload_to='establecimientos/', blank=True, null=True, verbose_name='Imagen')
     rtn = models.FileField(max_length=50, unique=True, verbose_name='Registro Nacional de Turismo (RNT/RTN)') 
     licencia_sanitaria = models.FileField(max_length=50, blank=True, null=True, verbose_name='Registro Sanitario')
-    # servicios = esta en una clase aparte. Unión ManyToMany con el modelo Servicio
-    servicios = models.ManyToManyField('Servicio', blank=True, related_name="servicios_hotel", verbose_name="Servicios Ofrecidos")
+    servicios = models.ManyToManyField('Servicio', blank=True, related_name="servicios_establecimiento", verbose_name="Servicios Ofrecidos")
 
     class Meta:
-        verbose_name = "Hotel"
-        verbose_name_plural = "Hoteles" 
+        verbose_name = "Establecimiento"
+        verbose_name_plural = "Establecimientos" 
 
     def __str__(self):
-        return self.nombre
-
-
-# 4. PERFIL DE ADMINISTRADOR DE RESTAURANTE
-class Restaurante(models.Model):
-    usuario = models.OneToOneField(
-        Usuario,
-        on_delete = models.CASCADE,
-        related_name = 'restaurantes',
-        verbose_name = 'Administrador del Restaurante'
-    )
-    nombre = models.CharField(max_length=150, verbose_name='Nombre del Restaurante')
-    descripcion = models.TextField(blank=True, null=True, verbose_name= 'Detalles')
-    direccion = models.CharField(max_length=200, verbose_name='Direccion')  
-    ciudad = models.CharField(max_length=100, verbose_name='Ciudad')  
-    pais = models.CharField(max_length=100, default='Colombia', verbose_name='Pais')     
-    url_img = models.ImageField(upload_to='restaurantes/', blank=True, null=True, verbose_name='Imagen del Restaurante')
-    licencia_sanitaria = models.FileField(max_length=50, blank=True, null=True, verbose_name='Registro Sanitario')
-    # servicios = esta en una clase aparte. Unión ManyToMany con el modelo Servicio
-    servicios = models.ManyToManyField('Servicio', blank=True, related_name='servicios_restaurante', verbose_name='Servicios Ofrecidos')
-
-    class Meta:
-        verbose_name = 'Restaurante'
-        verbose_name_plural = 'Restaurantes'
-
-    def __str__(self):
-        return self.nombre
-
-
+        return f"{self.nombre} ({self.tipo})"
 
 
