@@ -4,81 +4,81 @@
 {% block title %}Gestión de Establecimientos - Beyond Go{% endblock %}
 
 {% block header_title %}Gestión de Establecimientos{% endblock %}
-{% block header_subtitle %}Hoteles, restaurantes y operadores turísticos registrados en Aquitania{% endblock %}
+{% block header_subtitle %}Hoteles y Restaurantes registrados en Aquitania{% endblock %}
 
 {% block content %}
 
-<!-- Cabecera de acción (Botón Nuevo) -->
+<!-- Cabecera de acción (Botón Nuevo actualizado) -->
 <div class="flex justify-end mb-6">
     <button type="button" 
-            onclick="abrirModal('modalAgregarEstablecimiento')" 
-            class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs rounded-full shadow-sm transition">
+        onclick="abrirModal('modalAgregarEstablecimiento')" 
+        class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs rounded-full shadow-sm transition">
         <i class="fa-solid fa-plus text-xs"></i> Nuevo
-    </button>
+  </button>
 </div>
 
 <!-- Grilla de Establecimientos -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-
- <!--BUCLE USANDO FOR PARA LAS TARJETAS DE ESTABLECIMIENTOS -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {% for hotel in hoteles %}
-    <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+    {% for establecimiento in establecimientos %}
+    <div class="relative bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+        
+        <!-- Botón de 3 Puntos flotante en la esquina superior derecha -->
+        <div class="absolute top-3 right-3 z-30">
+            {% url 'gestion_establecimientos_accion' establecimiento.pk 'ver' as url_ver_val %}
+            {% url 'gestion_establecimientos_accion' establecimiento.pk 'editar' as url_edit_val %}
+            {% url 'gestion_establecimientos_accion' establecimiento.pk 'estado' as url_status_val %}
+            {% url 'gestion_establecimientos_accion' establecimiento.pk 'eliminar' as url_del_val %}
+
+            {% include 'components/dropdown_acciones.html' with usuario=establecimiento url_ver=url_ver_val url_editar=url_edit_val url_estado=url_status_val url_eliminar=url_del_val texto_ver="Ver detalle" texto_editar="Editar" texto_eliminar="Eliminar" %}
+        </div>
+
         <div>
             <!-- Imagen con badge de estado superior -->
-            <div class="relative h-44 w-full overflow-hidden bg-slate-100">
-                {% if hotel.url_img %}
-                    <img src="{{ hotel.url_img.url }}" alt="{{ hotel.nombre }}" class="w-full h-full object-cover">
+            <div class="relative h-44 w-full overflow-hidden bg-slate-100 rounded-t-2xl">
+                {% if establecimiento.url_img %}
+                    <img src="{{ establecimiento.url_img.url }}" alt="{{ establecimiento.nombre }}" class="w-full h-full object-cover">
                 {% else %}
-                    <img src="{% static 'images/establecimientos/default.jpg' %}" alt="{{ hotel.nombre }}" class="w-full h-full object-cover">
+                    <img src="{% static 'images/establecimientos/default.jpg' %}" alt="{{ establecimiento.nombre }}" class="w-full h-full object-cover">
                 {% endif %}
 
-                <!-- Badges de estado dinámicos -->
-                {% if hotel.estado == 'Activo' or not hotel.estado %}
-                    <span class="absolute top-3 right-3 bg-emerald-500/90 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">
-                        Activo
-                    </span>
-                {% elif hotel.estado == 'Pendiente' %}
-                    <span class="absolute top-3 right-3 bg-amber-400/90 backdrop-blur-md text-slate-900 text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm">
-                        Pendiente
-                    </span>
-                {% elif hotel.estado == 'Suspendido' %}
-                    <span class="absolute top-3 right-3 bg-rose-500/90 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">
-                        Suspendido
-                    </span>
-                {% endif %}
+                <!-- Badges de tipo dinámico -->
+                <span class="absolute top-3 left-3 bg-emerald-500/90 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">
+                    {{ establecimiento.tipo }}
+                </span>
             </div>
 
             <!-- Información del establecimiento -->
             <div class="p-4">
                 <div class="flex items-center justify-between mb-1">
-                    <h3 class="font-bold text-slate-800 text-base">{{ hotel.nombre }}</h3>
-                    <span class="text-xs bg-blue-50 text-blue-600 px-2.5 py-0.5 rounded-full font-medium">Hotel</span>
+                    <h3 class="font-bold text-slate-800 text-base">{{ establecimiento.nombre }}</h3>
                 </div>
                 <p class="text-xs text-slate-400 flex items-center gap-1.5 mb-3">
-                    <i class="fa-solid fa-location-dot text-slate-400"></i> {{ hotel.direccion }}{% if hotel.ciudad %}, {{ hotel.ciudad }}{% endif %}
+                    <i class="fa-solid fa-location-dot text-slate-400"></i> {{ establecimiento.direccion }}{% if establecimiento.ciudad %}, {{ establecimiento.ciudad }}{% endif %}
                 </p>
+                <p class="text-xs text-slate-500 line-clamp-2">{{ establecimiento.descripcion }}</p>
             </div>
         </div>
 
-        <!-- Footer de la tarjeta (Valoración y Botón de Estado) -->
-        <div class="px-4 pb-4 pt-0 flex items-center justify-between border-t border-slate-100 pt-3 mt-auto">
+        <!-- Footer de la tarjeta -->
+        <div class="px-4 pb-4 pt-3 flex items-center justify-between border-t border-slate-100 mt-auto">
             <div class="flex items-center gap-1 text-amber-400 text-xs font-semibold">
                 <i class="fa-solid fa-star"></i>
                 <span class="text-slate-700">5.0</span>
                 <span class="text-slate-400 font-normal">(1)</span>
             </div>
             
-            <!--Seccion de acciones reutilizando el componenete de forma generica-->
-            {% url 'gestion_establecimientos_accion' establecimiento.pk 'ver' as url_ver_val%}
-            {% url 'gestion_establecimientos_accion' establecimiento.pk 'editar' as url_edit_val%}
-            {% url 'gestion_establecimientos_accion' establecimiento.pk 'estado' as url_status_val%}
-            {% url 'gestion_establecimientos_accion' establecimiento.pk 'eliminar' as url_del_val%}
-            {% include 'components/dropdown_acciones.html' with establecimiento=establecimiento url_ver=url_ver_val url_editar=url_edit_val url_estado=url_status_val url_eliminar=url_del_val texto_ver="Ver establecimiento" %}
+            <!-- Estado dinámico real del establecimiento -->
+            <div>
+                {% if establecimiento.is_active %}
+                    <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-bold">Disponible</span>
+                {% else %}
+                    <span class="px-2.5 py-1 bg-amber-50 text-amber-600 rounded-full text-[10px] font-bold">No disponible</span>
+                {% endif %}
+            </div>
         </div>
+
     </div>
     {% empty %}
-    <!-- Mensaje cuando aún no hay establecimientos guardados en la base de datos -->
     <div class="col-span-full py-12 text-center bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
         <i class="fa-solid fa-hotel text-slate-300 text-4xl mb-3"></i>
         <p class="text-slate-500 text-sm font-medium">No hay establecimientos registrados aún.</p>
@@ -87,9 +87,8 @@
     {% endfor %}
 </div>
 
-<!-- Modal / Tarjeta para Nuevo Establecimiento -->
+<!-- Modal para Nuevo Establecimiento -->
 <div id="{{ modal_id|default:'modalAgregarEstablecimiento' }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
-  
   <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 md:p-8 my-8">
     
     <!-- Header del Modal -->
@@ -102,27 +101,27 @@
         <i class="fa-solid fa-xmark text-sm"></i>
       </button>
     </div>
-    <!-- Formulario -->
-    <form method="POST" action="{% url 'gestion_establecimientos' %}" enctype="multipart/form-data" class="space-y-4">
-      {% csrf_token %}
 
+    <!-- Formulario -->
+    <form method="POST" action="{% url 'gestion_establecimientos' %}" enctype="multipart/form-data" class="space-y-4">      
+      {% csrf_token %}
       {% block modal_body %}
         <!-- 1. IMAGEN DE PORTADA -->
         <div>
           <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-2">Imagen de Portada</label>
           <label class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-50 hover:border-emerald-400 transition group">
-            <div class="flex flex-col items-center justify-center pt-4 pb-4">
+            <div class="flex flex-col items-center justify-center pt-4 pb-4 px-4 text-center">
               <i class="fa-solid fa-image text-slate-400 group-hover:text-emerald-500 text-2xl mb-1 transition"></i>
-              <p class="text-xs text-slate-500 font-medium">Haz clic para subir imagen</p>
+              <p id="nombre-imagen" class="text-xs text-slate-500 font-medium truncate max-w-xs">Haz clic para subir imagen</p>
             </div>
-            <input type="file" name="url_img" accept="image/*" required class="hidden" />
+            <input type="file" name="url_img" accept="image/*" id="input-imagen" class="hidden" onchange="mostrarNombreImagen(this)" />
           </label>
         </div>
 
-        <!-- 2. NOMBRE DEL ESTABLECIMIENTO -->
+        <!-- 2. NOMBRE -->
         <div>
           <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">Nombre del Establecimiento</label>
-          <input type="text" name="nombre" placeholder="ej. Hotel Refugio del Sol" required 
+          <input type="text" name="nombre" placeholder="ej. Hotel El Real o Restaurante Sabor" required 
             class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white transition" />
         </div>
 
@@ -133,14 +132,24 @@
             class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white transition resize-none"></textarea>
         </div>
 
-        <!-- 4. DIRECCIÓN -->
-        <div>
-          <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">Dirección</label>
-          <input type="text" name="direccion" placeholder="ej. Vía Aquitania Km 12" required 
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white transition" />
+        <!-- 4 & 5. DIRECCIÓN Y TIPO -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">Dirección</label>
+            <input type="text" name="direccion" placeholder="ej. Vía Aquitania Km 12" required 
+              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white transition" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">Tipo de Establecimiento</label>
+            <select name="tipo" required 
+              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white transition">
+              <option value="Hotel">Hotel</option>
+              <option value="Restaurante">Restaurante</option>
+            </select>
+          </div>
         </div>
 
-        <!-- 5 & 6. CIUDAD Y PAÍS EN DOS COLUMNAS -->
+        <!-- 6 & 7. CIUDAD Y PAÍS -->
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">Ciudad</label>
@@ -154,7 +163,7 @@
           </div>
         </div>
 
-        <!-- 7 & 8. ADJUNTAR ARCHIVOS (RTN Y LICENCIA SANITARIA) -->
+        <!-- 8 & 9. ARCHIVOS ADJUNTOS -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
           <div>
             <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">RTN (PDF o Imagen)</label>
@@ -185,6 +194,13 @@
 </div>
 
 <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const accionActiva = "{{ accion }}";
+    if (accionActiva === 'crear' || accionActiva === 'editar') {
+      abrirModal('modalAgregarEstablecimiento');
+    }
+  });
+
   function abrirModal(idModal) {
     const modal = document.getElementById(idModal);
     if (modal) {
@@ -198,6 +214,14 @@
     if (modal) {
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+    }
+  }
+
+  function mostrarNombreImagen(input) {
+    const texto = document.getElementById('nombre-imagen');
+    if (input.files && input.files[0]) {
+      texto.textContent = input.files[0].name;
+      texto.classList.add('text-emerald-600', 'font-semibold');
     }
   }
 </script>
