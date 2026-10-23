@@ -16,6 +16,7 @@
 {% endblock %}
 
 <body class="bg-slate-50">
+    {% include 'components/server_alert.html' %}
 
     <!-- Aquí se inyecta todo lo de tus páginas hijas -->
     {% block content %}
@@ -25,4 +26,7 @@
 </body>
 
 {% include 'components/footer.html' %}
+{% block extra_js %}
+    <script src="{% static 'js/animaciones_alertas.js' %}"></script>
+{% endblock %}
 </html>

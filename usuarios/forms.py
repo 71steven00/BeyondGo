@@ -1,3 +1,4 @@
+from django.contrib.auth.password_validation import validate_password
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import Usuario
@@ -41,7 +42,12 @@ class RegistroClienteForm(forms.ModelForm):
         elif Usuario.objects.filter(numero_documento=numero_documento).exists():
             raise ValidationError('Este número de documento ya está registrado.')
         return numero_documento
-
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if password:
+            validate_password(password)
+        return password
+    
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get('password')
@@ -168,6 +174,12 @@ class UsuarioForm(forms.ModelForm):
                 'class': 'w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500'
             }),
         }
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if password:
+            validate_password(password)
+        return password
+    
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get("password")

@@ -16,6 +16,9 @@ from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect
 # Importamos el formulario desde el módulo de usuarios
 from usuarios.forms import RegistroClienteForm
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 
 # Create your views here.
@@ -196,28 +199,28 @@ class PasswordResetEmailView(TemplateView):
             # generar codigo aleatorio de 6 digitos
             codigo = str(random.randint(10000, 999999))
             
-            # Guardar el correo en sesión para los siguientes pasos
+        # Guardar el correo en sesión para los siguientes pasos
             self.request.session['email_recuperacion'] = email
-            # Todo: Aquí generas y envías el código por correo (simulación por ahora: '123456')
             self.request.session['codigo_recuperacion'] = codigo
+            
             asunto = 'Código de verificación - Recuperación de contraseña'
-            mensaje = (
-                f'Hola,\n\n'
-                f'Hemos recibido una solicitud para restablecer tu contrasena en BeyondGo.\n\n'
-                f'Tu codigo de verificación es: {codigo}\n\n'
-                f'Si no realizaste esta solicitud, puedes ignorar este mensaje.'
-            )
 
             try:
-                send_mail(
-                    asunto,
-                    mensaje,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [email],
-                    fail_silently=False,
-                )
+                # Contexto que se inyectará en tu plantilla HTML
+                contexto = {
+                    'codigo': codigo,
+                }
+                # Renderizar la plantilla HTML de correo que creaste
+                html_contenido = render_to_string('emails/correo_recuperacion_contra.html', contexto)
+                texto_plano = strip_tags(html_contenido)
+
+                # Enviar correo multiparte seguro a través de Gmail
+                email_msg = EmailMultiAlternatives(asunto, texto_plano, settings.DEFAULT_FROM_EMAIL, [email])
+                email_msg.attach_alternative(html_contenido, "text/html")
+                email_msg.send()
+
                 messages.success(self.request, 'Se ha enviado un código de verificación a tu correo.')
-                return redirect('password_request') # Redirige a la vista de ingresar el código
+                return redirect('password_request') # Mantén tu redirección actual
                 
             except Exception as e:
                 print("ERROR AL ENVIAR CORREO:", e)
@@ -239,26 +242,33 @@ class PasswordResetCodeView(TemplateView):
         
         # Generar nuevo codigo aleatorio de 6 digitos
         if request.GET.get('resend') == 'true':
-            nuevo_codigo =str(random.randint(100000, 999999))
+            nuevo_codigo = str(random.randint(100000, 999999))
             request.session['codigo_recuperacion'] = nuevo_codigo
-        #Reenviar el correo con el nuevo codigo
-            try:
-                asunto = 'Codigo de verificacion - Reenvio de clave'
-                mensaje = f'Tu nuevo codigo de verificacion es: {nuevo_codigo}'
+            
+            asunto = 'Código de verificación - Reenvío de clave'
 
-                send_mail(
-                    asunto,
-                    mensaje,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [email],
-                    fail_silently=False,
-                )
+            try:
+                # Contexto que se inyectará en la plantilla HTML
+                contexto = {
+                    'codigo': nuevo_codigo,
+                }
+
+                # Renderizar tu plantilla HTML profesional
+                html_contenido = render_to_string('emails/correo_recuperacion_contra.html', contexto)
+                texto_plano = strip_tags(html_contenido)
+
+                # Enviar correo multiparte seguro a través de Gmail
+                email_msg = EmailMultiAlternatives(asunto, texto_plano, settings.DEFAULT_FROM_EMAIL, [email])
+                email_msg.attach_alternative(html_contenido, "text/html")
+                email_msg.send()
+
                 messages.success(request, 'Se ha reenviado un nuevo código de verificación a tu correo.')
-                    
+
             except Exception as e:
                 print("ERROR AL REENVIAR CORREO:", e)
                 messages.error(request, f'Ocurrió un error al reenviar el correo: {e}')
-            return redirect('password_request')
+                return redirect('password_reset')
+            
         return self.render_to_response(self.get_context_data())
     
     def post(self, request, *args, **kwargs):

@@ -145,7 +145,7 @@
               <div>
                 <label class="block font-semibold text-slate-600 mb-1">Confirmar Contraseña</label>
                 {{ form.confirm_password }}
-                {% if form.confirm_password.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.confirm_password.errors.0 }}</p>{% endif %}
+                {% if form.password.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.password.errors.0 }}</p>{% endif %}
               </div>
             </div>
             {% endif %}

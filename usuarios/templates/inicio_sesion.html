@@ -59,7 +59,7 @@
         <span>Ingresar</span>
         <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
     </button>
-    {% include 'components/server_alert.html' %}
+    
 </form>
 
 <!-- Enlace a Registro -->
@@ -69,9 +69,4 @@
         <a href="{% url 'registro'%}" class="text-emerald-400 font-semibold hover:underline">Regístrate aquí</a>
     </p>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-    <script src="{% static 'js/form-validation.js' %}"></script>
-    <script src="{% static 'js/animaciones_alertas.js' %}"></script>
 {% endblock %}

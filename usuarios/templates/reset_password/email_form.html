@@ -9,7 +9,6 @@
 {% block home_url %}{% url 'login'%}{% endblock %}
 {%block home_title%}Volver al inicio de sesion{% endblock %}
 {% block content %}
-{% include 'components/server_alert.html' %}
     <h2 class="auth-title">ENVIAR CÓDIGO DE VERIFICACIÓN</h2>
     <p class="auth-subtitle">Ingresa el correo electrónico asociado a tu cuenta para recibir el código</p>
 
@@ -33,6 +32,6 @@
     </form>
 {% endblock %}
 {% block extra_js %}
-<script src="{% static 'js/form-validation.js' %}"></script>
-<script src="{% static 'js/animaciones_alertas.js' %}"></script>
+    <script src="{% static 'js/form-validation.js' %}"></script>
+    <script src="{% static 'js/animaciones_alertas.js' %}"></script>
 {% endblock %}

@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
-from email.header import Header
+import os
+from dotenv import load_dotenv
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -112,6 +114,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+    {
+        'NAME': 'usuarios.validators.PasswordRobustaValidator', #para ajustar las contraseñas global para que pida la funcion que hay en validators.py
+    },
 ]
 
 
@@ -141,28 +146,28 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
+load_dotenv()
 
-MAILERS = {
-    "default": {
-        "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
-        "OPTIONS": {
-            "host": "sandbox.smtp.mailtrap.io",
-            "port": 2525,
-            "username": "8933a630d8fa34",
-            "password": "1cd01ab1738d66",
-            "use_tls": True,
-        },
-    }
-}
-DEFAULT_FROM_EMAIL = 'BeyondGo <soporte@beyondgo.com>'
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# ... (tus otras configuraciones)
+
+# Configuración de Correo Segura con Variables de Entorno
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = f'BeyondGo <{EMAIL_HOST_USER}>'
 
 # indicarle a Django cuál es el modelo de usuario personalizado en el archivo de configuración principal.
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/' # ruta de tu vista principal tras iniciar sesión
-LOGOUT_REDIRECT_URL = 'login'
+LOGOUT_REDIRECT_URL = 'inicio'
 
 #configuracion para intentos fallidos Django-axes
 AXES_LOCK_OUT_BY_USER_OR_FAIL = False
