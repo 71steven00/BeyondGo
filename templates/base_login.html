@@ -18,7 +18,7 @@
     {% endblock %}
 </head>
 <body class="min-h-screen flex flex-col justify-center items-center p-4 antialiased bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white">
-
+    {% include 'components/server_alert.html' %}
     <!-- Enlace Volver -->
     <div class="w-full max-w-md mb-4 text-left">
         {% block top_navigation %}
@@ -48,7 +48,7 @@
     </main>
     <!-- Contenido si se necesita un archivo.js  -->
     {% block extra_js %}
-    <script src="{% static 'js/form-validation.js' %}"></script>
+        <script src="{% static 'js/animaciones_alertas.js' %}"></script>
     {% endblock %}
 </body>
 </html>

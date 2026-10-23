@@ -25,7 +25,7 @@ def rol_requerido(*roles_permitidos):
             # 3. Si no cumple los requisitos, rechaza el acceso y redirige
             messages.error(request, "No tienes permisos para acceder a esta página.")
             # Intenta regresar a la página previa; si no existe, redirige al inicio
-            return redirect('home')
+            return redirect('inicio')
         return wrapper
     return decorator
 

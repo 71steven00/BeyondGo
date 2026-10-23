@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperación de Contraseña</title>
+    <!-- Importar tipografía moderna (Poppins) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+                padding: 15px !important;
+            }
+            .content-cell {
+                padding: 25px 20px !important;
+            }
+            .verification-code {
+                font-size: 26px !important;
+                letter-spacing: 5px !important;
+                padding: 14px 20px !important;
+            }
+        }
+    </style>
+</head>
+<body style="font-family: 'Poppins', 'Segoe UI', Arial, sans-serif; background-color: #0f172a">
+    <!-- Fondo con degradado fluido y elegante -->
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #090d16 100%); padding: 50px 0;">
+        <tr>
+            <td align="center">
+                <!-- Tarjeta Principal con diseño ultra limpio y bordes sutiles -->
+                <table class="email-container" role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #111827; border: 1px solid rgba(56, 189, 248, 0.25); padding: 45px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); width: 600px; max-width: 100%;">
+                    
+                    <!-- Encabezado / Logo -->
+                    <tr>
+                        <td align="center" style="padding-bottom: 30px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                            <span style="color: #38bdf8; font-size: 26px; font-weight: 700; letter-spacing: 1.5px;">BEYONDGO😎✌️</span>
+                            <div style="color: #94a3b8; font-size: 12px; margin-top: 6px; font-weight: 400; letter-spacing: 0.5px;">PLATAFORMA OFICIAL</div>
+                        </td>
+                    </tr>
+
+                    <!-- Contenido Principal -->
+                    <tr>
+                        <td class="content-cell" style="color: #e2e8f0; font-size: 15px; line-height: 1.7; padding-top: 35px;">
+                            
+                            <!-- Título de la tarjeta -->
+                            <p style="margin: 0 0 8px 0; font-size: 22px; color: #ffffff; font-weight: 600; text-align: center; letter-spacing: 0.5px;">
+                                Restablecer contraseña
+                            </p>
+                            
+                            <p style="margin: 0 0 30px 0; color: #94a3b8; text-align: center; font-size: 14px; line-height: 1.6;">
+                                Hemos recibido una solicitud para cambiar tu contraseña. Utiliza el siguiente código de seguridad:
+                            </p>
+
+                            <!-- Caja del Código de Verificación (Efecto Destacado) -->
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="center" style="padding: 5px 0 30px 0;">
+                                        <div class="verification-code" style="display: inline-block; background: linear-gradient(180deg, #1f2937 0%, #111827 100%); border: 2px solid #38bdf8; color: #38bdf8; font-size: 34px; font-weight: 700; letter-spacing: 8px; padding: 16px 40px; border-radius: 16px; box-shadow: 0 8px 25px rgba(56, 189, 248, 0.25);">
+                                            {{ codigo }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Nota de seguridad -->
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: rgba(30, 41, 59, 0.5); border-radius: 12px; padding: 15px 20px; margin-bottom: 25px;">
+                                <tr>
+                                    <td>
+                                        <p style="margin: 0; color: #94a3b8; font-size: 13px; text-align: center; line-height: 1.5;">
+                                            Este código expirará en <strong style="color: #e2e8f0;">10 minutos</strong>. Si no solicitaste este cambio, puedes ignorar este mensaje de forma segura.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <!-- Pie de página -->
+                    <tr>
+                        <td align="center" style="color: #64748b; font-size: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 25px;">
+                            &copy; 2026 Aquitania BeyondGo. Todos los derechos reservados.
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -1,4 +1,5 @@
 from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -11,6 +12,9 @@ class UsuarioManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('El Email es obligatorio')
+        
+        if password:
+            validate_password(password, user=self.model(email=email, **extra_fields))
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
