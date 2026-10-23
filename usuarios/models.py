@@ -7,6 +7,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.core.validators import RegexValidator
 from datetime import date
 from django.core.exceptions import ValidationError
+from admin_panel.models import Servicio
 
 class UsuarioManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -105,23 +106,23 @@ class Guia(models.Model):
 
 
 
-# 2. CATÁLOGO GLOBAL DE SERVICIOS (Reutilizable para Hoteles y Restaurantes)
-class Servicio(models.Model):
-    nombre = models.CharField(max_length=50, unique=True, verbose_name="Nombre de Servicio")
-
-    class Meta:
-        verbose_name = "Servicio"
-        verbose_name_plural = "Servicios"
-
-    def __str__(self):
-        return self.nombre
-
 
 # 3. ATRIBUTOS DE HOTEL / RESTAURANTE (ESTABLECIMIENTOS) - MODELO UNIFICADO
 class Establecimiento(models.Model):
     TIPO_CHOICES = (
         ('Hotel', 'Hotel'),
         ('Restaurante', 'Restaurante'),
+    )
+    # 6 COMBOS DE SERVICIOS PREDEFINIDOS
+    SERVICIOS_CHOICES = (
+        # Combos de Hotel
+        ('WiFi, Hospedaje y Piscina', 'Hotel: WiFi, Hospedaje y Piscina'),
+        ('WiFi, Hospedaje y Sauna', 'Hotel: WiFi, Hospedaje y Sauna'),
+        ('WiFi, Hospedaje, Desayuno e Parqueadero', 'Hotel: WiFi, Hospedaje, Desayuno y Parqueadero'),
+        # Combos de Restaurante
+        ('Comida Típica, Bebidas y Música en Vivo', 'Restaurante: Comida Típica, Bebidas y Música en Vivo'),
+        ('Servicio a la Carta, Bebidas y Terraza', 'Restaurante: Servicio a la Carta, Bebidas y Terraza'),
+        ('Buffet, Postres y Zona Infantil', 'Restaurante: Buffet, Postres y Zona Infantil'),
     )
     
     usuario = models.ForeignKey(
@@ -132,17 +133,15 @@ class Establecimiento(models.Model):
     )
     nombre = models.CharField(max_length=150, verbose_name='Nombre del Establecimiento')
     descripcion = models.TextField(blank=True, null=True, verbose_name='Detalles')
-    
     # Selector de tipo visible en el formulario
     tipo = models.CharField(max_length=50, choices=TIPO_CHOICES, default='Hotel', verbose_name='Tipo de Establecimiento')
-    
     direccion = models.CharField(max_length=200, verbose_name='Dirección') 
     ciudad = models.CharField(max_length=100, verbose_name='Ciudad') 
     pais = models.CharField(max_length=100, blank=True, default='Colombia', verbose_name='País')  
     url_img = models.ImageField(upload_to='establecimientos/', blank=True, null=True, verbose_name='Imagen')
-    rtn = models.FileField(max_length=50, unique=True, verbose_name='Registro Nacional de Turismo (RNT/RTN)') 
-    licencia_sanitaria = models.FileField(max_length=50, blank=True, null=True, verbose_name='Registro Sanitario')
-    servicios = models.ManyToManyField('Servicio', blank=True, related_name="servicios_establecimiento", verbose_name="Servicios Ofrecidos")
+    rtn = models.FileField(upload_to='rtn/',max_length=255, verbose_name='Registro Nacional de Turismo (RNT/RTN)') #Aumenta el límite de caracteres para evitar error en la base de datos de tipo Value too long.
+    licencia_sanitaria = models.FileField(upload_to='licencias/', max_length=255, blank=True, null=True, verbose_name='Registro Sanitario')
+    servicios = models.ManyToManyField(Servicio, blank=True, related_name="servicios_establecimiento", verbose_name="Servicios Ofrecidos")
 
     class Meta:
         verbose_name = "Establecimiento"

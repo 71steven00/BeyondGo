@@ -8,221 +8,104 @@
 
 {% block content %}
 
-<!-- Cabecera de acción (Botón Nuevo actualizado) -->
-<div class="flex justify-end mb-6">
-    <button type="button" 
-        onclick="abrirModal('modalAgregarEstablecimiento')" 
-        class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-xs rounded-full shadow-sm transition">
-        <i class="fa-solid fa-plus text-xs"></i> Nuevo
-  </button>
-</div>
+<!-- CONTENEDOR PRINCIPAL DE LA VISTA -->
+<div class="p-6 space-y-6 bg-slate-50 min-h-screen">
 
-<!-- Grilla de Establecimientos -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {% for establecimiento in establecimientos %}
-    <div class="relative bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-        
-        <!-- Botón de 3 Puntos flotante en la esquina superior derecha -->
-        <div class="absolute top-3 right-3 z-30">
-            {% url 'gestion_establecimientos_accion' establecimiento.pk 'ver' as url_ver_val %}
-            {% url 'gestion_establecimientos_accion' establecimiento.pk 'editar' as url_edit_val %}
-            {% url 'gestion_establecimientos_accion' establecimiento.pk 'estado' as url_status_val %}
-            {% url 'gestion_establecimientos_accion' establecimiento.pk 'eliminar' as url_del_val %}
-
-            {% include 'components/dropdown_acciones.html' with usuario=establecimiento url_ver=url_ver_val url_editar=url_edit_val url_estado=url_status_val url_eliminar=url_del_val texto_ver="Ver detalle" texto_editar="Editar" texto_eliminar="Eliminar" %}
-        </div>
-
-        <div>
-            <!-- Imagen con badge de estado superior -->
-            <div class="relative h-44 w-full overflow-hidden bg-slate-100 rounded-t-2xl">
-                {% if establecimiento.url_img %}
-                    <img src="{{ establecimiento.url_img.url }}" alt="{{ establecimiento.nombre }}" class="w-full h-full object-cover">
-                {% else %}
-                    <img src="{% static 'images/establecimientos/default.jpg' %}" alt="{{ establecimiento.nombre }}" class="w-full h-full object-cover">
-                {% endif %}
-
-                <!-- Badges de tipo dinámico -->
-                <span class="absolute top-3 left-3 bg-emerald-500/90 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">
-                    {{ establecimiento.tipo }}
-                </span>
-            </div>
-
-            <!-- Información del establecimiento -->
-            <div class="p-4">
-                <div class="flex items-center justify-between mb-1">
-                    <h3 class="font-bold text-slate-800 text-base">{{ establecimiento.nombre }}</h3>
-                </div>
-                <p class="text-xs text-slate-400 flex items-center gap-1.5 mb-3">
-                    <i class="fa-solid fa-location-dot text-slate-400"></i> {{ establecimiento.direccion }}{% if establecimiento.ciudad %}, {{ establecimiento.ciudad }}{% endif %}
-                </p>
-                <p class="text-xs text-slate-500 line-clamp-2">{{ establecimiento.descripcion }}</p>
-            </div>
-        </div>
-
-        <!-- Footer de la tarjeta -->
-        <div class="px-4 pb-4 pt-3 flex items-center justify-between border-t border-slate-100 mt-auto">
-            <div class="flex items-center gap-1 text-amber-400 text-xs font-semibold">
-                <i class="fa-solid fa-star"></i>
-                <span class="text-slate-700">5.0</span>
-                <span class="text-slate-400 font-normal">(1)</span>
-            </div>
-            
-            <!-- Estado dinámico real del establecimiento -->
-            <div>
-                {% if establecimiento.is_active %}
-                    <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-bold">Disponible</span>
-                {% else %}
-                    <span class="px-2.5 py-1 bg-amber-50 text-amber-600 rounded-full text-[10px] font-bold">No disponible</span>
-                {% endif %}
-            </div>
-        </div>
-
-    </div>
-    {% empty %}
-    <div class="col-span-full py-12 text-center bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
-        <i class="fa-solid fa-hotel text-slate-300 text-4xl mb-3"></i>
-        <p class="text-slate-500 text-sm font-medium">No hay establecimientos registrados aún.</p>
-        <p class="text-slate-400 text-xs mt-1">Haz clic en "+ Nuevo" para agregar el primero.</p>
-    </div>
-    {% endfor %}
-</div>
-
-<!-- Modal para Nuevo Establecimiento -->
-<div id="{{ modal_id|default:'modalAgregarEstablecimiento' }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
-  <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 md:p-8 my-8">
-    
-    <!-- Header del Modal -->
-    <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
-      <div>
-        <h3 class="text-xl font-bold text-slate-900">{{ modal_titulo|default:"Nuevo Establecimiento" }}</h3>
-        <p class="text-xs text-slate-400 mt-1">{{ modal_subtitulo|default:"Completa la información requerida para registrar el lugar." }}</p>
-      </div>
-      <button type="button" onclick="cerrarModal('{{ modal_id|default:'modalAgregarEstablecimiento' }}')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
-        <i class="fa-solid fa-xmark text-sm"></i>
-      </button>
+  <!-- 1. CABECERA DE LA SECCIÓN (Botón de creación alineado a la derecha) -->
+    <div class="flex justify-end items-center mb-6">
+        <a href="{% url 'gestion_establecimientos_crear' 'crear' %}" 
+           class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-xl transition shadow-sm cursor-pointer whitespace-nowrap">
+            <i class="fa-solid fa-plus text-xs"></i>
+            Crear establecimiento
+        </a>
     </div>
 
-    <!-- Formulario -->
-    <form method="POST" action="{% url 'gestion_establecimientos' %}" enctype="multipart/form-data" class="space-y-4">      
-      {% csrf_token %}
-      {% block modal_body %}
-        <!-- 1. IMAGEN DE PORTADA -->
-        <div>
-          <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-2">Imagen de Portada</label>
-          <label class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-50 hover:border-emerald-400 transition group">
-            <div class="flex flex-col items-center justify-center pt-4 pb-4 px-4 text-center">
-              <i class="fa-solid fa-image text-slate-400 group-hover:text-emerald-500 text-2xl mb-1 transition"></i>
-              <p id="nombre-imagen" class="text-xs text-slate-500 font-medium truncate max-w-xs">Haz clic para subir imagen</p>
-            </div>
-            <input type="file" name="url_img" accept="image/*" id="input-imagen" class="hidden" onchange="mostrarNombreImagen(this)" />
-          </label>
-        </div>
+    <!-- 2. GRILLA DE TARJETAS DE ESTABLECIMIENTOS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for establecimiento in establecimientos %}
+          <div class="relative bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+              
+              <!-- Menú contextual de acciones (dropdown de tres puntos) -->
+              <div class="absolute top-3 right-3 z-30">
+                  {% url 'gestion_establecimientos_accion' establecimiento.pk 'ver' as url_ver_val %}
+                  {% url 'gestion_establecimientos_accion' establecimiento.pk 'editar' as url_edit_val %}
+                  {% url 'gestion_establecimientos_accion' establecimiento.pk 'estado' as url_status_val %}
+                  {% url 'gestion_establecimientos_accion' establecimiento.pk 'eliminar' as url_del_val %}
 
-        <!-- 2. NOMBRE -->
-        <div>
-          <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">Nombre del Establecimiento</label>
-          <input type="text" name="nombre" placeholder="ej. Hotel El Real o Restaurante Sabor" required 
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white transition" />
-        </div>
+                  {% include 'components/dropdown_acciones.html' with usuario=establecimiento url_ver=url_ver_val url_editar=url_edit_val url_estado=url_status_val url_eliminar=url_del_val texto_ver="Ver detalle" texto_editar="Editar" texto_eliminar="Eliminar" %}
+              </div>
 
-        <!-- 3. DESCRIPCIÓN -->
-        <div>
-          <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">Descripción</label>
-          <textarea name="descripcion" rows="3" placeholder="Escribe detalles sobre el establecimiento..." 
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white transition resize-none"></textarea>
-        </div>
+              <div>
+                  <!-- Contenedor de la Imagen con badge de tipo (Hotel / Restaurante) -->
+                  <div class="relative h-44 w-full overflow-hidden bg-slate-100 rounded-t-2xl">
+                      {% if establecimiento.url_img %}
+                          <img src="{{ establecimiento.url_img.url }}" alt="{{ establecimiento.nombre }}" class="w-full h-full object-cover">
+                      {% else %}
+                          <img src="{% static 'images/establecimientos/default.jpg' %}" alt="{{ establecimiento.nombre }}" class="w-full h-full object-cover">
+                      {% endif %}
 
-        <!-- 4 & 5. DIRECCIÓN Y TIPO -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">Dirección</label>
-            <input type="text" name="direccion" placeholder="ej. Vía Aquitania Km 12" required 
-              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white transition" />
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">Tipo de Establecimiento</label>
-            <select name="tipo" required 
-              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white transition">
-              <option value="Hotel">Hotel</option>
-              <option value="Restaurante">Restaurante</option>
-            </select>
-          </div>
-        </div>
+                      <!-- Badge de tipo de establecimiento -->
+                      <span class="absolute top-3 left-3 bg-emerald-500/90 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm">
+                          {{ establecimiento.tipo }} <!-- establecimiento funciona como una variable dentro del bucle de la plantilla-->
+                      </span> <!--.tipo sí hace referencia directa al campo en models.py-->
+                  </div>
 
-        <!-- 6 & 7. CIUDAD Y PAÍS -->
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">Ciudad</label>
-            <input type="text" name="ciudad" placeholder="ej. Aquitania" required 
-              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white transition" />
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">País</label>
-            <input type="text" name="pais" value="Colombia" required 
-              class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white transition" />
-          </div>
-        </div>
+                  <!-- Información relevante del establecimiento -->
+                  <div class="p-4">
+                      <div class="flex items-center justify-between mb-1">
+                          <h3 class="font-bold text-slate-800 text-base">{{ establecimiento.nombre }}</h3>
+                      </div>
+                      <p class="text-xs text-slate-400 flex items-center gap-1.5 mb-3">
+                          <i class="fa-solid fa-location-dot text-slate-400"></i> {{ establecimiento.direccion }}{% if establecimiento.ciudad %}, {{ establecimiento.ciudad }}{% endif %}
+                      </p>
+                      <p class="text-xs text-slate-500 line-clamp-2">{{ establecimiento.descripcion }}</p>
+                  </div>
+              </div>
 
-        <!-- 8 & 9. ARCHIVOS ADJUNTOS -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-          <div>
-            <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">RTN (PDF o Imagen)</label>
-            <input type="file" name="rtn" accept=".pdf,image/*" required 
-              class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer" />
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">Licencia Sanitaria</label>
-            <input type="file" name="licencia_sanitaria" accept=".pdf,image/*" 
-              class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer" />
-          </div>
-        </div>
-      {% endblock %}
+              <!-- Pie de la tarjeta: Métricas de reputación y badge de estado -->
+              <div class="px-4 pb-4 pt-3 flex items-center justify-between border-t border-slate-100 mt-auto">
+                  <div class="flex items-center gap-1 text-amber-400 text-xs font-semibold">
+                      <i class="fa-solid fa-star"></i>
+                      <span class="text-slate-700">5.0</span>
+                      <span class="text-slate-400 font-normal">(1)</span>
+                  </div>
+                  
+                  <!-- Badge dinámico de disponibilidad real del establecimiento -->
+                  <div>
+                      {% if establecimiento.is_active %} <!--Django revisa en tiempo de ejecución si el establecimiento actual tiene su campo is_active en True o en False.
 
-      <!-- Botones de Acción -->
-      <div class="flex items-center gap-3 pt-4 mt-6">
-        <button type="button" onclick="cerrarModal('{{ modal_id|default:'modalAgregarEstablecimiento' }}')"
-          class="w-1/2 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition text-center">
-          Cancelar
-        </button>
-        <button type="submit"
-          class="w-1/2 py-2.5 px-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold transition shadow-sm text-center">
-          {{ btn_texto|default:"Crear Establecimiento" }}
-        </button>
-      </div>
-    </form>
-  </div>
+                    Si es True, dibuja la etiqueta verde que dice "Disponible".
+
+                    Si es False, cambia automáticamente a la etiqueta ámbar/naranja que dice "No disponible".-->
+                          <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-bold">Disponible</span>
+                      {% else %}
+                          <span class="px-2.5 py-1 bg-amber-50 text-amber-600 rounded-full text-[10px] font-bold">No disponible</span>
+                      {% endif %}
+                  </div>
+              </div>
+
+          </div>
+        {% empty %}
+        <!-- Estado vacío cuando no existen registros en la base de datos -->
+        <div class="col-span-full py-12 text-center bg-white border border-dashed border-slate-200 rounded-2xl">
+            <i class="fa-solid fa-hotel text-slate-300 text-4xl mb-3"></i>
+            <p class="text-slate-500 text-sm font-medium">No hay establecimientos registrados aún.</p>
+            <p class="text-slate-400 text-xs mt-1">Haz clic en "Crear establecimiento" para agregar el primero.</p>
+        </div>
+        {% endfor %}
+    </div>
+
 </div>
 
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const accionActiva = "{{ accion }}";
-    if (accionActiva === 'crear' || accionActiva === 'editar') {
-      abrirModal('modalAgregarEstablecimiento');
-    }
-  });
+<!-- 3. RENDERIZADO CONDICIONAL DEL MODAL DINÁMICO -->
+<!-- Siguiendo exactamente la misma lógica de experiencias, se incluye el modal sólo si la bandera es verdadera -->
+{% if mostrar_modal %}
+    {% include 'modales/modal_establecimientos.html' %}
+{% endif %}
 
-  function abrirModal(idModal) {
-    const modal = document.getElementById(idModal);
-    if (modal) {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-  }
+{% endblock %}
 
-  function cerrarModal(idModal) {
-    const modal = document.getElementById(idModal);
-    if (modal) {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-  }
-
-  function mostrarNombreImagen(input) {
-    const texto = document.getElementById('nombre-imagen');
-    if (input.files && input.files[0]) {
-      texto.textContent = input.files[0].name;
-      texto.classList.add('text-emerald-600', 'font-semibold');
-    }
-  }
-</script>
+{% block extra_js %}
+  <!-- Carga de scripts dinámicos y alertas -->
+  <script src="{% static 'js/animaciones_alertas.js' %}"></script>
 {% endblock %}
