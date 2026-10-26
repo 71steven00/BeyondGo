@@ -113,18 +113,7 @@ class Establecimiento(models.Model):
         ('Hotel', 'Hotel'),
         ('Restaurante', 'Restaurante'),
     )
-    # 6 COMBOS DE SERVICIOS PREDEFINIDOS
-    SERVICIOS_CHOICES = (
-        # Combos de Hotel
-        ('WiFi, Hospedaje y Piscina', 'Hotel: WiFi, Hospedaje y Piscina'),
-        ('WiFi, Hospedaje y Sauna', 'Hotel: WiFi, Hospedaje y Sauna'),
-        ('WiFi, Hospedaje, Desayuno e Parqueadero', 'Hotel: WiFi, Hospedaje, Desayuno y Parqueadero'),
-        # Combos de Restaurante
-        ('Comida Típica, Bebidas y Música en Vivo', 'Restaurante: Comida Típica, Bebidas y Música en Vivo'),
-        ('Servicio a la Carta, Bebidas y Terraza', 'Restaurante: Servicio a la Carta, Bebidas y Terraza'),
-        ('Buffet, Postres y Zona Infantil', 'Restaurante: Buffet, Postres y Zona Infantil'),
-    )
-    
+  
     usuario = models.ForeignKey(
         Usuario,
         on_delete=models.CASCADE,
@@ -142,10 +131,12 @@ class Establecimiento(models.Model):
     rtn = models.FileField(upload_to='rtn/',max_length=255, verbose_name='Registro Nacional de Turismo (RNT/RTN)') #Aumenta el límite de caracteres para evitar error en la base de datos de tipo Value too long.
     licencia_sanitaria = models.FileField(upload_to='licencias/', max_length=255, blank=True, null=True, verbose_name='Registro Sanitario')
     servicios = models.ManyToManyField(Servicio, blank=True, related_name="servicios_establecimiento", verbose_name="Servicios Ofrecidos")
-
-    class Meta:
+# Crea una columna en la base de datos de tipo verdadero/falso que por defecto será True (es decir, "Disponible" al crear un nuevo registro) y le asigna el nombre descriptivo "Estado Disponible" para el panel de administración.
+    is_active = models.BooleanField(default=True, verbose_name="Disponible")
+    # clase interna de configuración de Django Permite definir metadatos
+    class Meta: 
         verbose_name = "Establecimiento"
-        verbose_name_plural = "Establecimientos" 
+        verbose_name_plural = "Establecimientos"
 
     def __str__(self):
         return f"{self.nombre} ({self.tipo})"
