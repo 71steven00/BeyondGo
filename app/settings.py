@@ -169,9 +169,33 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = '/' # ruta de tu vista principal tras iniciar sesión
 LOGOUT_REDIRECT_URL = 'inicio'
 
-#configuracion para intentos fallidos Django-axes
-AXES_LOCK_OUT_BY_USER_OR_FAIL = False
-AXES_LOCK_OUT_AT_FAILURE = False
+# ==============================================================================
+# CONFIGURACIÓN DE SEGURIDAD CONTRA FUERZA BRUTA (DJANGO-AXES)
+# ==============================================================================
+from datetime import timedelta
+
+# Habilita el middleware y backend de django-axes para registrar intentos en base de datos
 AXES_ENABLED = True
-AXES_FAILURE_LIMIT = 3
+
+# Indica a axes que el campo del formulario donde viaja el correo/usuario es 'username'
+# (Crucial: sin esto, axes guarda username: None y penaliza a todos los usuarios de la misma IP)
+AXES_USERNAME_FORM_FIELD = 'username'
+
+# Máximo de intentos erróneos antes de activar el bloqueo
+AXES_FAILURE_LIMIT = 5
+
+# Bloqueo TEMPORAL de 15 minutos (permite al usuario legítimo reintentar sin llamar a soporte)
+AXES_COOLOFF_TIME = timedelta(minutes=15)
+
+# Reinicia el contador de intentos fallidos cuando el usuario inicia sesión correctamente
+AXES_RESET_ON_SUCCESS = True
+
+# Bloquea por combinación exacta de usuario e IP para que cada cuenta tenga su propio contador independiente
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
+
+# Permite cargar siempre la página de login por GET para mostrar las alertas visuales
+AXES_NEVER_LOCKOUT_GET = True
+
+# Vista personalizada ante bloqueo: redirige a la plantilla de login con una alerta estilizada (no pantalla en blanco)
+AXES_LOCKOUT_CALLABLE = 'usuarios.views.axes_bloqueo_view'
 
