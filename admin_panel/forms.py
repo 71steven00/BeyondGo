@@ -37,7 +37,7 @@ class EstablecimientoForm(forms.ModelForm):
         widgets = {
             'url_img': forms.ClearableFileInput(attrs={
                 'class': 'hidden', 'accept': 'image/*'
-                }),
+            }),
             'nombre': forms.TextInput(attrs={
                 'class': 'w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition shadow-sm', 'placeholder': 'ej. Hotel El Real o Restaurante Sabor'}),
             'descripcion': forms.Textarea(attrs={
@@ -60,5 +60,7 @@ class EstablecimientoForm(forms.ModelForm):
             'licencia_sanitaria': forms.FileInput(attrs={
                 'class': 'w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer', 'accept': '.pdf,image/*'
             }),
-            'servicios': forms.CheckboxSelectMultiple(attrs={'class': 'space-y-2 text-xs text-slate-700'}),
+            'servicios': forms.CheckboxSelectMultiple(attrs={
+                'class': 'grid grid-cols-2 gap-2 text-xs text-slate-700 accent-emerald-500'
+            }),
         }

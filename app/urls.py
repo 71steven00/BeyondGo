@@ -19,7 +19,7 @@ from usuarios.views import CustomLoginView
 from django.urls import path, include
 from django.conf import settings #Estas dos líneas de código en Django sirven para configurar y servir archivos multimedia
 
-from django.conf.urls.static import static
+from django.conf.urls.static import static #Importa la función especial que habilita el servidor de desarrollo para entregar archivos multimedia.
 
 urlpatterns = [
     path('', include('inicio.urls')), #ruta para administradores.urls
@@ -29,5 +29,5 @@ urlpatterns = [
     path('', include('usuarios.urls')),  # rutas que incluye login, registro y perfil 
     path('administrador/', include('admin_panel.urls')), #ruta para administradores.urls
 ]
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) #Cada vez que alguien pida una URL que empiece con /media/, busca el archivo real en la carpeta física MEDIA_ROOT y muéstralo en el navegador".
 

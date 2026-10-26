@@ -9,7 +9,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from usuarios.forms import Editar_usuario, UsuarioForm
 from usuarios.models import Establecimiento
-from .forms import EstablecimientoForm, EstablecimientoForm
+from .forms import EstablecimientoForm
 from .models import Experiencia        # <--- Importa tu modelo
 from .forms import ExperienciaForm
 from django.db import models # para las consultas Q del buscador
@@ -173,8 +173,11 @@ def gestion_usuarios(request, pk=None, a= None):
     }
     return render(request, 'admin_general/gestion_usuarios.html', context)
 
-@rol_requerido('ADMIN')
+@rol_requerido('ADMIN') # Restringe el acceso exclusivamente a usuarios con rol de Administrador
 def gestion_establecimientos(request, pk=None, a=None):
+    
+    # 1. VALIDACIÓN DE REGISTRO ESPECÍFICO
+    # Si la URL incluye una primary key (pk) distinta de cero, buscamos el establecimiento o lanzamos un error 404
     if pk is not None and pk != 0:
         establecimiento = get_object_or_404(Establecimiento, id=pk)
     else:
@@ -182,66 +185,80 @@ def gestion_establecimientos(request, pk=None, a=None):
         
     form = None
     
-    # Manejo de peticiones POST (Crear / Editar)
-    if request.method == 'POST':
-        if a == 'editar' and establecimiento:
-            form = EstablecimientoForm(request.POST, request.FILES, instance=establecimiento)
-            mensaje = 'Establecimiento actualizado con éxito.'
-        else:
-            form = EstablecimientoForm(request.POST, request.FILES)
-            mensaje = 'Establecimiento creado con éxito.'
-            
-        if form.is_valid():
-            nuevo_est = form.save(commit=False)
-            nuevo_est.usuario = request.user
-            nuevo_est.save()
-            form.save_m2m()
-            messages.success(request, mensaje)
-            return redirect('gestion_establecimientos')
-
-    # Manejo de acciones dinámicas (GET)
-    elif a is not None:
+    # 2. VALIDACIÓN PARA LAS ACCIONES DE LOS MODALES
+    # Controla la lógica según la acción recibida en la URL ('crear', 'editar', 'estado', 'eliminar')
+    if a is not None:
         if a == 'crear':
-            form = EstablecimientoForm()
+            if request.method == 'POST':
+                # Instancia el formulario con los datos y archivos enviados por POST
+                form = EstablecimientoForm(request.POST, request.FILES)
+                if form.is_valid():
+                    # Guarda temporalmente para asignar el usuario autenticado antes de registrar en la BD
+                    nuevo_est = form.save(commit=False)
+                    nuevo_est.usuario = request.user
+                    nuevo_est.save()
+                    form.save_m2m() # Guarda relaciones de muchos a muchos (servicios)
+                    messages.success(request, 'Establecimiento creado con éxito.')
+                    return redirect('gestion_establecimientos')
+            else:
+                form = EstablecimientoForm()
+
         elif a == 'editar' and establecimiento:
-            form = EstablecimientoForm(instance=establecimiento)
+            if request.method == 'POST':
+                # Carga el formulario con los datos enviados y la instancia existente para actualizar
+                form = EstablecimientoForm(request.POST, request.FILES, instance=establecimiento)
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, 'Establecimiento actualizado con éxito.')
+                    return redirect('gestion_establecimientos')
+            else:
+                # Precarga el formulario con los datos actuales del establecimiento seleccionado
+                form = EstablecimientoForm(instance=establecimiento)
+
         elif a == 'estado' and establecimiento:
-            # Alterna el estado activo / inactivo
-            establecimiento.is_active = not establecimiento.is_active
-            establecimiento.save()
-            
-            estado_texto = "Disponible" if establecimiento.is_active else "No disponible"
-            messages.info(request, f'El establecimiento {establecimiento.nombre} ahora está {estado_texto}.')
-            return redirect('gestion_establecimientos')
-            
-        elif a == 'eliminar' and establecimiento:
+            if request.method == 'POST':
+                # Alterna el estado booleano de disponibilidad del establecimiento (Activo / Inactivo)
+                establecimiento.is_active = not establecimiento.is_active
+                establecimiento.save()
+                estado_texto = "Disponible" if establecimiento.is_active else "No disponible"
+                messages.info(request, f'El establecimiento {establecimiento.nombre} ahora está {estado_texto}.')
+                return redirect('gestion_establecimientos')
+
+        elif a == 'eliminar' and establecimiento and request.method == 'POST':
+            # Elimina permanentemente el registro de la base de datos tras la confirmación POST
             establecimiento.delete()
             messages.warning(request, 'Establecimiento eliminado correctamente.')
             return redirect('gestion_establecimientos')
 
-    # Listado y Paginación
-    query = request.GET.get('q')
+    # 3. LISTADO GENERAL Y BÚSQUEDA
+    # Obtiene todos los establecimientos ordenados del más reciente al más antiguo
     establecimientos_list = Establecimiento.objects.all().order_by('-id')
     
+    query = request.GET.get('q')
     if query:
+        # Filtra los resultados si el usuario ingresó un término de búsqueda
         establecimientos_list = establecimientos_list.filter(
             models.Q(nombre__icontains=query) | 
             models.Q(ciudad__icontains=query) |
             models.Q(direccion__icontains=query)
         )
 
+    # 4. PAGINACIÓN DE LOS RESULTADOS
+    # Configura la paginación para mostrar 6 establecimientos por cada página
     paginator = Paginator(establecimientos_list, 6)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # 5. DICCIONARIO DE CONTEXTO PARA LA PLANTILLA HTML
     context = {
-        'establecimiento_seleccionado': establecimiento,
-        'form': form,
-        'accion': a,
-        'mostrar_modal': bool(a in ['ver', 'crear', 'editar']),
-        'establecimientos': page_obj,
-        'query': query,
+        'establecimiento': establecimiento,  # Objeto específico para los modales (ver, editar, estado, eliminar)
+        'form': form,                        # Instancia del formulario para las acciones de creación o edición
+        'accion': a,                         # Acción activa actual en la URL
+        'mostrar_modal': bool(a in ['ver', 'crear', 'editar', 'eliminar', 'estado']), # Bandera para renderizar el modal
+        'establecimientos': page_obj,        # Objeto paginado con la lista de establecimientos
+        'query': query,                      # Texto de búsqueda actual para conservarlo en la vista
     }
+    
     return render(request, 'admin_general/gestion_establecimientos.html', context)
 
 @rol_requerido('ADMIN')

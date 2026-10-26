@@ -3,7 +3,6 @@ from usuarios.models import Usuario, Establecimiento, Servicio, Guia
 
 admin.site.register(Usuario)
 admin.site.register(Establecimiento)
-admin.site.register(Servicio)
 admin.site.register(Guia)
 
 
