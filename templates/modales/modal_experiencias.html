@@ -1,14 +1,14 @@
 <!-- OVERLAY / FONDO OSCURO DEL MODAL -->
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
+<div class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 overflow-y-auto">
   
   <!-- TARJETA DEL MODAL -->
-  <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+  <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
     
     {% if accion == 'ver' %}
       <!-- 1. VISTA DETALLE (Imagen superior con estado) -->
-      <div class="relative h-48 w-full bg-slate-100">
+      <div class="relative w-full overflow-hidden bg-slate-100">
         {% if experiencia.imagen %}
-          <img src="{{ experiencia.imagen.url }}" alt="{{ experiencia.titulo }}" class="w-full h-full object-cover">
+          <img src="{{ experiencia.imagen.url }}" alt="{{ experiencia.titulo }}" class="block w-full h-auto max-h-[55vh] object-contain">
         {% else %}
           <div class="w-full h-full flex items-center justify-center text-slate-400 bg-slate-100">
             <i class="fa-regular fa-image text-3xl"></i>
@@ -17,57 +17,67 @@
         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent"></div>
         
         <div class="absolute bottom-4 left-6">
-          <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold shadow-sm">
+          <span class="px-3 py-1 bg-emerald-500 text-white rounded-full text-[10px] font-bold shadow-sm uppercase tracking-wide">
             {{ experiencia.estado }}
           </span>
         </div>
 
-        <a href="{% url 'gestion_experiencias' %}" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center text-slate-600 transition shadow-md">
+        <a href="{% url 'gestion_experiencias' %}" class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center text-slate-600 transition shadow-md" aria-label="Cerrar detalle de experiencia">
           <i class="fa-solid fa-xmark text-sm"></i>
         </a>
       </div>
     {% else %}
       <!-- HEADER / CABECERA PARA CREAR / EDITAR / ELIMINAR / ESTADO -->
-      <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
-        <div>
-          <h3 class="text-lg font-bold text-slate-900">
-            {% if accion == 'crear' %}Nueva Experiencia
-            {% elif accion == 'editar' %}Editar Experiencia
-            {% elif accion == 'estado' %}Cambiar Estado
-            {% elif accion == 'eliminar' %}Eliminar Experiencia
-            {% endif %}
-          </h3>
-          <p class="text-xs text-slate-400 mt-0.5">
-            {% if accion == 'crear' %}Completa los datos para registrar una nueva experiencia.
-            {% elif accion == 'editar' %}Actualiza los datos de la experiencia.
-            {% elif accion == 'estado' %}Confirmación de cambio de estado de la experiencia.
-            {% elif accion == 'eliminar' %}Esta acción no se puede deshacer.
-            {% endif %}
-          </p>
+      <div class="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 border-b border-slate-800 shadow-md">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-inner
+            {% if accion == 'crear' %}bg-emerald-600/80 border border-emerald-400/30
+            {% elif accion == 'editar' %}bg-blue-600/80 border border-blue-400/30
+            {% elif accion == 'estado' %}bg-amber-600/80 border border-amber-400/30
+            {% elif accion == 'eliminar' %}bg-rose-600/80 border border-rose-400/30{% endif %}">
+            {% if accion == 'crear' %}<i class="fa-solid fa-plus"></i>
+            {% elif accion == 'editar' %}<i class="fa-regular fa-pen-to-square"></i>
+            {% elif accion == 'estado' %}<i class="fa-solid fa-arrows-rotate"></i>
+            {% elif accion == 'eliminar' %}<i class="fa-regular fa-trash-can"></i>{% endif %}
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white tracking-wide">
+              {% if accion == 'crear' %}Nueva Experiencia
+              {% elif accion == 'editar' %}Editar Experiencia
+              {% elif accion == 'estado' %}Cambiar Estado
+              {% elif accion == 'eliminar' %}Eliminar Experiencia{% endif %}
+            </h3>
+            <p class="text-[11px] text-slate-300">
+              {% if accion == 'crear' %}Ingresa los datos para registrar una experiencia
+              {% elif accion == 'editar' %}Modifica la información de la experiencia
+              {% elif accion == 'estado' %}Confirma el cambio de estado
+              {% elif accion == 'eliminar' %}Esta acción es permanente y no se puede deshacer{% endif %}
+            </p>
+          </div>
         </div>
 
-        <a href="{% url 'gestion_experiencias' %}" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition">
+        <a href="{% url 'gestion_experiencias' %}" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 border border-slate-700/60 transition shadow-sm" aria-label="Cerrar modal">
           <i class="fa-solid fa-xmark text-sm"></i>
         </a>
       </div>
     {% endif %}
 
     <!-- FORMULARIO / CONTENIDO -->
-    <form method="POST" action="{% if accion == 'crear' %}{% url 'gestion_experiencias_crear' 'crear' %}{% else %}{% url 'gestion_experiencias_accion' experiencia.id accion %}{% endif %}">
+    <form method="POST" enctype="multipart/form-data" action="{% if accion == 'crear' %}{% url 'gestion_experiencias_crear' 'crear' %}{% else %}{% url 'gestion_experiencias_accion' experiencia.id accion %}{% endif %}">
       {% csrf_token %}
 
-      <div class="p-6">
+      <div class="p-6 max-h-[70vh] overflow-y-auto">
         
         {% if accion == 'ver' %}
           <!-- CONTENIDO DETALLE -->
-          <div class="space-y-4">
+          <div class="space-y-4 text-xs">
             <div>
-              <h2 class="text-xl font-extrabold text-slate-900">{{ experiencia.titulo }}</h2>
+              <h2 class="text-lg font-extrabold text-slate-900">{{ experiencia.titulo }}</h2>
               <p class="text-xs text-slate-500 font-medium mt-0.5">{{ experiencia.tipo }}</p>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-              <div class="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 flex flex-col justify-between">
+              <div class="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col justify-between">
                 <div class="flex items-center gap-2 text-emerald-600 mb-1">
                   <i class="fa-regular fa-clock text-xs"></i>
                   <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Duración</span>
@@ -75,7 +85,7 @@
                 <span class="text-sm font-bold text-slate-800">{{ experiencia.duracion }}</span>
               </div>
 
-              <div class="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 flex flex-col justify-between">
+              <div class="p-3 rounded-xl border border-slate-100 bg-slate-50 flex flex-col justify-between">
                 <div class="flex items-center gap-2 text-emerald-600 mb-1">
                   <i class="fa-solid fa-dollar-sign text-xs"></i>
                   <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Precio / Persona</span>
@@ -89,41 +99,55 @@
           <!-- CONTENIDO FORMULARIO CREAR / EDITAR -->
           <div class="space-y-4 text-xs">
             
-            {% if accion == 'crear' %}
             <div>
-                <label class="block font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-1">Imagen de Portada</label>
-                <label class="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-2xl p-5 text-center cursor-pointer transition bg-slate-50/50 flex flex-col items-center justify-center block">
-                    <i class="fa-regular fa-image text-slate-400 text-lg mb-1"></i>
-                    <span class="text-xs text-slate-500 font-medium">Haz clic para subir imagen</span>
-                    {{ form.imagen }}
+                <label class="block font-semibold text-slate-600 mb-1">Imagen de portada</label>
+                {{ form.imagen }}
+                <label for="{{ form.imagen.id_for_label }}" class="relative block w-full cursor-pointer group">
+                    <img data-experience-image-preview
+                         {% if accion == 'editar' and experiencia.imagen %}src="{{ experiencia.imagen.url }}"{% endif %}
+                         alt="Vista previa de la imagen de portada"
+                         class="{% if not experiencia.imagen %}hidden {% endif %}mx-auto block h-auto max-h-[40vh] max-w-full w-auto object-contain">
+                    <div data-experience-image-placeholder
+                         class="{% if accion == 'editar' and experiencia.imagen %}hidden {% endif %}flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-xl bg-slate-50 text-slate-500">
+                        <i class="fa-regular fa-image text-2xl text-emerald-600"></i>
+                        <span class="text-xs font-medium">Haz clic para seleccionar una imagen</span>
+                    </div>
+                    <span class="absolute inset-x-0 bottom-0 bg-slate-950/60 py-2 text-center text-[11px] font-medium text-white opacity-0 transition group-hover:opacity-100">
+                        Haz clic en la imagen para cambiarla
+                    </span>
                 </label>
+                {% if form.imagen.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.imagen.errors.0 }}</p>{% endif %}
             </div>
-            {% endif %}
 
             <div>
-              <label class="block font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-1">Nombre</label>
+              <label class="block font-semibold text-slate-600 mb-1">Nombre</label>
               {{ form.titulo }}
+              {% if form.titulo.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.titulo.errors.0 }}</p>{% endif %}
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-1">Duración</label>
+                <label class="block font-semibold text-slate-600 mb-1">Duración</label>
                 {{ form.duracion }}
+                {% if form.duracion.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.duracion.errors.0 }}</p>{% endif %}
               </div>
               <div>
-                <label class="block font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-1">Precio / Persona</label>
+                <label class="block font-semibold text-slate-600 mb-1">Precio / Persona</label>
                 {{ form.precio }}
+                {% if form.precio.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.precio.errors.0 }}</p>{% endif %}
               </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-1">Tipo</label>
+                <label class="block font-semibold text-slate-600 mb-1">Tipo</label>
                 {{ form.tipo }}
+                {% if form.tipo.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.tipo.errors.0 }}</p>{% endif %}
               </div>
               <div>
-                <label class="block font-bold text-slate-400 uppercase tracking-wider text-[10px] mb-1">Estado</label>
+                <label class="block font-semibold text-slate-600 mb-1">Estado</label>
                 {{ form.estado }}
+                {% if form.estado.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.estado.errors.0 }}</p>{% endif %}
               </div>
             </div>
 
@@ -131,8 +155,11 @@
 
         {% elif accion == 'estado' %}
           <!-- 3. CAMBIAR ESTADO EXPERIENCIA -->
-          <div class="text-center py-4 space-y-2">
-            <p class="text-xs text-slate-600">
+          <div class="text-center py-5 px-3 space-y-3">
+            <div class="mx-auto w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <i class="fa-solid fa-arrows-rotate text-lg"></i>
+            </div>
+            <p class="text-sm text-slate-600">
               ¿Deseas cambiar el estado de la experiencia <strong>{{ experiencia.titulo }}</strong> a 
               <strong class="text-amber-600 font-bold">
                 {% if experiencia.estado == 'Activo' %}Pausado{% else %}Activo{% endif %}
@@ -142,8 +169,11 @@
 
         {% elif accion == 'eliminar' %}
           <!-- CONTENIDO ELIMINAR -->
-          <div class="text-center py-4 space-y-2">
-            <p class="text-xs text-slate-600">
+          <div class="text-center py-5 px-3 space-y-3">
+            <div class="mx-auto w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
+              <i class="fa-regular fa-trash-can text-lg"></i>
+            </div>
+            <p class="text-sm text-slate-600">
               ¿Estás seguro de eliminar permanentemente la experiencia <strong>{{ experiencia.titulo }}</strong>?
             </p>
           </div>
@@ -152,22 +182,22 @@
       </div>
 
       <!-- FOOTER / BOTONES DE ACCIÓN -->
-      <div class="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50 border-t border-slate-100">
+      <div class="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50 border-t border-slate-200">
         {% if accion == 'ver' %}
-          <a href="{% url 'gestion_experiencias' %}" class="w-1/2 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition text-center">
+          <a href="{% url 'gestion_experiencias' %}" class="w-1/2 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold transition text-center">
             Cerrar
           </a>
-          <a href="{% url 'gestion_experiencias_accion' experiencia.id 'editar' %}" class="w-1/2 py-2.5 px-4 bg-[#1e293b] hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition shadow-sm text-center">
+          <a href="{% url 'gestion_experiencias_accion' experiencia.id 'editar' %}" class="w-1/2 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition shadow-sm text-center">
             Editar
           </a>
         {% else %}
-          <a href="{% url 'gestion_experiencias' %}" class="w-1/2 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition text-center">
+          <a href="{% url 'gestion_experiencias' %}" class="w-1/2 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold transition text-center">
             Cancelar
           </a>
           <button type="submit" class="w-1/2 py-2.5 px-4 rounded-xl text-xs font-semibold transition shadow-sm text-white 
             {% if accion == 'eliminar' %}bg-rose-600 hover:bg-rose-700
             {% elif accion == 'estado' %}bg-amber-500 hover:bg-amber-600
-            {% else %}bg-[#22c55e] hover:bg-emerald-600{% endif %}">
+            {% else %}bg-emerald-600 hover:bg-emerald-700{% endif %}">
                 {% if accion == 'crear' %}Crear Experiencia
                 {% elif accion == 'editar' %}Guardar Cambios
                 {% elif accion == 'estado' %}Confirmar Cambio

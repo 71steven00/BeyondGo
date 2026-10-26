@@ -9,6 +9,11 @@ class ExperienciaForm(forms.ModelForm):
         model = Experiencia
         fields = ['titulo', 'duracion', 'precio', 'tipo', 'estado', 'imagen']
         widgets = {
+            'imagen': forms.FileInput(attrs={
+                'class': 'hidden',
+                'accept': 'image/*',
+                'data-experience-image-input': 'true',
+            }),
             'titulo': forms.TextInput(attrs={
                 'class': 'w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition shadow-sm',
                 'placeholder': 'ej. Tour nocturno por el lago'
