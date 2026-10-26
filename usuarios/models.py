@@ -7,6 +7,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.core.validators import RegexValidator
 from datetime import date
 from django.core.exceptions import ValidationError
+from admin_panel.models import Servicio
 
 class UsuarioManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -105,17 +106,6 @@ class Guia(models.Model):
 
 
 
-# 2. CATÁLOGO GLOBAL DE SERVICIOS (Reutilizable para Hoteles y Restaurantes)
-class Servicio(models.Model):
-    nombre = models.CharField(max_length=50, unique=True, verbose_name="Nombre de Servicio")
-
-    class Meta:
-        verbose_name = "Servicio"
-        verbose_name_plural = "Servicios"
-
-    def __str__(self):
-        return self.nombre
-
 
 # 3. ATRIBUTOS DE HOTEL / RESTAURANTE (ESTABLECIMIENTOS) - MODELO UNIFICADO
 class Establecimiento(models.Model):
@@ -123,7 +113,7 @@ class Establecimiento(models.Model):
         ('Hotel', 'Hotel'),
         ('Restaurante', 'Restaurante'),
     )
-    
+  
     usuario = models.ForeignKey(
         Usuario,
         on_delete=models.CASCADE,
@@ -132,21 +122,21 @@ class Establecimiento(models.Model):
     )
     nombre = models.CharField(max_length=150, verbose_name='Nombre del Establecimiento')
     descripcion = models.TextField(blank=True, null=True, verbose_name='Detalles')
-    
     # Selector de tipo visible en el formulario
     tipo = models.CharField(max_length=50, choices=TIPO_CHOICES, default='Hotel', verbose_name='Tipo de Establecimiento')
-    
     direccion = models.CharField(max_length=200, verbose_name='Dirección') 
     ciudad = models.CharField(max_length=100, verbose_name='Ciudad') 
     pais = models.CharField(max_length=100, blank=True, default='Colombia', verbose_name='País')  
     url_img = models.ImageField(upload_to='establecimientos/', blank=True, null=True, verbose_name='Imagen')
-    rtn = models.FileField(max_length=50, unique=True, verbose_name='Registro Nacional de Turismo (RNT/RTN)') 
-    licencia_sanitaria = models.FileField(max_length=50, blank=True, null=True, verbose_name='Registro Sanitario')
-    servicios = models.ManyToManyField('Servicio', blank=True, related_name="servicios_establecimiento", verbose_name="Servicios Ofrecidos")
-
-    class Meta:
+    rtn = models.FileField(upload_to='rtn/',max_length=255, verbose_name='Registro Nacional de Turismo (RNT/RTN)') #Aumenta el límite de caracteres para evitar error en la base de datos de tipo Value too long.
+    licencia_sanitaria = models.FileField(upload_to='licencias/', max_length=255, blank=True, null=True, verbose_name='Registro Sanitario')
+    servicios = models.ManyToManyField(Servicio, blank=True, related_name="servicios_establecimiento", verbose_name="Servicios Ofrecidos")
+# Crea una columna en la base de datos de tipo verdadero/falso que por defecto será True (es decir, "Disponible" al crear un nuevo registro) y le asigna el nombre descriptivo "Estado Disponible" para el panel de administración.
+    is_active = models.BooleanField(default=True, verbose_name="Disponible")
+    # clase interna de configuración de Django Permite definir metadatos
+    class Meta: 
         verbose_name = "Establecimiento"
-        verbose_name_plural = "Establecimientos" 
+        verbose_name_plural = "Establecimientos"
 
     def __str__(self):
         return f"{self.nombre} ({self.tipo})"

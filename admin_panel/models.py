@@ -26,3 +26,17 @@ class Experiencia(models.Model):
 
     def __str__(self):
         return self.titulo
+    
+    
+# 2. CATÁLOGO GLOBAL DE SERVICIOS (Reutilizable para Hoteles y Restaurantes)
+class Servicio(models.Model):
+    nombre = models.CharField(max_length=50, unique=True, verbose_name="Nombre de Servicio")
+
+    class Meta:
+        verbose_name = "Servicio"
+        verbose_name_plural = "Servicios"
+
+    def __str__(self):
+        return self.nombre
+    
+

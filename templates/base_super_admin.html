@@ -110,12 +110,15 @@
 
             <!-- Buscador y Usuario -->
             <div class="flex items-center gap-3 sm:gap-4">
+                <!-- Bloque reutilizable para el buscador superior -->
+                {% block header_search %}
                 <div class="relative hidden sm:block">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                         <i class="fa-solid fa-magnifying-glass text-xs"></i>
                     </span>
                     <input type="text" placeholder="Buscar datos..." class="w-48 md:w-64 pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500">
                 </div>
+                {% endblock %}
                 <button class="w-10 h-10 bg-[#0d1527] text-white rounded-xl flex items-center justify-center hover:bg-slate-800 transition">
                     <i class="fa-solid fa-user text-sm"></i>
                 </button>
