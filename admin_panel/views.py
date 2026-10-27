@@ -7,7 +7,7 @@ from usuarios.decorators import rol_requerido
 from usuarios.models import Usuario, Guia
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
-from usuarios.forms import Editar_usuario, UsuarioForm
+from usuarios.forms import UsuarioForm
 from usuarios.models import Establecimiento
 from .forms import EstablecimientoForm
 from .models import Experiencia        # <--- Importa tu modelo
@@ -90,72 +90,138 @@ def gestion_usuarios(request, pk=None, a= None):
                 form = UsuarioForm()
                 
         elif a == 'editar' and user:
+            form_editar_usuario = UsuarioForm
             if request.method == 'POST':
-                form = Editar_usuario(request.POST, request.FILES, instance=user)
+                form = form_editar_usuario(request.POST, request.FILES, instance=user)
                 if form.is_valid():
                     form.save()
                     limpiar_mensajes_previos(request)
                     messages.success(request, 'Usuario actualizado con éxito.')
                     return redirect('gestion_usuarios')
             else:
-                form = Editar_usuario(instance=user)
+                form = form_editar_usuario(instance=user)
 
         elif a == 'estado' and user:
             if request.method == 'POST':
+                if user == request.user:
+                    limpiar_mensajes_previos(request)
+                    messages.error(request, 'No puedes desactivar tu propia cuenta mientras estás en sesión activa.')
+                    return redirect('gestion_usuarios')
+
                 user.is_active = not user.is_active
                 user.save()
                 limpiar_mensajes_previos(request)
-                messages.info(request, f'Estado de {user.first_name} actualizado.')
+                estado_str = "activado" if user.is_active else "desactivado"
+                messages.info(request, f'El usuario {user.get_full_name() or user.email} ha sido {estado_str}.')
                 return redirect('gestion_usuarios')
 
         elif a == 'eliminar' and user:
             if request.method == 'POST':
+                if user == request.user:
+                    limpiar_mensajes_previos(request)
+                    messages.error(request, 'No puedes eliminar tu propia cuenta mientras estás en sesión activa.')
+                    return redirect('gestion_usuarios')
+
+                # Verificación de dependencias (Establecimientos vinculados)
+                if hasattr(user, 'establecimientos') and user.establecimientos.exists():
+                    nombres_est = list(user.establecimientos.values_list('nombre', flat=True)[:3])
+                    lista_est = ", ".join(f'"{nom}"' for nom in nombres_est)
+                    total_est = user.establecimientos.count()
+                    if total_est > 3:
+                        lista_est += f" y {total_est - 3} más"
+
+                    limpiar_mensajes_previos(request)
+                    messages.error(
+                        request,
+                        f'No se puede eliminar a {user.first_name or user.email}: administra {total_est} establecimiento(s) ({lista_est}). Debes reasignar o eliminar los establecimientos primero, o desactivar la cuenta.'
+                    )
+                    return redirect('gestion_usuarios')
+
+                nombre_usuario = user.get_full_name() or user.email
                 user.delete()
                 limpiar_mensajes_previos(request)
-                messages.warning(request, 'Usuario eliminado correctamente.')
+                messages.warning(request, f'Usuario {nombre_usuario} eliminado correctamente.')
                 return redirect('gestion_usuarios')
             
         
         
-    #LISTAMOS LOS DATOS QUE SE ENCUENTRAN EN LA BASE DE DATOS
-    usuarios = Usuario.objects.all().order_by('-date_joined')
-    
-    #METRICAS Y CONTADORES 
-    total_usuarios = usuarios.count()
-    usuarios_activos = usuarios.filter(is_active=True).count()
-    
-    pendientes_verificacion = usuarios.filter(is_active=False).count()
+    # =========================================================================
+    # PASO D: OPTIMIZACIÓN SQL DE MÉTRICAS GLOBALES (UNA SOLA CONSULTA)
+    # En lugar de ejecutar 10 consultas COUNT por separado, usamos aggregate()
+    # con filtros condicionales Q() para obtener todas las estadísticas en un solo viaje a la BD.
+    # =========================================================================
     ahora = timezone.now()
     inicio_mes_actual = ahora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    
-    # Inicio del mes anterior
     primer_dia_mes_anterior = (inicio_mes_actual - timedelta(days=1)).replace(day=1)
 
-    # Usuarios registrados en el mes actual vs mes anterior
-    activos_este_mes = usuarios.filter(is_active=True, date_joined__gte=inicio_mes_actual).count()
-    activos_mes_anterior = usuarios.filter(is_active=True, date_joined__gte=primer_dia_mes_anterior, date_joined__lt=inicio_mes_actual).count()
-    
-    # --- PAGINACIÓN ---
-    # Mostramos 5 usuarios por página
-    paginator = Paginator(usuarios, 5) 
-    page_number = request.GET.get('page')  # Capturamos el parámetro ?page=2 de la URL
-    page_obj = paginator.get_page(page_number)
+    metricas = Usuario.objects.aggregate(
+        total=models.Count('id'),
+        activos=models.Count('id', filter=models.Q(is_active=True)),
+        pendientes=models.Count('id', filter=models.Q(is_active=False)),
+        turistas=models.Count('id', filter=models.Q(rol="TURISTA")),
+        guias=models.Count('id', filter=models.Q(rol="GUIA")),
+        restaurantes=models.Count('id', filter=models.Q(rol="ADMIN_R")),
+        hoteles=models.Count('id', filter=models.Q(rol="ADMIN_H")),
+        admins=models.Count('id', filter=models.Q(rol="ADMIN")),
+        activos_este_mes=models.Count('id', filter=models.Q(is_active=True, date_joined__gte=inicio_mes_actual)),
+        activos_mes_anterior=models.Count('id', filter=models.Q(is_active=True, date_joined__gte=primer_dia_mes_anterior, date_joined__lt=inicio_mes_actual))
+    )
 
-    # Cálculo del porcentaje de cambio
+    total_usuarios = metricas['total']
+    usuarios_activos = metricas['activos']
+    pendientes_verificacion = metricas['pendientes']
+    cant_turistas = metricas['turistas']
+    cant_guias = metricas['guias']
+    cant_restaurantes = metricas['restaurantes']
+    cant_hoteles = metricas['hoteles']
+    cant_admins = metricas['admins']
+    activos_este_mes = metricas['activos_este_mes']
+    activos_mes_anterior = metricas['activos_mes_anterior']
+
+    # Cálculo del porcentaje de crecimiento comparativo mensual
     if activos_mes_anterior > 0:
         porcentaje_crecimiento = round(((activos_este_mes - activos_mes_anterior) / activos_mes_anterior) * 100)
     else:
-        # Si el mes anterior fue 0, el incremento es del 100% por cada registro nuevo
         porcentaje_crecimiento = 100 if activos_este_mes > 0 else 0
-    
-    cant_turistas = usuarios.filter(rol="TURISTA").count()
-    cant_guias = usuarios.filter(rol="GUIA").count()
-    cant_restaurantes = usuarios.filter(rol="ADMIN_R").count()
-    cant_hoteles = usuarios.filter(rol="ADMIN_H").count()
-    cant_admins = usuarios.filter(rol="ADMIN").count()
+
+    # =========================================================================
+    # PASO D: LISTADO, BÚSQUEDA Y FILTRADO AVANZADO DE USUARIOS
+    # Obtenemos los parámetros GET enviados desde el formulario de búsqueda/filtros
+    # =========================================================================
+    busqueda_q = request.GET.get('q', '').strip()
+    filtro_rol = request.GET.get('rol', '').strip()
+    filtro_estado = request.GET.get('estado', '').strip()
+
+    # QuerySet base ordenado por fecha de registro descendente
+    usuarios = Usuario.objects.all().order_by('-date_joined')
+
+    # 1. Filtro por término de búsqueda (nombre, apellido, email, número de documento)
+    if busqueda_q:
+        usuarios = usuarios.filter(
+            models.Q(first_name__icontains=busqueda_q) |
+            models.Q(last_name__icontains=busqueda_q) |
+            models.Q(email__icontains=busqueda_q) |
+            models.Q(numero_documento__icontains=busqueda_q)
+        )
+
+    # 2. Filtro por rol específico
+    if filtro_rol:
+        usuarios = usuarios.filter(rol=filtro_rol)
+
+    # 3. Filtro por estado activo / inactivo
+    if filtro_estado == 'activo':
+        usuarios = usuarios.filter(is_active=True)
+    elif filtro_estado == 'inactivo':
+        usuarios = usuarios.filter(is_active=False)
+
+    # --- PAGINACIÓN ---
+    # Mostramos 8 usuarios por página sobre el QuerySet filtrado
+    paginator = Paginator(usuarios, 8) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     
     context = {
-        'user':user,
+        'user': user,
         'form': form,
         'accion': a,
         'mostrar_modal': bool(a in ['ver', 'crear', 'editar', 'estado', 'eliminar']),
@@ -170,8 +236,13 @@ def gestion_usuarios(request, pk=None, a= None):
         'cant_admins': cant_admins,
         'porcentaje_crecimiento': porcentaje_crecimiento,
         'page_obj': page_obj,
+        # Parámetros para mantener el estado de búsqueda y filtros en la vista y paginación
+        'busqueda_q': busqueda_q,
+        'filtro_rol': filtro_rol,
+        'filtro_estado': filtro_estado,
     }
     return render(request, 'admin_general/gestion_usuarios.html', context)
+
 
 @rol_requerido('ADMIN') # Restringe el acceso exclusivamente a usuarios con rol de Administrador
 def gestion_establecimientos(request, pk=None, a=None):
