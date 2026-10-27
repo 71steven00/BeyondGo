@@ -1,7 +1,119 @@
 from django.contrib.auth.password_validation import validate_password
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Usuario
+from .models import Usuario, Guia
+
+class UsuarioForm(forms.ModelForm):
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500',
+            'placeholder': '••••••••'
+        }),
+        required=False,
+        label="Contraseña"
+    )
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500',
+            'placeholder': '••••••••'
+        }),
+        required=False,
+        label="Confirmar contraseña"
+    )
+    certificado_turismo = forms.ImageField(
+        required=False,
+        label="Certificado de Turismo (Solo Guías)",
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100'
+        })
+    )  
+
+    class Meta: 
+        model = Usuario
+        fields = ['first_name', 'last_name', 'email', 'telefono', 'rol', 'is_active']
+        exclude = [
+            'password',
+            'last_login',
+            'user_permissions',
+            'groups',
+            'is_superuser',
+            'is_staff',
+        ]
+        widgets = {
+            'first_name': forms.TextInput(attrs={
+                'class': 'w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500',
+                'placeholder': 'Ej. Juan'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500',
+                'placeholder': 'Ej. Pérez'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500',
+                'placeholder': 'correo@ejemplo.com'
+            }),
+            'telefono': forms.TextInput(attrs={
+                'class': 'w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500',
+                'placeholder': '+57 300 000 0000'
+            }),
+            'rol': forms.Select(attrs={
+                'class': 'w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500 bg-white'
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Si se está editando un usuario existente, excluimos los campos de contraseña
+        if self.instance and self.instance.pk:
+            self.fields.pop('password', None)
+            self.fields.pop('confirm_password', None)
+            if hasattr(self.instance, 'perfil_guia') and self.instance.perfil_guia.certificado_turismo:
+                self.fields['certificado_turismo'].initial = self.instance.perfil_guia.certificado_turismo
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if password:
+            validate_password(password)
+        return password
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        # Solo se validan contraseñas al crear un usuario nuevo
+        if not self.instance.pk:
+            password = cleaned_data.get("password")
+            confirm_password = cleaned_data.get("confirm_password")
+            if not password:
+                self.add_error('password', 'La contraseña es obligatoria para usuarios nuevos.')
+            elif password != confirm_password:
+                self.add_error('confirm_password', 'Las contraseñas no coinciden.')
+        return cleaned_data
+
+    def save(self, commit=True):
+        usuario = super().save(commit=False)
+        # Solo en creación se encripta la contraseña
+        if not self.instance.pk:
+            password = self.cleaned_data.get("password")
+            if password:
+                usuario.set_password(password)
+            
+        if commit:
+            usuario.save()
+
+        # Manejo unificado del perfil del Guía
+        if usuario.rol == 'GUIA':
+            certificado = self.cleaned_data.get('certificado_turismo')
+            guia, _ = Guia.objects.get_or_create(usuario=usuario)
+            if certificado:
+                guia.certificado_turismo = certificado
+                guia.save()
+
+        return usuario
+
+# Alias de compatibilidad
+Editar_usuario = UsuarioForm
 
 class RegistroClienteForm(forms.ModelForm):
     last_name = forms.CharField(
@@ -70,141 +182,5 @@ class RegistroClienteForm(forms.ModelForm):
         if commit:
             usuario.save()
         return usuario
-    
-    
-class Editar_usuario(forms.ModelForm):
-    class Meta:
-        model = Usuario
-        fields = '__all__'
-        
-        exclude = [
-            'tipo_documento',
-            'numero_documento',
-            'fecha_nacimiento',
-            'password',          # Importante excluir la contraseña por seguridad
-            'last_login',        # Campos del sistema heredados de AbstractUser
-            'user_permissions',
-            'groups',
-            'is_superuser',
-            'is_staff',
-            'date_joined',
-        ]
-        widgets = {
-            'first_name': forms.TextInput(attrs={
-                'class': 'w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none',
-                'placeholder': 'Nombre'
-            }),
-            'last_name': forms.TextInput(attrs={
-                'class': 'w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none',
-                'placeholder': 'Apellido'
-            }),
-            'email': forms.EmailInput(attrs={
-                'class': 'w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none',
-                'placeholder': 'correo@ejemplo.com'
-            }),
-            'telefono': forms.TextInput(attrs={
-                'class': 'w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none',
-                'placeholder': '+573000000000'
-            }),
-            'rol': forms.Select(attrs={
-                'class': 'w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none'
-            }),
-            'is_active': forms.CheckboxInput(attrs={
-                'class': 'w-4 h-4 text-emerald-600 bg-slate-100 border-slate-300 rounded focus:ring-emerald-500'
-            }),
-        }
-        
-class UsuarioForm(forms.ModelForm):
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={
-            'class': 'w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500',
-            'placeholder': '••••••••'
-        }),
-        required=False, # Requerida solo al crear
-        label="Contraseña"
-    )
-    confirm_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={
-            'class': 'w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500',
-            'placeholder': '••••••••'
-        }),
-        required=False,
-        label="Confirmar contraseña"
-    )
-    certificado_turismo = forms.ImageField(
-        required=False,
-        label="Certificado de Turismo (Solo Guías)",
-        widget=forms.ClearableFileInput(attrs={
-            'class': 'w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100'
-        })
-    )  
-    class Meta: 
-        model = Usuario
-        fields = ['first_name', 'last_name', 'email', 'telefono', 'rol', 'is_active']
-        
-        exclude = [
-            'password',          # Importante excluir la contraseña por seguridad
-            'last_login',        # Campos del sistema heredados de AbstractUser
-            'user_permissions',
-            'groups',
-            'is_superuser',
-            'is_staff',
-        ]
-        widgets = {
-            'first_name': forms.TextInput(attrs={
-                'class': 'w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500',
-                'placeholder': 'Ej. Juan'
-            }),
-            'last_name': forms.TextInput(attrs={
-                'class': 'w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500',
-                'placeholder': 'Ej. Pérez'
-            }),
-            'email': forms.EmailInput(attrs={
-                'class': 'w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500',
-                'placeholder': 'correo@ejemplo.com'
-            }),
-            'telefono': forms.TextInput(attrs={
-                'class': 'w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500',
-                'placeholder': '+57 300 000 0000'
-            }),
-            'rol': forms.Select(attrs={
-                'class': 'w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500 bg-white'
-            }),
-            'is_active': forms.CheckboxInput(attrs={
-                'class': 'w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500'
-            }),
-        }
-    def clean_password(self):
-        password = self.cleaned_data.get('password')
-        if password:
-            validate_password(password)
-        return password
-    
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        confirm_password = cleaned_data.get("confirm_password")
 
-        # Validación si se está creando un nuevo usuario (no hay instancia previa con ID)
-        if not self.instance.pk:
-            if not password:
-                self.add_error('password', 'La contraseña es obligatoria para usuarios nuevos.')
-            if password != confirm_password:
-                self.add_error('confirm_password', 'Las contraseñas no coinciden.')
-
-        return cleaned_data
-
-    def save(self, commit=True):
-        usuario = super().save(commit=False)
-        password = self.cleaned_data.get("password")
         
-        # Si se ingresó una contraseña, la encriptamos de forma segura
-        if not usuario.username:
-            usuario.username = self.cleaned_data.get("email")
-            
-        if password:
-            usuario.set_password(password)
-            
-        if commit:
-            usuario.save()
-        return usuario

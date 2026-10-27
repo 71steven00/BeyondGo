@@ -9,18 +9,114 @@
 {% block content %}
 <div class="space-y-6">
 
-  <!-- Botones de Acción Superiores -->
-  <div class="flex items-center justify-end gap-3">
-    <button class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-sm">
-      <i class="fa-solid fa-sliders text-slate-400"></i>
-      Filtros
-    </button>
-    <a href="{% url 'gestion_usuarios_crear' 'crear' %}" 
-          class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-xl transition">
-            <i class="fa-solid fa-plus text-xs"></i>
-            Crear usuario
+  <!-- ========================================================================= -->
+  <!-- PASO D: BARRA DE BÚSQUEDA Y PANEL DE FILTROS AVANZADOS -->
+  <!-- Permite buscar usuarios en tiempo real por texto (nombre, apellido, email, documento) -->
+  <!-- y filtrar por rol o estado de activación. Todos los controles envían parámetros vía GET. -->
+  <!-- ========================================================================= -->
+  <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+    
+    <!-- Formulario de búsqueda textual con auto-envío por botón o Enter -->
+    <form method="GET" action="{% url 'gestion_usuarios' %}" class="flex-1 max-w-md relative">
+      <!-- Mantenemos los filtros actuales de rol y estado si están activos al buscar -->
+      {% if filtro_rol %}<input type="hidden" name="rol" value="{{ filtro_rol }}">{% endif %}
+      {% if filtro_estado %}<input type="hidden" name="estado" value="{{ filtro_estado }}">{% endif %}
+      
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input 
+          type="text" 
+          name="q" 
+          value="{{ busqueda_q }}" 
+          placeholder="Buscar por nombre, correo o documento..." 
+          class="w-full pl-10 pr-10 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm"
+        >
+        <!-- Botón para limpiar la búsqueda si ya hay un término ingresado -->
+        {% if busqueda_q %}
+          <a href="?{% if filtro_rol %}rol={{ filtro_rol }}&{% endif %}{% if filtro_estado %}estado={{ filtro_estado }}{% endif %}" 
+             class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition" 
+             title="Limpiar búsqueda">
+            <i class="fa-solid fa-xmark text-xs"></i>
+          </a>
+        {% endif %}
+      </div>
+    </form>
+
+    <!-- Botones de Acción: Filtros y Crear Usuario -->
+    <div class="flex items-center justify-end gap-3">
+      
+      <!-- Contenedor relativo del Botón y Menú Desplegable de Filtros -->
+      <div class="relative" id="contenedor-filtros">
+        <button 
+          id="btn-toggle-filtros" 
+          type="button" 
+          class="inline-flex items-center gap-2 px-4 py-2 bg-white border {% if filtro_rol or filtro_estado %}border-emerald-500 text-emerald-700 bg-emerald-50/50{% else %}border-slate-200 text-slate-700{% endif %} rounded-xl text-xs font-semibold hover:bg-slate-50 transition shadow-sm">
+          <i class="fa-solid fa-sliders {% if filtro_rol or filtro_estado %}text-emerald-500{% else %}text-slate-400{% endif %}"></i>
+          Filtros
+          <!-- Indicador visual si hay filtros activos -->
+          {% if filtro_rol or filtro_estado %}
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          {% endif %}
+        </button>
+
+        <!-- Menú Desplegable flotante con las opciones de filtrado -->
+        <div 
+          id="menu-filtros" 
+          class="hidden absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 z-30 transition-all">
+          <form method="GET" action="{% url 'gestion_usuarios' %}" class="space-y-4">
+            <!-- Preservamos el término de búsqueda si existe -->
+            {% if busqueda_q %}<input type="hidden" name="q" value="{{ busqueda_q }}">{% endif %}
+
+            <!-- Encabezado del desplegable -->
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+              <span class="text-xs font-bold text-slate-800">Filtrar Usuarios</span>
+              <!-- Enlace para resetear todos los filtros -->
+              <a href="{% url 'gestion_usuarios' %}" class="text-[11px] font-semibold text-emerald-600 hover:underline">
+                Restablecer
+              </a>
+            </div>
+
+            <!-- Filtro por Rol -->
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Rol</label>
+              <select name="rol" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 focus:outline-none focus:border-emerald-500">
+                <option value="">Todos los roles</option>
+                <option value="TURISTA" {% if filtro_rol == 'TURISTA' %}selected{% endif %}>Turista</option>
+                <option value="GUIA" {% if filtro_rol == 'GUIA' %}selected{% endif %}>Guía Turístico</option>
+                <option value="ADMIN_H" {% if filtro_rol == 'ADMIN_H' %}selected{% endif %}>Admin Hotel</option>
+                <option value="ADMIN_R" {% if filtro_rol == 'ADMIN_R' %}selected{% endif %}>Admin Restaurante</option>
+                <option value="ADMIN" {% if filtro_rol == 'ADMIN' %}selected{% endif %}>Administrador</option>
+              </select>
+            </div>
+
+            <!-- Filtro por Estado (Activo / Inactivo) -->
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Estado</label>
+              <select name="estado" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 focus:outline-none focus:border-emerald-500">
+                <option value="">Todos los estados</option>
+                <option value="activo" {% if filtro_estado == 'activo' %}selected{% endif %}>Activo</option>
+                <option value="inactivo" {% if filtro_estado == 'inactivo' %}selected{% endif %}>Pendiente / Inactivo</option>
+              </select>
+            </div>
+
+            <!-- Botón para aplicar los filtros seleccionados -->
+            <button type="submit" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition">
+              Aplicar Filtros
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Botón para Abrir Modal de Creación de Usuario -->
+      <a href="{% url 'gestion_usuarios_crear' 'crear' %}" 
+         class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-xl transition shadow-sm">
+        <i class="fa-solid fa-plus text-xs"></i>
+        Crear usuario
       </a>
+    </div>
+
   </div>
+
 
   <!-- Tarjetas de Métricas / Estadísticas -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -103,7 +199,7 @@
                             {{ usuario.first_name|slice:":1" }}{{ usuario.last_name|slice:":1" }}
                         </div>
                         <div>
-                            <div class="font-bold text-slate-800">{{ usuario.get_full_name|default:usuario.username }}</div>
+                            <div class="font-bold text-slate-800">{{ usuario.get_full_name|default:usuario.email }}</div>
                             <div class="text-xs text-slate-400">{{ usuario.email }}</div>
                         </div>
                     </div>
@@ -115,8 +211,12 @@
                         <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-semibold">Turista</span>
                     {% elif usuario.rol == 'GUIA' %}
                         <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-semibold">Guía Turístico</span>
-                    {% elif usuario.rol == 'OPERADOR' %}
-                        <span class="px-3 py-1 bg-purple-50 text-purple-600 rounded-full text-xs font-semibold">Operador Local</span>
+                    {% elif usuario.rol == 'ADMIN_H' %}
+                        <span class="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-semibold">Admin Hotel</span>
+                    {% elif usuario.rol == 'ADMIN_R' %}
+                        <span class="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs font-semibold">Admin Restaurante</span>
+                    {% elif usuario.rol == 'ADMIN' %}
+                        <span class="px-3 py-1 bg-slate-900 text-white rounded-full text-xs font-semibold">Administrador</span>
                     {% else %}
                         <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold">{{ usuario.get_rol_display|default:usuario.rol }}</span>
                     {% endif %}
@@ -158,18 +258,26 @@
       </table>
     </div>
 
-    <!-- Pie de página con Paginación -->
+    <!-- ========================================================================= -->
+    <!-- PASO D: PIE DE PÁGINA CON PAGINACIÓN Y PERSISTENCIA DE FILTROS -->
+    <!-- Al paginar, se conservan los parámetros ?page=X&q=...&rol=...&estado=... -->
+    <!-- para no perder los filtros activos al navegar entre páginas. -->
+    <!-- ========================================================================= -->
   <div class="flex items-center justify-between px-6 py-4 bg-white border-t border-slate-100 rounded-b-2xl">
       <!-- Texto con la cantidad total de registros -->
       <div class="text-xs text-slate-500 font-medium">
           Mostrando {{ page_obj.start_index }}–{{ page_obj.end_index }} de {{ page_obj.paginator.count }} usuarios
+          {% if busqueda_q or filtro_rol or filtro_estado %}
+            <span class="text-emerald-600 font-semibold">(filtrados de {{ total_usuarios }})</span>
+          {% endif %}
       </div>
 
       <!-- Botones de Navegación -->
       <div class="flex items-center gap-1.5">
           <!-- Botón Flecha Izquierda (<) -->
           {% if page_obj.has_previous %}
-              <a href="?page={{ page_obj.previous_page_number }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+              <a href="?page={{ page_obj.previous_page_number }}{% if busqueda_q %}&q={{ busqueda_q }}{% endif %}{% if filtro_rol %}&rol={{ filtro_rol }}{% endif %}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}" 
+                 class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
                   <i class="fa-solid fa-chevron-left text-xs"></i>
               </a>
           {% else %}
@@ -186,8 +294,9 @@
                       {{ num }}
                   </span>
               {% else %}
-                  <!-- Otras páginas (fondo claro) -->
-                  <a href="?page={{ num }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-semibold transition-colors">
+                  <!-- Otras páginas (fondo claro con preservación de filtros) -->
+                  <a href="?page={{ num }}{% if busqueda_q %}&q={{ busqueda_q }}{% endif %}{% if filtro_rol %}&rol={{ filtro_rol }}{% endif %}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}" 
+                     class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-semibold transition-colors">
                       {{ num }}
                   </a>
               {% endif %}
@@ -195,7 +304,8 @@
 
           <!-- Botón Flecha Derecha (>) -->
           {% if page_obj.has_next %}
-              <a href="?page={{ page_obj.next_page_number }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+              <a href="?page={{ page_obj.next_page_number }}{% if busqueda_q %}&q={{ busqueda_q }}{% endif %}{% if filtro_rol %}&rol={{ filtro_rol }}{% endif %}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}" 
+                 class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
                   <i class="fa-solid fa-chevron-right text-xs"></i>
               </a>
           {% else %}
@@ -213,4 +323,6 @@
 {% endblock %}
 {% block extra_js %}
     <script src="{% static 'js/animaciones_alertas.js' %}"></script>
+    <script src="{% static 'js/abrir_contenedor_filtros.js' %}"></script>
+
 {% endblock %}

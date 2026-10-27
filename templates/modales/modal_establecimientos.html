@@ -73,7 +73,6 @@
     <!-- ================================================================= -->
     <form method="POST" action="{% if accion == 'crear' %}{% url 'gestion_establecimientos_crear' 'crear' %}{% else %}{% url 'gestion_establecimientos_accion' establecimiento.id accion %}{% endif %}" enctype="multipart/form-data">
       {% csrf_token %}
-
       <!-- Contenedor con scroll interno para formularios largos -->
       <div class="p-6 max-h-[70vh] overflow-y-auto">
         
@@ -226,6 +225,10 @@
                 {{ form.licencia_sanitaria }}
               </div>
             </div>
+            <div>
+              <label>{{form.usuario}}</label>
+            </div>
+            
 
           </div>
 
