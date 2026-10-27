@@ -38,7 +38,7 @@ class ExperienciaForm(forms.ModelForm):
 class EstablecimientoForm(forms.ModelForm):
     class Meta:
         model = Establecimiento  
-        fields = ['url_img', 'nombre', 'descripcion', 'tipo', 'direccion', 'ciudad', 'pais', 'rtn', 'licencia_sanitaria', 'servicios']
+        fields = ['url_img', 'nombre', 'descripcion', 'tipo', 'direccion', 'ciudad', 'pais', 'rtn', 'licencia_sanitaria', 'servicios','usuario']
         widgets = {
             'url_img': forms.ClearableFileInput(attrs={
                 'class': 'hidden', 'accept': 'image/*'
@@ -68,4 +68,10 @@ class EstablecimientoForm(forms.ModelForm):
             'servicios': forms.CheckboxSelectMultiple(attrs={
                 'class': 'grid grid-cols-2 gap-2 text-xs text-slate-700 accent-emerald-500'
             }),
+            'usuario': forms.Select(attrs={
+                'class': 'w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-500 focus:outline-none focus:border-emerald-500 transition shadow-sm'
+            }),
         }
+        
+#FORMULARIO RAPIDO PARA UNIR CON EL FORMULARIO DE ESTABLECIMIENTO PARA AGREGAR USUARIO:
+
