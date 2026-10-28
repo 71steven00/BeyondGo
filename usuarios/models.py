@@ -113,6 +113,12 @@ class Establecimiento(models.Model):
         ('Hotel', 'Hotel'),
         ('Restaurante', 'Restaurante'),
     )
+    ESTADO_REVISION_CHOICES = (
+        ('pendiente', 'Pendiente de revisión'),
+        ('informacion', 'Información solicitada'),
+        ('aprobada', 'Aprobada'),
+        ('rechazada', 'Rechazada'),
+    )
   
     usuario = models.ForeignKey(
         Usuario,
@@ -128,9 +134,12 @@ class Establecimiento(models.Model):
     ciudad = models.CharField(max_length=100, verbose_name='Ciudad') 
     pais = models.CharField(max_length=100, blank=True, default='Colombia', verbose_name='País')  
     url_img = models.ImageField(upload_to='establecimientos/', blank=True, null=True, verbose_name='Imagen')
-    rtn = models.FileField(upload_to='rtn/',max_length=255, verbose_name='Registro Nacional de Turismo (RNT/RTN)') #Aumenta el límite de caracteres para evitar error en la base de datos de tipo Value too long.
+    rtn = models.FileField(upload_to='rtn/', max_length=255, blank=True, verbose_name='Registro Nacional de Turismo (RNT/RTN)')
     licencia_sanitaria = models.FileField(upload_to='licencias/', max_length=255, blank=True, null=True, verbose_name='Registro Sanitario')
+    camara_comercio = models.FileField(upload_to='camara_comercio/', max_length=255, blank=True, verbose_name='Certificado de Cámara de Comercio')
     servicios = models.ManyToManyField(Servicio, blank=True, related_name="servicios_establecimiento", verbose_name="Servicios Ofrecidos")
+    estado_revision = models.CharField(max_length=20, choices=ESTADO_REVISION_CHOICES, default='pendiente', verbose_name='Estado de revisión')
+    observacion_revision = models.TextField(blank=True, verbose_name='Observación de revisión')
 # Crea una columna en la base de datos de tipo verdadero/falso que por defecto será True (es decir, "Disponible" al crear un nuevo registro) y le asigna el nombre descriptivo "Estado Disponible" para el panel de administración.
     is_active = models.BooleanField(default=True, verbose_name="Disponible")
     # clase interna de configuración de Django Permite definir metadatos

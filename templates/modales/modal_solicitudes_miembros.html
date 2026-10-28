@@ -1,0 +1,126 @@
+<div class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="titulo-solicitud">
+	<div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+		<div class="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 border-b border-slate-800 shadow-md">
+			<div class="flex items-center gap-3">
+				<div class="w-10 h-10 rounded-2xl flex items-center justify-center text-white bg-amber-600/80 border border-amber-400/30">
+					<i class="fa-regular fa-clipboard"></i>
+				</div>
+				<div>
+					<h3 id="titulo-solicitud" class="text-sm font-bold text-white tracking-wide">Detalle de solicitud</h3>
+					<p class="text-[11px] text-slate-300">Información registrada para verificación</p>
+				</div>
+			</div>
+			<a href="?estado={{ estado_actual }}" aria-label="Cerrar modal" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 border border-slate-700/60 transition">
+				<i class="fa-solid fa-xmark"></i>
+			</a>
+		</div>
+
+		<div class="p-6 max-h-[75vh] overflow-y-auto space-y-5">
+			<div class="border-b border-slate-100 pb-4">
+				<div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+					<span class="text-blue-600 font-semibold text-xs">{{ solicitud.get_tipo_display }}</span>
+					<span class="inline-block font-semibold px-2.5 py-1 rounded-full text-[11px] {% if solicitud.estado_revision == 'aprobada' %}bg-emerald-100 text-emerald-700{% elif solicitud.estado_revision == 'rechazada' %}bg-rose-100 text-rose-700{% elif solicitud.estado_revision == 'informacion' %}bg-blue-100 text-blue-700{% else %}bg-amber-100 text-amber-700{% endif %}">{{ solicitud.get_estado_revision_display }}</span>
+				</div>
+				<h2 class="text-lg font-bold text-slate-900">{{ solicitud.nombre }}</h2>
+				<p class="text-xs text-slate-500 mt-1">{{ solicitud.descripcion|default:"Sin descripción registrada." }}</p>
+			</div>
+
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+				<div class="p-3 bg-slate-50 rounded-xl">
+					<span class="text-slate-400 font-medium block mb-1">Representante</span>
+					<span class="text-slate-800 font-semibold">{{ solicitud.usuario.first_name }}</span>
+				</div>
+				<div class="p-3 bg-slate-50 rounded-xl">
+					<span class="text-slate-400 font-medium block mb-1">Cuenta</span>
+					<span class="text-slate-800 font-semibold">{{ solicitud.usuario.get_rol_display }}</span>
+				</div>
+				<div class="p-3 bg-slate-50 rounded-xl">
+					<span class="text-slate-400 font-medium block mb-1">Correo electrónico</span>
+					<a href="mailto:{{ solicitud.usuario.email }}" class="text-emerald-700 font-semibold hover:underline">{{ solicitud.usuario.email }}</a>
+				</div>
+				<div class="p-3 bg-slate-50 rounded-xl">
+					<span class="text-slate-400 font-medium block mb-1">Teléfono</span>
+					<span class="text-slate-800 font-semibold">{{ solicitud.usuario.telefono|default:"No registrado" }}</span>
+				</div>
+				<div class="p-3 bg-slate-50 rounded-xl sm:col-span-2">
+					<span class="text-slate-400 font-medium block mb-1">Dirección</span>
+					<span class="text-slate-800 font-semibold">{{ solicitud.direccion }}, {{ solicitud.ciudad }}{% if solicitud.pais %}, {{ solicitud.pais }}{% endif %}</span>
+				</div>
+				<div class="p-3 bg-slate-50 rounded-xl">
+					<span class="text-slate-400 font-medium block mb-1">Fecha de solicitud</span>
+					<span class="text-slate-800 font-semibold">{{ solicitud.usuario.date_joined|date:"d/m/Y H:i" }}</span>
+				</div>
+				<div class="p-3 bg-slate-50 rounded-xl">
+					<span class="text-slate-400 font-medium block mb-1">Cuenta de acceso</span>
+					<span class="font-semibold {% if solicitud.usuario.is_active %}text-emerald-700{% else %}text-amber-700{% endif %}">{% if solicitud.usuario.is_active %}Activa{% else %}Inactiva{% endif %}</span>
+				</div>
+			</div>
+
+			<div class="border-t border-slate-100 pt-4">
+				<h4 class="text-xs font-bold text-slate-700 mb-2">Documentos adjuntos</h4>
+				<div class="space-y-2">
+					{% if solicitud.rtn %}
+						<a href="{% url 'solicitud_documento' solicitud.pk 'rnt' %}" target="_blank" rel="noopener" class="flex items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs hover:bg-slate-100 transition">
+							<span class="flex items-center gap-2 min-w-0"><i class="fa-regular fa-file-lines text-slate-500"></i><span class="font-medium text-slate-700 truncate">{{ solicitud.rtn.name }}</span></span><i class="fa-regular fa-eye text-slate-400"></i>
+						</a>
+					{% else %}<p class="text-xs text-rose-600">No hay documento RNT adjunto.</p>{% endif %}
+					{% if solicitud.licencia_sanitaria %}
+						<a href="{% url 'solicitud_documento' solicitud.pk 'sanidad' %}" target="_blank" rel="noopener" class="flex items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs hover:bg-slate-100 transition">
+							<span class="flex items-center gap-2 min-w-0"><i class="fa-regular fa-file-lines text-slate-500"></i><span class="font-medium text-slate-700 truncate">{{ solicitud.licencia_sanitaria.name }}</span></span><i class="fa-regular fa-eye text-slate-400"></i>
+						</a>
+					{% else %}<p class="text-xs text-rose-600">No hay certificado sanitario adjunto.</p>{% endif %}
+					{% if solicitud.camara_comercio %}
+						<a href="{% url 'solicitud_documento' solicitud.pk 'camara_comercio' %}" target="_blank" rel="noopener" class="flex items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs hover:bg-slate-100 transition">
+							<span class="flex items-center gap-2 min-w-0"><i class="fa-regular fa-file-lines text-slate-500"></i><span class="font-medium text-slate-700 truncate">{{ solicitud.camara_comercio.name }}</span></span><i class="fa-regular fa-eye text-slate-400"></i>
+						</a>
+					{% else %}<p class="text-xs text-rose-600">No hay certificado de Cámara de Comercio adjunto.</p>{% endif %}
+				</div>
+			</div>
+
+			{% if solicitud.observacion_revision %}
+			<div class="border-t border-slate-100 pt-4">
+				<h4 class="text-xs font-bold text-slate-700 mb-2">Observación de revisión</h4>
+				<p class="p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-slate-700 whitespace-pre-line">{{ solicitud.observacion_revision }}</p>
+			</div>
+			{% endif %}
+
+			{% if solicitud.servicios.exists %}
+			<div class="border-t border-slate-100 pt-4">
+				<h4 class="text-xs font-bold text-slate-700 mb-2">Servicios registrados</h4>
+				<div class="flex flex-wrap gap-2">
+					{% for servicio in solicitud.servicios.all %}
+						<span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[11px] font-medium">{{ servicio.nombre }}</span>
+					{% endfor %}
+				</div>
+			</div>
+			{% endif %}
+
+			{% if solicitud.estado_revision == 'pendiente' or solicitud.estado_revision == 'informacion' %}
+			<form method="post" action="{% url 'solicitudes_miembros' %}?estado={{ estado_actual }}" class="border-t border-slate-100 pt-4 space-y-3">
+				{% csrf_token %}
+				<input type="hidden" name="establecimiento_id" value="{{ solicitud.pk }}">
+				<div>
+					<label for="observacion-solicitud" class="block text-xs font-bold text-slate-700 mb-1">Mensaje para el solicitante</label>
+					<textarea id="observacion-solicitud" name="observacion" rows="3" class="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-500" placeholder="Indica el motivo del rechazo o la información/documentos que faltan.">{{ solicitud.observacion_revision }}</textarea>
+					<p class="text-[10px] text-slate-500 mt-1">Obligatorio para rechazar o pedir información.</p>
+				</div>
+				<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+					<button type="submit" name="accion" value="aprobar" class="inline-flex items-center justify-center gap-2 px-3 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition">
+						<i class="fa-solid fa-check"></i> Aprobar
+					</button>
+					<button type="submit" name="accion" value="solicitar_informacion" class="inline-flex items-center justify-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-700 bg-amber-100 hover:bg-amber-200 rounded-xl transition">
+						<i class="fa-solid fa-envelope"></i> Pedir información
+					</button>
+					<button type="submit" name="accion" value="rechazar" class="inline-flex items-center justify-center gap-2 px-3 py-2.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition">
+						<i class="fa-solid fa-xmark"></i> Rechazar
+					</button>
+				</div>
+			</form>
+			{% endif %}
+		</div>
+
+		<div class="flex items-center justify-end px-6 py-4 bg-gradient-to-r from-slate-100/90 via-blue-50/60 to-emerald-50/60 border-t border-slate-200/80 shadow-inner">
+			<a href="?estado={{ estado_actual }}" class="px-5 py-2.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition shadow-sm">Cerrar</a>
+		</div>
+	</div>
+</div>
