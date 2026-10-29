@@ -277,6 +277,7 @@ def gestion_establecimientos(request, pk=None, a=None):
         elif a == 'editar' and establecimiento:
             if request.method == 'POST':
                 # Carga el formulario con los datos enviados y la instancia existente para actualizar
+                # IMPORTANTE: Se añade request.FILES para procesar los archivos nuevos o actualizados
                 form = EstablecimientoForm(request.POST, request.FILES, instance=establecimiento)
                 if form.is_valid():
                     form.save()
