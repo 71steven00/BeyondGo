@@ -1,0 +1,229 @@
+{% extends "base_inicio.html" %}
+{% load static %}
+
+{% block header_content %}
+<!-- Relleno superior para evitar franjas blancas en el navbar de la base -->
+
+{% endblock %}
+
+{% block title %}Registro de Establecimiento | Beyond Go{% endblock %}
+
+{% block content %}
+{% include 'components/server_alert.html' %}
+
+<!-- FONDO PRINCIPAL EXACTO A LA IMAGEM -->
+<div class="min-h-screen py-40 px-4 flex flex-col items-center justify-center relative bg-[radial-gradient(ellipse_at_center,_#121d3b_0%,_#0b1328_50%,_#050811_100%)]">
+
+    <!-- Encabezado fuera de la tarjeta -->
+    <div class="text-center mb-8 max-w-xl z-10">
+        <div class="inline-flex items-center justify-center w-12 h-12 bg-[#1c2747] border border-[#2d3a5e] rounded-xl shadow-lg mb-3">
+            <i class="fa-solid fa-store text-[#39ef68] text-xl"></i>
+        </div>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight uppercase">
+            ¡Únete a BeyondGo!
+        </h1>
+        <p class="text-sm text-slate-400 mt-2">
+            Registra tu establecimiento y llega a miles de turistas en Aquitania, Boyacá
+        </p>
+    </div>
+
+    <!-- TARJETA DEL FORMULARIO CON EL COLOR EXACTO (#182038) -->
+    <div class="w-full max-w-3xl bg-[#182038] border border-[#2d3a5e] rounded-2xl p-6 md:p-10 shadow-2xl z-10">
+        
+        <div class="text-center mb-8">
+            <h2 class="text-xl md:text-2xl font-bold text-white tracking-wide uppercase">1. INFORMACIÓN DEL ESTABLECIMIENTO</h2>
+            <p class="text-xs text-slate-400 mt-1">Ingresa los datos principales de tu negocio</p>
+        </div>
+
+        <form method="POST" action="{% url 'hazte_miembro' %}" enctype="multipart/form-data" class="space-y-4" id="establecimiento-form" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="rounded-lg border border-red-400/40 bg-red-500/10 px-4 py-3 text-xs text-red-300">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <!-- Sección 1: Información del negocio (Grid de 2 columnas) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <!-- Nombre del Establecimiento -->
+                <div class="flex flex-col">
+                    <label for="nombre_establecimiento" class="text-xs font-semibold text-slate-200 mb-1">Nombre del Establecimiento</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-building absolute left-3 text-[#39ef68] text-sm"></i>
+                        <input value="{{ form.nombre_establecimiento.value|default:'' }}" type="text" id="nombre_establecimiento" name="nombre_establecimiento" placeholder="Ej: Eco-Hotel Refugio del Sol" class="w-full bg-[#283352] border border-[#37466e] text-white placeholder-slate-400 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-[#39ef68] focus:ring-1 focus:ring-[#39ef68] transition">
+                    </div>
+                    {% if form.nombre_establecimiento.errors %}
+                        <span class="text-red-400 text-xs mt-1 block">{{ form.nombre_establecimiento.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Tipo de Establecimiento -->
+                <div class="flex flex-col">
+                    <label for="tipo_establecimiento" class="text-xs font-semibold text-slate-200 mb-1">Tipo de Establecimiento</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-list-check absolute left-3 text-[#39ef68] text-sm"></i>
+                        <select id="tipo_establecimiento" name="tipo_establecimiento" class="w-full bg-[#283352] border border-[#37466e] text-slate-200 rounded-lg pl-9 pr-8 py-2.5 text-sm focus:outline-none focus:border-[#39ef68] focus:ring-1 focus:ring-[#39ef68] transition appearance-none cursor-pointer">
+                            {% for val, label in form.tipo_establecimiento.field.choices %}
+                                <option value="{{ val }}" class="bg-[#283352] text-white" {% if form.tipo_establecimiento.value == val %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-3 text-slate-400 pointer-events-none text-xs"></i>
+                    </div>
+                    {% if form.tipo_establecimiento.errors %}
+                        <span class="text-red-400 text-xs mt-1 block">{{ form.tipo_establecimiento.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Nombre del Propietario -->
+                <div class="flex flex-col">
+                    <label for="nombre_propietario" class="text-xs font-semibold text-slate-200 mb-1">Nombre del Propietario o Representante</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-user absolute left-3 text-[#39ef68] text-sm"></i>
+                        <input value="{{ form.nombre_propietario.value|default:'' }}" type="text" id="nombre_propietario" name="nombre_propietario" placeholder="Ej: Carlos Mendoza" class="w-full bg-[#283352] border border-[#37466e] text-white placeholder-slate-400 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-[#39ef68] focus:ring-1 focus:ring-[#39ef68] transition">
+                    </div>
+                    {% if form.nombre_propietario.errors %}
+                        <span class="text-red-400 text-xs mt-1 block">{{ form.nombre_propietario.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Email de Contacto -->
+                <div class="flex flex-col">
+                    <label for="email_contacto" class="text-xs font-semibold text-slate-200 mb-1">Email de Contacto</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-envelope absolute left-3 text-[#39ef68] text-sm"></i>
+                        <input value="{{ form.email_contacto.value|default:'' }}" type="email" id="email_contacto" name="email_contacto" placeholder="propietario@correo.com" class="w-full bg-[#283352] border border-[#37466e] text-white placeholder-slate-400 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-[#39ef68] focus:ring-1 focus:ring-[#39ef68] transition">
+                    </div>
+                    {% if form.email_contacto.errors %}
+                        <span class="text-red-400 text-xs mt-1 block">{{ form.email_contacto.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Teléfono -->
+                <div class="flex flex-col">
+                    <label for="telefono" class="text-xs font-semibold text-slate-200 mb-1">Teléfono</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-phone absolute left-3 text-[#39ef68] text-sm"></i>
+                        <input value="{{ form.telefono.value|default:'' }}" type="tel" id="telefono" name="telefono" placeholder="+57 312 456 7890" class="w-full bg-[#283352] border border-[#37466e] text-white placeholder-slate-400 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-[#39ef68] focus:ring-1 focus:ring-[#39ef68] transition">
+                    </div>
+                    {% if form.telefono.errors %}
+                        <span class="text-red-400 text-xs mt-1 block">{{ form.telefono.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Dirección -->
+                <div class="flex flex-col">
+                    <label for="direccion" class="text-xs font-semibold text-slate-200 mb-1">Dirección del Establecimiento</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-location-dot absolute left-3 text-[#39ef68] text-sm"></i>
+                        <input value="{{ form.direccion.value|default:'' }}" type="text" id="direccion" name="direccion" placeholder="Vereda Llano Alarcón, Km 12" class="w-full bg-[#283352] border border-[#37466e] text-white placeholder-slate-400 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-[#39ef68] focus:ring-1 focus:ring-[#39ef68] transition">
+                    </div>
+                    {% if form.direccion.errors %}
+                        <span class="text-red-400 text-xs mt-1 block">{{ form.direccion.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="flex flex-col">
+                    <label for="ciudad" class="text-xs font-semibold text-slate-200 mb-1">Ciudad o municipio</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-map-location-dot absolute left-3 text-[#39ef68] text-sm"></i>
+                        <input value="{{ form.ciudad.value|default:'' }}" type="text" id="ciudad" name="ciudad" required placeholder="Ej: Aquitania" class="w-full bg-[#283352] border border-[#37466e] text-white placeholder-slate-400 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-[#39ef68] focus:ring-1 focus:ring-[#39ef68] transition">
+                    </div>
+                    {% if form.ciudad.errors %}
+                        <span class="text-red-400 text-xs mt-1 block">{{ form.ciudad.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Descripción Breve (Ancho Completo) -->
+                <div class="flex flex-col md:col-span-2">
+                    <label for="descripcion" class="text-xs font-semibold text-slate-200 mb-1">Descripción breve del negocio</label>
+                    <div class="relative flex items-start">
+                        <i class="fa-solid fa-pen-to-square absolute left-3 top-3 text-[#39ef68] text-sm"></i>
+                        <textarea id="descripcion" name="descripcion" rows="3" placeholder="Describe brevemente los servicios que me ofreces, capacidad y especialidades..." class="w-full bg-[#283352] border border-[#37466e] text-white placeholder-slate-400 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-[#39ef68] focus:ring-1 focus:ring-[#39ef68] transition resize-none">{{ form.descripcion.value|default:'' }}</textarea>
+                    </div>
+                    {% if form.descripcion.errors %}
+                        <span class="text-red-400 text-xs mt-1 block">{{ form.descripcion.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- Sección 2: Documentación Requerida -->
+            <div class="pt-6 border-t border-[#2d3a5e] mt-6">
+                <h2 class="text-xl font-bold text-white tracking-wide uppercase mb-4">2. DOCUMENTACIÓN REQUERIDA</h2>
+
+                <div class="space-y-3">
+                    <!-- RNT -->
+                    <div class="flex flex-col">
+                        <label class="text-xs font-semibold text-slate-200 mb-1">Registro Nacional de Turismo (RNT)</label>
+                        <div class="relative flex items-center bg-[#283352] border border-[#37466e] rounded-lg p-2">
+                            <i class="fa-solid fa-file-arrow-up text-[#39ef68] text-base ml-2 mr-3"></i>
+                            <div class="flex-1 min-w-0 pr-2">
+                                <p class="text-xs font-medium text-slate-200 truncate">Subir archivo (PDF, PNG o JPG)</p>
+                                <p class="text-[10px] text-slate-400">Máx 5MB</p>
+                            </div>
+                            <input type="file" id="rnt_file" name="rnt_file" accept=".pdf,.png,.jpg,.jpeg" class="text-xs text-slate-400 file:mr-1 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#39ef68] file:text-slate-950 hover:file:bg-[#32d85d] cursor-pointer transition">
+                        </div>
+                        {% if form.rnt_file.errors %}
+                            <span class="text-red-400 text-xs mt-1 block">{{ form.rnt_file.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Certificado de Sanidad -->
+                    <div class="flex flex-col">
+                        <label class="text-xs font-semibold text-slate-200 mb-1">Certificado de Sanidad Vigente</label>
+                        <div class="relative flex items-center bg-[#283352] border border-[#37466e] rounded-lg p-2">
+                            <i class="fa-solid fa-file-arrow-up text-[#39ef68] text-base ml-2 mr-3"></i>
+                            <div class="flex-1 min-w-0 pr-2">
+                                <p class="text-xs font-medium text-slate-200 truncate">Subir archivo (PDF, PNG o JPG)</p>
+                                <p class="text-[10px] text-slate-400">Máx 5MB</p>
+                            </div>
+                            <input type="file" id="sanidad_file" name="sanidad_file" accept=".pdf,.png,.jpg,.jpeg" class="text-xs text-slate-400 file:mr-1 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#39ef68] file:text-slate-950 hover:file:bg-[#32d85d] cursor-pointer transition">
+                        </div>
+                        {% if form.sanidad_file.errors %}
+                            <span class="text-red-400 text-xs mt-1 block">{{ form.sanidad_file.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Cámara de Comercio -->
+                    <div class="flex flex-col">
+                        <label class="text-xs font-semibold text-slate-200 mb-1">Cámara de Comercio (No mayor a 30 días)</label>
+                        <div class="relative flex items-center bg-[#283352] border border-[#37466e] rounded-lg p-2">
+                            <i class="fa-solid fa-file-arrow-up text-[#39ef68] text-base ml-2 mr-3"></i>
+                            <div class="flex-1 min-w-0 pr-2">
+                                <p class="text-xs font-medium text-slate-200 truncate">Subir archivo (PDF, PNG o JPG)</p>
+                                <p class="text-[10px] text-slate-400">Máx 5MB</p>
+                            </div>
+                            <input type="file" id="camara_comercio_file" name="camara_comercio_file" accept=".pdf,.png,.jpg,.jpeg" class="text-xs text-slate-400 file:mr-1 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#39ef68] file:text-slate-950 hover:file:bg-[#32d85d] cursor-pointer transition">
+                        </div>
+                        {% if form.camara_comercio_file.errors %}
+                            <span class="text-red-400 text-xs mt-1 block">{{ form.camara_comercio_file.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-6">
+                <button type="submit" class="w-full py-3 px-4 bg-[#39ef68] hover:bg-[#32d85d] text-[#0b1328] font-black rounded-lg transition shadow-md shadow-[#39ef68]/10 text-xs tracking-wider uppercase">
+                    ENVIAR SOLICITUD DE REGISTRO
+                </button>
+                <a href="{% url 'inicio' %}" class="w-full py-3 px-4 bg-[#283352] hover:bg-[#323f63] text-[#39ef68] border border-[#39ef68] font-black rounded-lg text-center transition text-xs tracking-wider uppercase flex items-center justify-center">
+                    VOLVER AL INICIO
+                </a>
+            </div>
+
+        </form>
+
+        <p class="text-center text-[11px] text-slate-400 mt-6">
+            Al registrarte, aceptas nuestros términos y condiciones
+        </p>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/animaciones_alertas.js' %}"></script>
+    <script src="{% static 'js/form-validation.js' %}"></script>
+{% endblock %}
