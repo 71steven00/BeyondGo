@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 @never_cache
 @rol_requerido('ADMIN')
-def visualizar_template2(request):
+def gestion_solicitudes(request):
     queryset = Establecimiento.objects.select_related('usuario').prefetch_related('servicios').filter(
         usuario__rol__in=('ADMIN_H', 'ADMIN_R'),
     )
@@ -141,28 +141,7 @@ def _enviar_notificacion_solicitud(request, solicitud, accion, observacion):
     correo.send()
 
 
-@never_cache
-@rol_requerido('ADMIN')
-def ver_documento_solicitud(request, pk, tipo):
-    solicitud = get_object_or_404(Establecimiento, pk=pk)
-    campos_documentos = {
-        'rnt': solicitud.rtn,
-        'sanidad': solicitud.licencia_sanitaria,
-        'camara_comercio': solicitud.camara_comercio,
-    }
-    documento = campos_documentos.get(tipo)
-    if not documento:
-        raise Http404
 
-    try:
-        archivo = documento.open('rb')
-    except (OSError, ValueError):
-        raise Http404
-    return FileResponse(
-        archivo,
-        content_type=guess_type(documento.name)[0] or 'application/octet-stream',
-        filename=documento.name.rsplit('/', 1)[-1],
-    )
 
 @never_cache # Se utiliza para que el navegador no guarde cache cuando se haga logout.
 @rol_requerido('ADMIN')
