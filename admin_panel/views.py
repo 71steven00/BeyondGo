@@ -1,6 +1,17 @@
-from django.views.decorators.cache import never_cache
-from usuarios.views import limpiar_mensajes_previos
+import logging
+from mimetypes import guess_type
+from urllib.parse import urlencode
+from django.conf import settings
 from django.contrib import messages
+from django.core.mail import EmailMultiAlternatives
+from django.db import transaction
+from django.db.models import Count
+from django.http import FileResponse, Http404
+from django.views.decorators.cache import never_cache
+from django.urls import reverse
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from usuarios.views import limpiar_mensajes_previos
 from django.utils import timezone
 from datetime import timedelta
 from usuarios.decorators import rol_requerido
@@ -15,8 +26,122 @@ from .forms import ExperienciaForm
 from django.db import models # para las consultas Q del buscador
 
 # Create your views here.
-def visualizar_template2(request):
-    return render(request, 'admin_general/solicitudes_miembros.html')
+logger = logging.getLogger(__name__)
+
+
+@never_cache
+@rol_requerido('ADMIN')
+def gestion_solicitudes(request):
+    queryset = Establecimiento.objects.select_related('usuario').prefetch_related('servicios').filter(
+        usuario__rol__in=('ADMIN_H', 'ADMIN_R'),
+    )
+    estados = ('pendiente', 'informacion', 'aprobada', 'rechazada')
+    estado_actual = request.GET.get('estado', 'pendiente')
+    if estado_actual not in estados:
+        estado_actual = 'pendiente'
+
+    if request.method == 'POST':
+        solicitud_id = request.POST.get('establecimiento_id')
+        accion = request.POST.get('accion')
+        observacion = request.POST.get('observacion', '').strip()
+        solicitud = get_object_or_404(
+            queryset.filter(estado_revision__in=('pendiente', 'informacion')),
+            pk=solicitud_id,
+        )
+
+        if accion not in ('aprobar', 'rechazar', 'solicitar_informacion'):
+            messages.error(request, 'La acción solicitada no es válida.')
+            return _redirigir_solicitudes('pendiente', solicitud.pk)
+        if accion in ('rechazar', 'solicitar_informacion') and not observacion:
+            messages.error(request, 'Escribe un motivo o la información que se debe completar.')
+            return _redirigir_solicitudes(solicitud.estado_revision, solicitud.pk)
+        if accion == 'aprobar' and not all((solicitud.rtn, solicitud.licencia_sanitaria, solicitud.camara_comercio)):
+            messages.error(request, 'No se puede aprobar la solicitud mientras falten documentos obligatorios.')
+            return _redirigir_solicitudes(solicitud.estado_revision, solicitud.pk)
+
+        estado_anterior = solicitud.estado_revision
+        try:
+            with transaction.atomic():
+                if accion == 'aprobar':
+                    solicitud.estado_revision = 'aprobada'
+                    solicitud.observacion_revision = ''
+                    solicitud.is_active = True
+                    solicitud.usuario.is_active = True
+                    solicitud.usuario.save(update_fields=['is_active'])
+                    estado_resultante = 'aprobada'
+                elif accion == 'rechazar':
+                    solicitud.estado_revision = 'rechazada'
+                    solicitud.observacion_revision = observacion
+                    solicitud.is_active = False
+                    solicitud.usuario.is_active = False
+                    solicitud.usuario.save(update_fields=['is_active'])
+                    estado_resultante = 'rechazada'
+                else:
+                    solicitud.estado_revision = 'informacion'
+                    solicitud.observacion_revision = observacion
+                    estado_resultante = 'informacion'
+
+                solicitud.save(update_fields=['estado_revision', 'observacion_revision', 'is_active'])
+                _enviar_notificacion_solicitud(request, solicitud, accion, observacion)
+        except Exception:
+            logger.exception('No se pudo enviar el correo de revisión al miembro.')
+            messages.error(request, 'No se pudo enviar el correo; la solicitud no fue actualizada. Verifica la configuración SMTP.')
+            return _redirigir_solicitudes(estado_anterior, solicitud.pk)
+        else:
+            messages.success(request, 'La solicitud fue actualizada y se envió el correo de notificación.')
+        return _redirigir_solicitudes(estado_resultante)
+
+    solicitudes = queryset.filter(estado_revision=estado_actual).order_by('-usuario__date_joined')
+    conteos = dict(
+        queryset.values('estado_revision').annotate(total=Count('pk')).values_list('estado_revision', 'total')
+    )
+    estados_revision = [
+        {'valor': valor, 'etiqueta': etiqueta, 'total': conteos.get(valor, 0)}
+        for valor, etiqueta in Establecimiento.ESTADO_REVISION_CHOICES
+    ]
+    solicitud_id = request.GET.get('establecimiento')
+    solicitud_seleccionada = get_object_or_404(solicitudes, pk=solicitud_id) if solicitud_id else None
+
+    return render(request, 'admin_general/solicitudes_miembros.html', {
+        'solicitudes': solicitudes,
+        'solicitud_seleccionada': solicitud_seleccionada,
+        'estado_actual': estado_actual,
+        'estados_revision': estados_revision,
+        'solicitudes_pendientes_count': conteos.get('pendiente', 0) + conteos.get('informacion', 0),
+    })
+
+
+def _redirigir_solicitudes(estado, solicitud_id=None):
+    parametros = {'estado': estado}
+    if solicitud_id:
+        parametros['establecimiento'] = solicitud_id
+    return redirect(f"{reverse('solicitudes_miembros')}?{urlencode(parametros)}")
+
+
+def _enviar_notificacion_solicitud(request, solicitud, accion, observacion):
+    nombre = solicitud.usuario.get_full_name() or solicitud.usuario.email
+    if accion == 'aprobar':
+        asunto = 'Tu solicitud para unirte a BeyondGo fue aprobada'
+    elif accion == 'rechazar':
+        asunto = 'Actualización sobre tu solicitud de BeyondGo'
+    else:
+        asunto = 'Información adicional para tu solicitud de BeyondGo'
+
+    contexto = {
+        'nombre': nombre,
+        'establecimiento': solicitud.nombre,
+        'estado': solicitud.estado_revision,
+        'observacion': observacion,
+        'url_accion': request.build_absolute_uri(reverse('password_reset')) if accion == 'aprobar' else None,
+    }
+    html = render_to_string('emails/notificacion_solicitud_miembro.html', contexto)
+    texto = strip_tags(html)
+    correo = EmailMultiAlternatives(asunto, texto, settings.DEFAULT_FROM_EMAIL, [solicitud.usuario.email])
+    correo.attach_alternative(html, 'text/html')
+    correo.send()
+
+
+
 
 @never_cache # Se utiliza para que el navegador no guarde cache cuando se haga logout.
 @rol_requerido('ADMIN')
@@ -267,6 +392,7 @@ def gestion_establecimientos(request, pk=None, a=None):
                     # Guarda temporalmente para asignar el usuario autenticado antes de registrar en la BD
                     nuevo_est = form.save(commit=False)
                     nuevo_est.usuario = request.user
+                    nuevo_est.estado_revision = 'aprobada'
                     nuevo_est.save()
                     form.save_m2m() # Guarda relaciones de muchos a muchos (servicios)
                     messages.success(request, 'Establecimiento creado con éxito.')
