@@ -1,13 +1,24 @@
-from django.views.decorators.cache import never_cache
-from usuarios.views import limpiar_mensajes_previos
+import logging
+from mimetypes import guess_type
+from urllib.parse import urlencode
+from django.conf import settings
 from django.contrib import messages
+from django.core.mail import EmailMultiAlternatives
+from django.db import transaction
+from django.db.models import Count
+from django.http import FileResponse, Http404
+from django.views.decorators.cache import never_cache
+from django.urls import reverse
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from usuarios.views import limpiar_mensajes_previos
 from django.utils import timezone
 from datetime import timedelta
 from usuarios.decorators import rol_requerido
 from usuarios.models import Usuario, Guia
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
-from usuarios.forms import Editar_usuario, UsuarioForm
+from usuarios.forms import UsuarioForm
 from usuarios.models import Establecimiento
 from .forms import EstablecimientoForm
 from .models import Experiencia        # <--- Importa tu modelo
@@ -15,8 +26,122 @@ from .forms import ExperienciaForm
 from django.db import models # para las consultas Q del buscador
 
 # Create your views here.
-def visualizar_template2(request):
-    return render(request, 'admin_general/solicitudes_miembros.html')
+logger = logging.getLogger(__name__)
+
+
+@never_cache
+@rol_requerido('ADMIN')
+def gestion_solicitudes(request):
+    queryset = Establecimiento.objects.select_related('usuario').prefetch_related('servicios').filter(
+        usuario__rol__in=('ADMIN_H', 'ADMIN_R'),
+    )
+    estados = ('pendiente', 'informacion', 'aprobada', 'rechazada')
+    estado_actual = request.GET.get('estado', 'pendiente')
+    if estado_actual not in estados:
+        estado_actual = 'pendiente'
+
+    if request.method == 'POST':
+        solicitud_id = request.POST.get('establecimiento_id')
+        accion = request.POST.get('accion')
+        observacion = request.POST.get('observacion', '').strip()
+        solicitud = get_object_or_404(
+            queryset.filter(estado_revision__in=('pendiente', 'informacion')),
+            pk=solicitud_id,
+        )
+
+        if accion not in ('aprobar', 'rechazar', 'solicitar_informacion'):
+            messages.error(request, 'La acción solicitada no es válida.')
+            return _redirigir_solicitudes('pendiente', solicitud.pk)
+        if accion in ('rechazar', 'solicitar_informacion') and not observacion:
+            messages.error(request, 'Escribe un motivo o la información que se debe completar.')
+            return _redirigir_solicitudes(solicitud.estado_revision, solicitud.pk)
+        if accion == 'aprobar' and not all((solicitud.rtn, solicitud.licencia_sanitaria, solicitud.camara_comercio)):
+            messages.error(request, 'No se puede aprobar la solicitud mientras falten documentos obligatorios.')
+            return _redirigir_solicitudes(solicitud.estado_revision, solicitud.pk)
+
+        estado_anterior = solicitud.estado_revision
+        try:
+            with transaction.atomic():
+                if accion == 'aprobar':
+                    solicitud.estado_revision = 'aprobada'
+                    solicitud.observacion_revision = ''
+                    solicitud.is_active = True
+                    solicitud.usuario.is_active = True
+                    solicitud.usuario.save(update_fields=['is_active'])
+                    estado_resultante = 'aprobada'
+                elif accion == 'rechazar':
+                    solicitud.estado_revision = 'rechazada'
+                    solicitud.observacion_revision = observacion
+                    solicitud.is_active = False
+                    solicitud.usuario.is_active = False
+                    solicitud.usuario.save(update_fields=['is_active'])
+                    estado_resultante = 'rechazada'
+                else:
+                    solicitud.estado_revision = 'informacion'
+                    solicitud.observacion_revision = observacion
+                    estado_resultante = 'informacion'
+
+                solicitud.save(update_fields=['estado_revision', 'observacion_revision', 'is_active'])
+                _enviar_notificacion_solicitud(request, solicitud, accion, observacion)
+        except Exception:
+            logger.exception('No se pudo enviar el correo de revisión al miembro.')
+            messages.error(request, 'No se pudo enviar el correo; la solicitud no fue actualizada. Verifica la configuración SMTP.')
+            return _redirigir_solicitudes(estado_anterior, solicitud.pk)
+        else:
+            messages.success(request, 'La solicitud fue actualizada y se envió el correo de notificación.')
+        return _redirigir_solicitudes(estado_resultante)
+
+    solicitudes = queryset.filter(estado_revision=estado_actual).order_by('-usuario__date_joined')
+    conteos = dict(
+        queryset.values('estado_revision').annotate(total=Count('pk')).values_list('estado_revision', 'total')
+    )
+    estados_revision = [
+        {'valor': valor, 'etiqueta': etiqueta, 'total': conteos.get(valor, 0)}
+        for valor, etiqueta in Establecimiento.ESTADO_REVISION_CHOICES
+    ]
+    solicitud_id = request.GET.get('establecimiento')
+    solicitud_seleccionada = get_object_or_404(solicitudes, pk=solicitud_id) if solicitud_id else None
+
+    return render(request, 'admin_general/solicitudes_miembros.html', {
+        'solicitudes': solicitudes,
+        'solicitud_seleccionada': solicitud_seleccionada,
+        'estado_actual': estado_actual,
+        'estados_revision': estados_revision,
+        'solicitudes_pendientes_count': conteos.get('pendiente', 0) + conteos.get('informacion', 0),
+    })
+
+
+def _redirigir_solicitudes(estado, solicitud_id=None):
+    parametros = {'estado': estado}
+    if solicitud_id:
+        parametros['establecimiento'] = solicitud_id
+    return redirect(f"{reverse('solicitudes_miembros')}?{urlencode(parametros)}")
+
+
+def _enviar_notificacion_solicitud(request, solicitud, accion, observacion):
+    nombre = solicitud.usuario.get_full_name() or solicitud.usuario.email
+    if accion == 'aprobar':
+        asunto = 'Tu solicitud para unirte a BeyondGo fue aprobada'
+    elif accion == 'rechazar':
+        asunto = 'Actualización sobre tu solicitud de BeyondGo'
+    else:
+        asunto = 'Información adicional para tu solicitud de BeyondGo'
+
+    contexto = {
+        'nombre': nombre,
+        'establecimiento': solicitud.nombre,
+        'estado': solicitud.estado_revision,
+        'observacion': observacion,
+        'url_accion': request.build_absolute_uri(reverse('password_reset')) if accion == 'aprobar' else None,
+    }
+    html = render_to_string('emails/notificacion_solicitud_miembro.html', contexto)
+    texto = strip_tags(html)
+    correo = EmailMultiAlternatives(asunto, texto, settings.DEFAULT_FROM_EMAIL, [solicitud.usuario.email])
+    correo.attach_alternative(html, 'text/html')
+    correo.send()
+
+
+
 
 @never_cache # Se utiliza para que el navegador no guarde cache cuando se haga logout.
 @rol_requerido('ADMIN')
@@ -90,72 +215,138 @@ def gestion_usuarios(request, pk=None, a= None):
                 form = UsuarioForm()
                 
         elif a == 'editar' and user:
+            form_editar_usuario = UsuarioForm
             if request.method == 'POST':
-                form = Editar_usuario(request.POST, request.FILES, instance=user)
+                form = form_editar_usuario(request.POST, request.FILES, instance=user)
                 if form.is_valid():
                     form.save()
                     limpiar_mensajes_previos(request)
                     messages.success(request, 'Usuario actualizado con éxito.')
                     return redirect('gestion_usuarios')
             else:
-                form = Editar_usuario(instance=user)
+                form = form_editar_usuario(instance=user)
 
         elif a == 'estado' and user:
             if request.method == 'POST':
+                if user == request.user:
+                    limpiar_mensajes_previos(request)
+                    messages.error(request, 'No puedes desactivar tu propia cuenta mientras estás en sesión activa.')
+                    return redirect('gestion_usuarios')
+
                 user.is_active = not user.is_active
                 user.save()
                 limpiar_mensajes_previos(request)
-                messages.info(request, f'Estado de {user.first_name} actualizado.')
+                estado_str = "activado" if user.is_active else "desactivado"
+                messages.info(request, f'El usuario {user.get_full_name() or user.email} ha sido {estado_str}.')
                 return redirect('gestion_usuarios')
 
         elif a == 'eliminar' and user:
             if request.method == 'POST':
+                if user == request.user:
+                    limpiar_mensajes_previos(request)
+                    messages.error(request, 'No puedes eliminar tu propia cuenta mientras estás en sesión activa.')
+                    return redirect('gestion_usuarios')
+
+                # Verificación de dependencias (Establecimientos vinculados)
+                if hasattr(user, 'establecimientos') and user.establecimientos.exists():
+                    nombres_est = list(user.establecimientos.values_list('nombre', flat=True)[:3])
+                    lista_est = ", ".join(f'"{nom}"' for nom in nombres_est)
+                    total_est = user.establecimientos.count()
+                    if total_est > 3:
+                        lista_est += f" y {total_est - 3} más"
+
+                    limpiar_mensajes_previos(request)
+                    messages.error(
+                        request,
+                        f'No se puede eliminar a {user.first_name or user.email}: administra {total_est} establecimiento(s) ({lista_est}). Debes reasignar o eliminar los establecimientos primero, o desactivar la cuenta.'
+                    )
+                    return redirect('gestion_usuarios')
+
+                nombre_usuario = user.get_full_name() or user.email
                 user.delete()
                 limpiar_mensajes_previos(request)
-                messages.warning(request, 'Usuario eliminado correctamente.')
+                messages.warning(request, f'Usuario {nombre_usuario} eliminado correctamente.')
                 return redirect('gestion_usuarios')
             
         
         
-    #LISTAMOS LOS DATOS QUE SE ENCUENTRAN EN LA BASE DE DATOS
-    usuarios = Usuario.objects.all().order_by('-date_joined')
-    
-    #METRICAS Y CONTADORES 
-    total_usuarios = usuarios.count()
-    usuarios_activos = usuarios.filter(is_active=True).count()
-    
-    pendientes_verificacion = usuarios.filter(is_active=False).count()
+    # =========================================================================
+    # PASO D: OPTIMIZACIÓN SQL DE MÉTRICAS GLOBALES (UNA SOLA CONSULTA)
+    # En lugar de ejecutar 10 consultas COUNT por separado, usamos aggregate()
+    # con filtros condicionales Q() para obtener todas las estadísticas en un solo viaje a la BD.
+    # =========================================================================
     ahora = timezone.now()
     inicio_mes_actual = ahora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    
-    # Inicio del mes anterior
     primer_dia_mes_anterior = (inicio_mes_actual - timedelta(days=1)).replace(day=1)
 
-    # Usuarios registrados en el mes actual vs mes anterior
-    activos_este_mes = usuarios.filter(is_active=True, date_joined__gte=inicio_mes_actual).count()
-    activos_mes_anterior = usuarios.filter(is_active=True, date_joined__gte=primer_dia_mes_anterior, date_joined__lt=inicio_mes_actual).count()
-    
-    # --- PAGINACIÓN ---
-    # Mostramos 5 usuarios por página
-    paginator = Paginator(usuarios, 5) 
-    page_number = request.GET.get('page')  # Capturamos el parámetro ?page=2 de la URL
-    page_obj = paginator.get_page(page_number)
+    metricas = Usuario.objects.aggregate(
+        total=models.Count('id'),
+        activos=models.Count('id', filter=models.Q(is_active=True)),
+        pendientes=models.Count('id', filter=models.Q(is_active=False)),
+        turistas=models.Count('id', filter=models.Q(rol="TURISTA")),
+        guias=models.Count('id', filter=models.Q(rol="GUIA")),
+        restaurantes=models.Count('id', filter=models.Q(rol="ADMIN_R")),
+        hoteles=models.Count('id', filter=models.Q(rol="ADMIN_H")),
+        admins=models.Count('id', filter=models.Q(rol="ADMIN")),
+        activos_este_mes=models.Count('id', filter=models.Q(is_active=True, date_joined__gte=inicio_mes_actual)),
+        activos_mes_anterior=models.Count('id', filter=models.Q(is_active=True, date_joined__gte=primer_dia_mes_anterior, date_joined__lt=inicio_mes_actual))
+    )
 
-    # Cálculo del porcentaje de cambio
+    total_usuarios = metricas['total']
+    usuarios_activos = metricas['activos']
+    pendientes_verificacion = metricas['pendientes']
+    cant_turistas = metricas['turistas']
+    cant_guias = metricas['guias']
+    cant_restaurantes = metricas['restaurantes']
+    cant_hoteles = metricas['hoteles']
+    cant_admins = metricas['admins']
+    activos_este_mes = metricas['activos_este_mes']
+    activos_mes_anterior = metricas['activos_mes_anterior']
+
+    # Cálculo del porcentaje de crecimiento comparativo mensual
     if activos_mes_anterior > 0:
         porcentaje_crecimiento = round(((activos_este_mes - activos_mes_anterior) / activos_mes_anterior) * 100)
     else:
-        # Si el mes anterior fue 0, el incremento es del 100% por cada registro nuevo
         porcentaje_crecimiento = 100 if activos_este_mes > 0 else 0
-    
-    cant_turistas = usuarios.filter(rol="TURISTA").count()
-    cant_guias = usuarios.filter(rol="GUIA").count()
-    cant_restaurantes = usuarios.filter(rol="ADMIN_R").count()
-    cant_hoteles = usuarios.filter(rol="ADMIN_H").count()
-    cant_admins = usuarios.filter(rol="ADMIN").count()
+
+    # =========================================================================
+    # PASO D: LISTADO, BÚSQUEDA Y FILTRADO AVANZADO DE USUARIOS
+    # Obtenemos los parámetros GET enviados desde el formulario de búsqueda/filtros
+    # =========================================================================
+    busqueda_q = request.GET.get('q', '').strip()
+    filtro_rol = request.GET.get('rol', '').strip()
+    filtro_estado = request.GET.get('estado', '').strip()
+
+    # QuerySet base ordenado por fecha de registro descendente
+    usuarios = Usuario.objects.all().order_by('-date_joined')
+
+    # 1. Filtro por término de búsqueda (nombre, apellido, email, número de documento)
+    if busqueda_q:
+        usuarios = usuarios.filter(
+            models.Q(first_name__icontains=busqueda_q) |
+            models.Q(last_name__icontains=busqueda_q) |
+            models.Q(email__icontains=busqueda_q) |
+            models.Q(numero_documento__icontains=busqueda_q)
+        )
+
+    # 2. Filtro por rol específico
+    if filtro_rol:
+        usuarios = usuarios.filter(rol=filtro_rol)
+
+    # 3. Filtro por estado activo / inactivo
+    if filtro_estado == 'activo':
+        usuarios = usuarios.filter(is_active=True)
+    elif filtro_estado == 'inactivo':
+        usuarios = usuarios.filter(is_active=False)
+
+    # --- PAGINACIÓN ---
+    # Mostramos 8 usuarios por página sobre el QuerySet filtrado
+    paginator = Paginator(usuarios, 8) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     
     context = {
-        'user':user,
+        'user': user,
         'form': form,
         'accion': a,
         'mostrar_modal': bool(a in ['ver', 'crear', 'editar', 'estado', 'eliminar']),
@@ -170,8 +361,13 @@ def gestion_usuarios(request, pk=None, a= None):
         'cant_admins': cant_admins,
         'porcentaje_crecimiento': porcentaje_crecimiento,
         'page_obj': page_obj,
+        # Parámetros para mantener el estado de búsqueda y filtros en la vista y paginación
+        'busqueda_q': busqueda_q,
+        'filtro_rol': filtro_rol,
+        'filtro_estado': filtro_estado,
     }
     return render(request, 'admin_general/gestion_usuarios.html', context)
+
 
 @rol_requerido('ADMIN') # Restringe el acceso exclusivamente a usuarios con rol de Administrador
 def gestion_establecimientos(request, pk=None, a=None):
@@ -196,6 +392,7 @@ def gestion_establecimientos(request, pk=None, a=None):
                     # Guarda temporalmente para asignar el usuario autenticado antes de registrar en la BD
                     nuevo_est = form.save(commit=False)
                     nuevo_est.usuario = request.user
+                    nuevo_est.estado_revision = 'aprobada'
                     nuevo_est.save()
                     form.save_m2m() # Guarda relaciones de muchos a muchos (servicios)
                     messages.success(request, 'Establecimiento creado con éxito.')
@@ -206,6 +403,7 @@ def gestion_establecimientos(request, pk=None, a=None):
         elif a == 'editar' and establecimiento:
             if request.method == 'POST':
                 # Carga el formulario con los datos enviados y la instancia existente para actualizar
+                # IMPORTANTE: Se añade request.FILES para procesar los archivos nuevos o actualizados
                 form = EstablecimientoForm(request.POST, request.FILES, instance=establecimiento)
                 if form.is_valid():
                     form.save()

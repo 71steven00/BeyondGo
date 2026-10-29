@@ -18,7 +18,6 @@ from django.contrib import admin
 from usuarios.views import CustomLoginView
 from django.urls import path, include
 from django.conf import settings #Estas dos líneas de código en Django sirven para configurar y servir archivos multimedia
-
 from django.conf.urls.static import static #Importa la función especial que habilita el servidor de desarrollo para entregar archivos multimedia.
 
 urlpatterns = [

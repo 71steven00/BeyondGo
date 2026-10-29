@@ -36,7 +36,7 @@
     <!-- 2. GRILLA DE TARJETAS DE ESTABLECIMIENTOS -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for establecimiento in establecimientos %}
-          <!-- Tarjeta individual: Se usa 'overflow-visible' para permitir que el menú flotante sobresalga sin cortarse -->
+          <!-- Tarjeta individual DE ESTABLECIMIENTO: Se usa 'overflow-visible' para permitir que el menú flotante sobresalga sin cortarse -->
           <div class="relative bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition flex flex-col justify-between overflow-visible">
 
               <div>
@@ -49,9 +49,17 @@
                       {% endif %}
 
                       <!-- Badge de tipo de establecimiento con efecto vidrioso (Glassmorphism) -->
-                      <span class="absolute top-3 left-3 bg-white/30 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full shadow-sm border border-white/20 z-10">
-                          {{ establecimiento.tipo }}
-                      </span>
+                       <!-- Se evalúa el tipo para cambiar dinámicamente el color:-->
+                        <span class="absolute top-3 left-3 backdrop-blur-md text-[11px] font-semibold px-3 py-1 rounded-full shadow-sm border z-10
+                            {% if establecimiento.tipo == 'Hotel' or establecimiento.tipo == 'hotel' %}
+                                bg-emerald-500/80 text-white border-emerald-400/30
+                            {% elif establecimiento.tipo == 'Restaurante' or establecimiento.tipo == 'restaurante' %}
+                                bg-blue-500/80 text-white border-blue-400/30
+                            {% else %}
+                                bg-white/30 text-white border-white/20
+                            {% endif %}">
+                            {{ establecimiento.tipo }}
+                        </span>
                   </div>
 
                   <!-- Información y detalles principales del establecimiento -->
@@ -121,4 +129,9 @@
 {% block extra_js %}
   <!-- Carga de scripts dinámicos de animaciones y alertas -->
   <script src="{% static 'js/animaciones_alertas.js' %}"></script>
+  <!-- Script reutilizado de experiencias para la previsualización de imágenes -->
+  <script src="{% static 'js/experiencia-imagen-preview.js' %}"></script>
+    <!-- Script para mostrar el nombre del archivo de imagen seleccionado en tiempo real -->
+    <script src="{% static 'js/js_nmbre_img_establ.js' %}"></script>
+
 {% endblock %}

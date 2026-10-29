@@ -86,6 +86,54 @@
                 <span class="text-slate-800 font-semibold">{{ user.get_rol_display }}</span>
               </div>
             </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-3 bg-slate-50 rounded-xl">
+                <span class="text-slate-400 font-medium block">Documento</span>
+                <span class="text-slate-800 font-semibold">{{ user.get_tipo_documento_display }}: {{ user.numero_documento|default:"No registrado" }}</span>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-xl">
+                <span class="text-slate-400 font-medium block">Estado</span>
+                {% if user.is_active %}
+                  <span class="text-emerald-600 font-bold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Activo</span>
+                {% else %}
+                  <span class="text-amber-600 font-bold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Pendiente / Inactivo</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Certificado para Guías -->
+            {% if user.rol == 'GUIA' %}
+              <div class="p-3 bg-emerald-50/70 border border-emerald-100 rounded-xl">
+                <span class="text-emerald-800 font-bold block mb-1.5">Certificado de Turismo</span>
+                {% if user.perfil_guia and user.perfil_guia.certificado_turismo %}
+                  <a href="{{ user.perfil_guia.certificado_turismo.url }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition shadow-sm">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    Ver Certificado Adjunto
+                  </a>
+                {% else %}
+                  <span class="text-slate-400 italic">No ha adjuntado certificado aún.</span>
+                {% endif %}
+              </div>
+            {% endif %}
+
+            <!-- Establecimiento para Hotel o Restaurante -->
+            {% if user.rol == 'ADMIN_H' or user.rol == 'ADMIN_R' %}
+            <div class="p-3 bg-amber-50/70 border border-amber-100 rounded-xl space-y-2">
+                <div class="flex items-center gap-2 text-amber-800 font-bold">
+                    <i class="fa-solid fa-hotel text-xs"></i>
+                    <span>Establecimientos Vinculados</span>
+                </div>
+                
+                {% for est in user.establecimientos.all %}
+                    <div class="space-y-0.5 {% if not forloop.first %}border-t border-amber-200/60 pt-2 mt-2{% endif %}">
+                        <div class="text-slate-800 font-bold text-xs">{{ est.nombre }} <span class="font-normal text-slate-500">({{ est.tipo }})</span></div>
+                        <div class="text-slate-500 text-[11px]">{{ est.direccion }}, {{ est.ciudad }}</div>
+                    </div>
+                {% empty %}
+                    <div class="text-slate-400 italic text-[11px]">Sin establecimiento registrado aún.</div>
+                {% endfor %}
+            </div>
+            {% endif %}
           </div>
 
 
@@ -127,7 +175,7 @@
               </div>
             </div>
 
-            <!-- Fila 4: Certificado de Turismo (Ancho completo - Oculto por defecto mediante JS) -->
+            <!-- Fila 4: Certificado de Turismo (Solo para Guías) -->
             <div>
               <label class="block font-semibold text-slate-600 mb-1">{{ form.certificado_turismo.label }}</label>
               {{ form.certificado_turismo }}
@@ -145,7 +193,7 @@
               <div>
                 <label class="block font-semibold text-slate-600 mb-1">Confirmar Contraseña</label>
                 {{ form.confirm_password }}
-                {% if form.password.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.password.errors.0 }}</p>{% endif %}
+                {% if form.confirm_password.errors %}<p class="text-rose-500 text-[10px] mt-1">{{ form.confirm_password.errors.0 }}</p>{% endif %}
               </div>
             </div>
             {% endif %}
