@@ -116,6 +116,76 @@
         </div>
         {% endfor %}
     </div>
+    <!-- ========================================================================= -->
+    <!-- PIE DE PÁGINA CON PAGINACIÓN Y PERSISTENCIA DE BÚSQUEDA                   -->
+    <!-- ========================================================================= -->
+    <div class="flex items-center justify-between px-6 py-4 bg-white border border-slate-200/80 rounded-2xl shadow-sm mt-6">
+        
+        <!-- ===================================================================== -->
+        <!-- 1. TEXTO INFORMATIVO DE REGISTROS MOSTRADOS                           -->
+        <!-- Indica el rango actual de elementos visibles y el total existente     -->
+        <!-- ===================================================================== -->
+        <div class="text-xs text-slate-500 font-medium">
+            Mostrando {{ establecimientos.start_index }}–{{ establecimientos.end_index }} de {{ establecimientos.paginator.count }} establecimientos
+            
+            <!-- Si se aplicó un filtro de búsqueda, muestra una nota aclaratoria -->
+            {% if query %}
+              <span class="text-emerald-600 font-semibold">(Filtrados)</span>
+            {% endif %}
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- 2. BOTONES DE NAVEGACIÓN Y PAGINACIÓN NUMÉRICA                         -->
+        <!-- ===================================================================== -->
+        <div class="flex items-center gap-1.5">
+            
+            <!-- A. BOTÓN FLECHA IZQUIERDA (<): Ir a la página anterior -->
+            {% if establecimientos.has_previous %}
+                <!-- Si existe una página anterior, genera el enlace funcional con persistencia de búsqueda -->
+                <a href="?page={{ establecimientos.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" 
+                   class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                </a>
+            {% else %}
+                <!-- Si estamos en la primera página, deshabilita visualmente el botón -->
+                <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-300 cursor-not-allowed">
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                </span>
+            {% endif %}
+
+            <!-- B. BOTONES NUMÉRICOS (1, 2, 3...) -->
+            <!-- Itera sobre el rango total de páginas disponibles en el paginador -->
+            {% for num in establecimientos.paginator.page_range %}
+                {% if establecimientos.number == num %}
+                    <!-- Si es la página actual, resalta el botón con un fondo oscuro y negrita -->
+                    <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-900 text-white font-bold text-xs shadow-sm">
+                        {{ num }}
+                    </span>
+                {% else %}
+                    <!-- Para las demás páginas, crea un enlace interactivo que conserva el término de búsqueda -->
+                    <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" 
+                       class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-semibold transition-colors">
+                        {{ num }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+
+            <!-- C. BOTÓN FLECHA DERECHA (>): Ir a la página siguiente -->
+            {% if establecimientos.has_next %}
+                <!-- Si existe una página siguiente, habilita el enlace conservando la búsqueda -->
+                <a href="?page={{ establecimientos.next_page_number }}{% if query %}&q={{ query }}{% endif %}" 
+                   class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </a>
+            {% else %}
+                <!-- Si estamos en la última página, deshabilita visualmente la flecha -->
+                <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-300 cursor-not-allowed">
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </span>
+            {% endif %}
+
+        </div>
+    </div>
 
 </div>
 
