@@ -2,23 +2,22 @@ from django.shortcuts import render, redirect
 from usuarios.decorators import rol_requerido
 import secrets  # Generador criptográficamente seguro para códigos de verificación (evita predicciones)
 from django.utils import timezone  # Manejo de marcas de tiempo para expiración de códigos OTP
+from django.utils.decorators import method_decorator
+from django.utils.html import strip_tags
 from django.contrib.auth.password_validation import validate_password  # Aplica los validadores configurados en settings
 from django.core.exceptions import ValidationError  # Captura fallos de complejidad de contraseñas
-from django.http import HttpResponseRedirect
+from django.core.mail import EmailMultiAlternatives
+from django.http import HttpResponseRedirect, request
 from django.contrib.auth import login as auth_login
-from django.http import request
 from django.urls import reverse, reverse_lazy
 from django.conf import settings # importacion para enviar correos
-from django.views.generic import DetailView, FormView, TemplateView
-from django.utils.decorators import method_decorator #opcional de prueba
+from django.views.generic import FormView, TemplateView, UpdateView
 from .models import Usuario
 from django.contrib import messages
 from django.contrib.auth.views import LoginView
 # Importamos el formulario desde el módulo de usuarios
-from usuarios.forms import RegistroClienteForm
-from django.core.mail import EmailMultiAlternatives
+from usuarios.forms import RegistroClienteForm,UsuarioFormPerfil
 from django.template.loader import render_to_string
-from django.utils.html import strip_tags
 
 
 # Create your views here.
@@ -144,16 +143,18 @@ class CustomLoginView(LoginView):
 
 
 @method_decorator(rol_requerido('ADMIN', 'ADMIN_H', 'ADMIN_R', 'GUIA', 'TURISTA'), name='dispatch')
-class PerfilUsuarioView(DetailView):
+class PerfilUsuarioView(UpdateView):
     model = Usuario
-    template_name = 'login/perfil.html'
-    context_object_name = 'usuario'
+    form_class = UsuarioFormPerfil
+    template_name = 'perfil_usuarios.html'
+    success_url = reverse_lazy('perfil')  # Ajusta a tu URL de éxito
 
     def get_object(self):
         return self.request.user
 
-def registro(request):
-    return render(request, 'registro.html')
+    def form_valid(self, form):
+        messages.success(self.request, 'Perfil actualizado correctamente.')
+        return super().form_valid(form)
 
 
 """Parte de recuperación de contraseña"""

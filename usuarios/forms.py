@@ -2,6 +2,10 @@ from django.contrib.auth.password_validation import validate_password
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import Usuario, Guia
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Field
+from phonenumber_field.widgets import RegionalPhoneNumberWidget
+
 
 class UsuarioForm(forms.ModelForm):
     password = forms.CharField(
@@ -182,5 +186,77 @@ class RegistroClienteForm(forms.ModelForm):
         if commit:
             usuario.save()
         return usuario
+    
+#Formulario para los datos de ver perfil
+class UsuarioFormPerfil(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False  # Para evitar renderizar la etiqueta <form> duplicada
+        
+        # Validación condicional: Si el usuario es guía, agregamos el campo dinámicamente
+        if hasattr(self.instance, 'perfil_guia') or getattr(self.instance, 'rol', None) == 'GUIA':
+            self.fields['certificado_turismo'] = forms.ImageField(
+                required=False, 
+                label="Certificado de Turismo"
+            )
+            
+        # Inyectamos clases directas a los controles de Crispy
+        self.helper.layout = Layout(
+            Field('first_name', css_class='w-full px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl !text-white focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white/15 transition-all'),
+            Field('last_name', css_class='w-full px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl !text-white focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white/15 transition-all'),
+            Field('email', css_class='w-full px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl !text-white focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white/15 transition-all'),
+            Field('telefono'),
+            Field('numero_documento', css_class='w-full px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl !text-white focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white/15 transition-all'),
+            Field('fecha_nacimiento', css_class='w-full px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl !text-white focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white/15 transition-all'),
+        )
+        self.helper.label_class = '!text-gray-200 font-semibold'
+        self.helper.asterisk_field_css_class = ''
+        
+        # Si el campo existe, lo añadimos al layout visual de Crispy
+        if 'certificado_turismo' in self.fields:
+            if self.instance.pk:
+                try:
+                    self.fields['certificado_turismo'].initial = self.instance.perfil_guia.certificado_turismo
+                except Guia.DoesNotExist:
+                    pass
+            self.helper.layout.append(
+                Field('certificado_turismo', css_class='w-full px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl !text-white focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white/15 transition-all')
+            )
 
+    class Meta:
+        model = Usuario
+        fields = '__all__'
+        exclude = [
+            'password',
+            'rol',
+            'is_active',
+            'is_staff',
+            'is_superuser',
+            'groups',
+            'user_permissions',
+            'last_login',
+            'date_joined',
+            'tipo_documento'
+        ]
+        widgets = {
+            'telefono': RegionalPhoneNumberWidget(attrs={
+                'class': 'w-full px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white/15 transition-all'
+            }),
+        }
+
+    def save(self, commit=True):
+        usuario = super().save(commit=False)
+        if commit:
+            usuario.save()
+
+        # Si el usuario es guía, guardamos el certificado
+        if usuario.rol == 'GUIA':
+            certificado = self.cleaned_data.get('certificado_turismo')
+            if certificado:
+                guia, _ = Guia.objects.get_or_create(usuario=usuario)
+                guia.certificado_turismo = certificado
+                guia.save()
+        return usuario
+        
         
