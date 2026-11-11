@@ -110,5 +110,3 @@ class EstablecimientoForm(forms.ModelForm):
                 'class': 'grid grid-cols-2 gap-2 text-xs text-slate-700 accent-emerald-500'
             }),
         }
-        
-#FORMULARIO RAPIDO PARA UNIR CON EL FORMULARIO DE ESTABLECIMIENTO PARA AGREGAR USUARIO:
