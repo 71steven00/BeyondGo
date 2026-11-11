@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     # librerias añadidas 
     "phonenumber_field",
     "axes",
-    
+    'crispy_forms',
+    'crispy_tailwind',
 ]
 
 MIDDLEWARE = [
@@ -199,3 +200,6 @@ AXES_NEVER_LOCKOUT_GET = True
 # Vista personalizada ante bloqueo: redirige a la plantilla de login con una alerta estilizada (no pantalla en blanco)
 AXES_LOCKOUT_CALLABLE = 'usuarios.views.axes_bloqueo_view'
 
+#Template pack para crispy talwind
+CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
+CRISPY_TEMPLATE_PACK = "tailwind"
