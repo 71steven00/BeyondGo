@@ -3,8 +3,12 @@ from django.db import IntegrityError, transaction
 from django.shortcuts import redirect, render
 from usuarios.models import Establecimiento, Usuario
 from .forms import SolicitudMiembroForm
+import re
+from admin_panel.models import Experiencia
+from django.db.models import F
+from django.shortcuts import get_object_or_404
 
-# Create your views here.
+
 def pagina_inicio(request):
     return render(request, 'index/inicio.html')
 
@@ -45,3 +49,56 @@ def hazte_miembro(request):
             return redirect('hazte_miembro')
 
     return render(request, 'index/Formulario_hazte_miembro.html', {'form': form})
+def pagina_experiencias(request):
+    experiencias = list(
+        Experiencia.objects.filter(estado='Activo').order_by('-creado_en')
+    )
+    categoria = request.GET.get('tipo', '')
+    rango_precio = request.GET.get('precio', '')
+
+    if categoria:
+        experiencias = [
+            experiencia for experiencia in experiencias
+            if experiencia.tipo == categoria
+        ]
+
+    rangos_precio = {
+        'hasta-50000': (0, 50000),
+        '50000-80000': (50000, 80000),
+        'mas-80000': (80000, None),
+    }
+    if rango_precio in rangos_precio:
+        minimo, maximo = rangos_precio[rango_precio]
+        experiencias_filtradas = []
+        for experiencia in experiencias:
+            digitos_precio = re.sub(r'\D', '', experiencia.precio)
+            if not digitos_precio:
+                continue
+            precio_numerico = int(digitos_precio)
+            if precio_numerico >= minimo and (
+                maximo is None or precio_numerico <= maximo
+            ):
+                experiencias_filtradas.append(experiencia)
+        experiencias = experiencias_filtradas
+
+    return render(request, 'index/experiencias.html', {
+        'experiencias': experiencias,
+        'tipo_seleccionado': categoria,
+        'precio_seleccionado': rango_precio,
+        'tipos_experiencia': Experiencia.TIPO_CHOICES,
+        'fecha_seleccionada': request.GET.get('fecha', ''),
+        'hay_mas_experiencias': len(experiencias) > 4,
+    })
+
+
+def detalle_experiencia(request, pk):
+    experiencia = get_object_or_404(
+        Experiencia.objects.prefetch_related('servicios'),
+        pk=pk,
+        estado='Activo',
+    )
+    Experiencia.objects.filter(pk=experiencia.pk).update(visitas=F('visitas') + 1)
+    experiencia.refresh_from_db(fields=['visitas'])
+    return render(request, 'index/experiencia_detalle.html', {
+        'experiencia': experiencia,
+    })
