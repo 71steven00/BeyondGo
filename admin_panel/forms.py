@@ -5,19 +5,50 @@ from usuarios.models import Establecimiento
 from usuarios.models import Usuario
 
 
+class MultipleImageInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class MultipleImageField(forms.ImageField):
+    widget = MultipleImageInput
+
+    def clean(self, data, initial=None):
+        if not data:
+            return []
+
+        archivos = data if isinstance(data, (list, tuple)) else [data]
+        return [forms.ImageField.clean(self, archivo, None) for archivo in archivos]
+
+
 class ExperienciaForm(forms.ModelForm):
+    cantidad_servicios_nuevos = forms.IntegerField(
+        min_value=1,
+        max_value=10,
+        initial=1,
+        widget=forms.HiddenInput(attrs={'data-service-row-count': 'true'}),
+    )
+    imagenes = MultipleImageField(
+        required=False,
+        label='Imágenes de la experiencia',
+        widget=MultipleImageInput(attrs={
+            'class': 'sr-only',
+            'accept': 'image/*',
+            'data-experience-images-input': 'true',
+        }),
+    )
+
     class Meta:
         model = Experiencia
-        fields = ['titulo', 'duracion', 'precio', 'tipo', 'estado', 'imagen']
+        fields = ['titulo', 'descripcion', 'duracion', 'precio', 'tipo', 'estado', 'servicios']
         widgets = {
-            'imagen': forms.FileInput(attrs={
-                'class': 'hidden',
-                'accept': 'image/*',
-                'data-experience-image-input': 'true',
-            }),
             'titulo': forms.TextInput(attrs={
                 'class': 'w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition shadow-sm',
                 'placeholder': 'ej. Tour nocturno por el lago'
+            }),
+            'descripcion': forms.Textarea(attrs={
+                'class': 'w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition shadow-sm resize-y',
+                'rows': 4,
+                'placeholder': 'Describe qué incluye la experiencia y qué podrán disfrutar los visitantes.'
             }),
             'duracion': forms.TextInput(attrs={
                 'class': 'w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition shadow-sm',
@@ -33,7 +64,11 @@ class ExperienciaForm(forms.ModelForm):
             'estado': forms.Select(attrs={
                 'class': 'w-full px-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-500 focus:outline-none focus:border-emerald-500 transition shadow-sm'
             }),
+            'servicios': forms.CheckboxSelectMultiple(attrs={
+                'class': 'h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500',
+            }),
         }
+
  # FORMULARIO DE ESTABLECIMIENTOS 
   # =====================================================================
     # CONFIGURACIÓN DE CAMPOS OBLIGATORIOS Y RESTRICCIÓN DE FORMATO (PDF)
