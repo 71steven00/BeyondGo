@@ -2,6 +2,10 @@ import logging
 from mimetypes import guess_type
 from urllib.parse import urlencode
 from django.conf import settings
+from django import forms
+from django.db import transaction
+from django.views.decorators.cache import never_cache
+from usuarios.views import limpiar_mensajes_previos
 from django.contrib import messages
 from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
@@ -21,7 +25,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from usuarios.forms import UsuarioForm
 from usuarios.models import Establecimiento
 from .forms import EstablecimientoForm
-from .models import Experiencia        # <--- Importa tu modelo
+from .models import Experiencia, ExperienciaImagen, Servicio
 from .forms import ExperienciaForm
 from django.db import models # para las consultas Q del buscador
 
@@ -459,6 +463,122 @@ def gestion_establecimientos(request, pk=None, a=None):
     
     return render(request, 'admin_general/gestion_establecimientos.html', context)
 
+def guardar_servicios_nuevos(form, experiencia):
+    for datos_servicio in form.cleaned_data.get('servicios_nuevos', []):
+        nombre = datos_servicio['nombre']
+        descripcion = datos_servicio['descripcion']
+        servicio = Servicio.objects.filter(nombre__iexact=nombre).first()
+        if servicio is None:
+            servicio = Servicio.objects.create(nombre=nombre, descripcion=descripcion)
+        elif servicio.descripcion != descripcion:
+            servicio.descripcion = descripcion
+            servicio.save(update_fields=['descripcion'])
+        experiencia.servicios.add(servicio)
+
+
+def preparar_formulario_experiencia(form):
+    cantidad_bruta = form.data.get('cantidad_servicios_nuevos', 1) if form.is_bound else 1
+    try:
+        cantidad_servicios = int(cantidad_bruta)
+    except (TypeError, ValueError):
+        cantidad_servicios = 1
+    cantidad_servicios = min(max(cantidad_servicios, 1), 10)
+
+    filas = []
+    for indice in range(cantidad_servicios):
+        nombre_campo = f'servicio_nombre_{indice}'
+        descripcion_campo = f'servicio_descripcion_{indice}'
+        form.fields[nombre_campo] = forms.CharField(
+            required=False,
+            max_length=50,
+            label='Nombre del servicio',
+            widget=forms.TextInput(attrs={
+                'class': 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:outline-none',
+                'placeholder': 'ej. Guía local',
+            }),
+        )
+        form.fields[descripcion_campo] = forms.CharField(
+            required=False,
+            max_length=1000,
+            label='Descripción del servicio',
+            widget=forms.Textarea(attrs={
+                'class': 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:outline-none',
+                'rows': 2,
+                'placeholder': 'Describe qué ofrece este servicio',
+            }),
+        )
+        filas.append({
+            'nombre': form[nombre_campo],
+            'descripcion': form[descripcion_campo],
+        })
+    form.filas_servicios_nuevos = filas
+
+    imagenes_existentes = 0
+    if form.instance.pk:
+        imagenes_existentes = form.instance.imagenes.count()
+        if form.instance.imagen:
+            imagenes_existentes += 1
+    form.fields['imagenes'].widget.attrs['data-max-files'] = str(
+        max(0, 10 - imagenes_existentes)
+    )
+    return imagenes_existentes
+
+
+def validar_datos_extra_experiencia(form, imagenes_existentes):
+    servicios_nuevos = []
+    nombres_vistos = set()
+    cantidad_servicios = form.cleaned_data['cantidad_servicios_nuevos']
+    for indice in range(cantidad_servicios):
+        nombre_campo = f'servicio_nombre_{indice}'
+        descripcion_campo = f'servicio_descripcion_{indice}'
+        nombre = (form.cleaned_data.get(nombre_campo) or '').strip()
+        descripcion = (form.cleaned_data.get(descripcion_campo) or '').strip()
+        if not nombre and not descripcion:
+            continue
+        if not nombre:
+            form.add_error(nombre_campo, 'Escribe el nombre del servicio.')
+            continue
+        if not descripcion:
+            form.add_error(descripcion_campo, 'Escribe una descripción para este servicio.')
+            continue
+        nombre_normalizado = nombre.casefold()
+        if nombre_normalizado in nombres_vistos:
+            form.add_error(nombre_campo, 'Este servicio ya está en la lista.')
+            continue
+        servicios_nuevos.append({'nombre': nombre, 'descripcion': descripcion})
+        nombres_vistos.add(nombre_normalizado)
+
+    form.cleaned_data['servicios_nuevos'] = servicios_nuevos
+    imagenes_nuevas = form.cleaned_data.get('imagenes', [])
+    if imagenes_existentes + len(imagenes_nuevas) > 10:
+        disponibles = max(0, 10 - imagenes_existentes)
+        form.add_error(
+            'imagenes',
+            f'Cada experiencia admite hasta 10 imágenes. Puedes agregar {disponibles} más.',
+        )
+    return not form.errors
+
+
+def guardar_imagenes_experiencia(form, experiencia):
+    imagenes = list(form.cleaned_data.get('imagenes', []))
+    if not imagenes:
+        return
+    if not experiencia.imagen:
+        experiencia.imagen = imagenes.pop(0)
+        experiencia.save(update_fields=['imagen'])
+    ExperienciaImagen.objects.bulk_create([
+        ExperienciaImagen(experiencia=experiencia, imagen=imagen)
+        for imagen in imagenes
+    ])
+
+
+def guardar_experiencia(form):
+    experiencia = form.save()
+    guardar_servicios_nuevos(form, experiencia)
+    guardar_imagenes_experiencia(form, experiencia)
+    return experiencia
+
+
 @rol_requerido('ADMIN')
 def experiencias(request, pk=None, a=None):
     # Validación para consultar un dato específico si viene el pk
@@ -474,22 +594,30 @@ def experiencias(request, pk=None, a=None):
         if a == 'crear':
             if request.method == 'POST':
                 form = ExperienciaForm(request.POST, request.FILES)
+                imagenes_existentes = preparar_formulario_experiencia(form)
                 if form.is_valid():
-                    form.save()
-                    messages.success(request, 'Experiencia creada con éxito.')
-                    return redirect('gestion_experiencias')
+                    if validar_datos_extra_experiencia(form, imagenes_existentes):
+                        with transaction.atomic():
+                            guardar_experiencia(form)
+                        messages.success(request, 'Experiencia creada con éxito.')
+                        return redirect('gestion_experiencias')
             else:
                 form = ExperienciaForm()
+                imagenes_existentes = preparar_formulario_experiencia(form)
 
         elif a == 'editar' and experiencia:
             if request.method == 'POST':
                 form = ExperienciaForm(request.POST, request.FILES, instance=experiencia)
+                imagenes_existentes = preparar_formulario_experiencia(form)
                 if form.is_valid():
-                    form.save()
-                    messages.success(request, 'Experiencia actualizada con éxito.')
-                    return redirect('gestion_experiencias')
+                    if validar_datos_extra_experiencia(form, imagenes_existentes):
+                        with transaction.atomic():
+                            guardar_experiencia(form)
+                        messages.success(request, 'Experiencia actualizada con éxito.')
+                        return redirect('gestion_experiencias')
             else:
                 form = ExperienciaForm(instance=experiencia)
+                imagenes_existentes = preparar_formulario_experiencia(form)
 
         elif a == 'estado' and experiencia:
             if request.method == 'POST':
@@ -519,6 +647,9 @@ def experiencias(request, pk=None, a=None):
     context = {
         'experiencia': experiencia,
         'form': form,
+        'imagenes_existentes': imagenes_existentes if form else 0,
+        'imagenes_disponibles': max(0, 10 - imagenes_existentes) if form else 10,
+        'imagenes_galeria': experiencia.imagenes.all() if experiencia else [],
         'accion': a,
         'mostrar_modal': bool(a in ['ver', 'crear', 'editar', 'eliminar', 'estado']),
         'experiencias': page_obj,  # Usamos page_obj para la paginación consistente

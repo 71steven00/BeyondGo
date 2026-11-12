@@ -1,0 +1,221 @@
+{% extends 'base_inicio.html' %}
+{% load static %}
+
+{% block header_content %}
+<header class="relative isolate z-20 flex min-h-[360px] items-center justify-center bg-slate-950 px-4 pb-10 pt-28 text-center sm:min-h-[390px]">
+    <img src="{% static 'img/Arca.avif' %}" alt="" class="absolute inset-0 -z-20 h-full w-full object-cover">
+    <div class="absolute inset-0 -z-10 bg-slate-950/65"></div>
+    <div class="mx-auto w-full max-w-3xl text-white">
+        <p class="mb-3 text-xs font-bold uppercase tracking-[0.3em] text-emerald-300 sm:text-sm">Beyond Go · Lago de Tota</p>
+        <h1 class="text-3xl font-extrabold uppercase leading-tight sm:text-5xl">
+            Descubre <span class="text-emerald-400">experiencias</span> únicas
+        </h1>
+    </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<main class="min-h-[55vh] bg-white px-4 pb-28 pt-6 text-slate-800 sm:px-6 sm:py-8 lg:pb-8">
+    <div class="mx-auto max-w-6xl">
+        <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+                <!-- Aquí se muestran las fotos de la experiencia y se puede avanzar entre ellas. -->
+                <div data-experiencia-carousel class="relative overflow-hidden bg-slate-950/20" tabindex="0" aria-label="Galería de imágenes de {{ experiencia.titulo }}">
+                    <div data-carousel-track>
+                    {% if experiencia.imagen %}
+                    <div data-carousel-slide aria-hidden="false" class="relative flex min-h-64 items-center justify-center">
+                        <img src="{{ experiencia.imagen.url }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-xl">
+                        <img src="{{ experiencia.imagen.url }}" alt="{{ experiencia.titulo }} - imagen principal" class="relative z-10 block max-h-[70vh] max-w-full object-contain">
+                    </div>
+                    {% endif %}
+                    {% for foto in experiencia.imagenes.all %}
+                    <div data-carousel-slide aria-hidden="{% if not forloop.first or experiencia.imagen %}true{% else %}false{% endif %}" class="relative {% if forloop.first and not experiencia.imagen %}flex{% else %}hidden{% endif %} min-h-64 items-center justify-center">
+                        <img src="{{ foto.imagen.url }}" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-xl">
+                        <img src="{{ foto.imagen.url }}" alt="{{ experiencia.titulo }} - imagen {{ forloop.counter|add:1 }}" class="relative z-10 block max-h-[70vh] max-w-full object-contain">
+                    </div>
+                    {% empty %}
+                    {% if not experiencia.imagen %}
+                    <div data-carousel-empty class="flex min-h-64 w-full items-center justify-center text-emerald-400">
+                        <i class="fa-solid fa-mountain-sun text-6xl" aria-hidden="true"></i>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    </div>
+                    <button type="button" data-carousel-prev aria-label="Imagen anterior" class="absolute left-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-slate-950/70 text-white shadow-lg backdrop-blur transition hover:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" data-carousel-next aria-label="Imagen siguiente" class="absolute right-3 top-1/2 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-slate-950/70 text-white shadow-lg backdrop-blur transition hover:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </button>
+                    <div data-carousel-counter class="absolute bottom-3 right-3 hidden rounded-full border border-white/20 bg-slate-950/75 px-3 py-1 text-xs font-semibold text-white backdrop-blur" aria-live="polite"></div>
+                </div>
+                <section class="p-5 text-slate-700 sm:p-7">
+                    <h2 class="text-xl font-extrabold text-slate-900">Sobre la experiencia</h2>
+                    {% if experiencia.descripcion %}
+                    <p class="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">{{ experiencia.descripcion }}</p>
+                    {% else %}
+                    <p class="mt-3 text-sm leading-6 text-slate-600">La descripción de esta experiencia estará disponible próximamente.</p>
+                    {% endif %}
+
+                    <!-- Aquí aparecen los servicios elegidos para esta experiencia. -->
+                    <section class="mt-8">
+                        <h2 class="border-b border-slate-200 pb-3 text-xl font-extrabold text-slate-900">¿Qué incluye?</h2>
+                        <div class="mt-4 grid gap-3 sm:grid-cols-3">
+                            {% for servicio in experiencia.servicios.all %}
+                            <article class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                <i class="fa-solid fa-circle-check shrink-0 text-emerald-600" aria-hidden="true"></i>
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-900">{{ servicio.nombre }}</h3>
+                                    {% if servicio.descripcion %}
+                                    <p class="mt-1 text-xs leading-5 text-slate-600">{{ servicio.descripcion }}</p>
+                                    {% endif %}
+                                </div>
+                            </article>
+                            {% empty %}
+                            <p class="text-sm text-slate-600 sm:col-span-3">Esta experiencia todavía no tiene servicios registrados.</p>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                    <section class="mt-8">
+                        <h2 class="border-b border-slate-200 pb-3 text-xl font-extrabold text-slate-900">Punto de encuentro</h2>
+                        <p class="mt-3 flex items-center gap-2 text-sm text-slate-600">
+                            <i class="fa-solid fa-location-dot text-emerald-600" aria-hidden="true"></i>
+                            Lago de Tota, Boyacá
+                        </p>
+                        <div class="mt-4 flex min-h-40 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 sm:min-h-52">
+                            <div class="text-center">
+                                <i class="fa-regular fa-map text-2xl" aria-hidden="true"></i>
+                                <p class="mt-2 text-xs">Mapa de ubicación próximamente</p>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-xs text-slate-500">Ubicación ilustrativa; el mapa aún no está conectado.</p>
+                    </section>
+                </section>
+            </div>
+
+            <!-- En esta tarjeta se elige la fecha y las personas, y se calcula el precio. -->
+            <aside data-booking-card data-adult-price="{{ experiencia.precio }}" data-child-price="80000" class="rounded-2xl border border-slate-200 bg-white p-5 text-slate-700 shadow-xl lg:sticky lg:top-24">
+                <h2 class="text-lg font-extrabold text-slate-900">Reserva tu experiencia</h2>
+                <!-- Permite escoger una fecha futura y muestra cuál quedó elegida. -->
+                <section data-booking-calendar aria-labelledby="fecha-reserva-titulo" class="mt-5">
+                    <h3 id="fecha-reserva-titulo" class="text-sm font-bold text-slate-900">1. Elige una fecha disponible</h3>
+                    <div class="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <p data-calendar-month class="text-sm font-semibold capitalize text-slate-900" aria-live="polite"></p>
+                            <div class="flex items-center gap-2">
+                                <button type="button" data-calendar-prev aria-label="Mes anterior" class="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:border-emerald-500 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <i class="fa-solid fa-chevron-left text-xs" aria-hidden="true"></i>
+                                </button>
+                                <button type="button" data-calendar-next aria-label="Mes siguiente" class="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:border-emerald-500 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <i class="fa-solid fa-chevron-right text-xs" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-3 grid grid-cols-7 gap-1 text-center text-[10px] font-medium uppercase text-slate-500" aria-hidden="true">
+                            <span>D</span><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span>
+                        </div>
+                        <div data-calendar-days class="mt-1 grid grid-cols-7 gap-1" role="group" aria-label="Fechas disponibles"></div>
+                    </div>
+                    <input data-booking-date type="hidden" name="fecha_reserva" value="">
+                    <p data-calendar-selection class="mt-2 min-h-4 text-xs text-emerald-300" aria-live="polite">Selecciona una fecha para tu experiencia.</p>
+                    <p class="mt-1 text-[11px] leading-4 text-slate-500">Fechas futuras seleccionables; disponibilidad pendiente de confirmación.</p>
+                </section>
+                <!-- Los botones cambian la cantidad de adultos y niños. -->
+                <section aria-labelledby="participantes-titulo" class="mt-5">
+                    <h3 id="participantes-titulo" class="text-sm font-bold text-slate-900">2. Número de participantes</h3>
+                    <div class="mt-3 space-y-3">
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900">Adultos</p>
+                                    <p class="mt-1 text-xs text-slate-500"><span data-adult-unit-price>{{ experiencia.precio }}</span> c/u</p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" data-adult-decrease aria-label="Quitar un adulto" class="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:border-emerald-500 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                        <i class="fa-solid fa-minus text-xs" aria-hidden="true"></i>
+                                    </button>
+                                    <output data-adult-count aria-live="polite" class="min-w-5 text-center text-sm font-bold text-slate-900">2</output>
+                                    <button type="button" data-adult-increase aria-label="Agregar un adulto" class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 transition hover:bg-emerald-500/35 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                                        <i class="fa-solid fa-plus text-xs" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900">Niños (6–12 años)</p>
+                                    <p class="mt-1 text-xs text-slate-500"><span data-child-unit-price>$80.000 COP</span> c/u</p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" data-child-decrease aria-label="Quitar un niño" class="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:border-emerald-500 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                        <i class="fa-solid fa-minus text-xs" aria-hidden="true"></i>
+                                    </button>
+                                    <output data-child-count aria-live="polite" class="min-w-5 text-center text-sm font-bold text-slate-900">0</output>
+                                    <button type="button" data-child-increase aria-label="Agregar un niño" class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 transition hover:bg-emerald-500/35 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                                        <i class="fa-solid fa-plus text-xs" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- El precio total cambia según la cantidad de personas. -->
+                <section aria-label="Resumen de precio" class="mt-5 border-t border-slate-200 pt-4">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Precio por persona</p>
+                    <p data-adult-summary-price class="mt-1 text-2xl font-extrabold text-slate-900">{{ experiencia.precio }}</p>
+                    <dl class="mt-4 space-y-3 border-t border-slate-200 pt-4 text-sm">
+                        <div class="flex items-center justify-between gap-3">
+                            <dt class="text-slate-600">Adultos (×<span data-adult-count-summary>2</span>)</dt>
+                            <dd data-adult-subtotal class="font-semibold text-slate-900">—</dd>
+                        </div>
+                        <div class="flex items-center justify-between gap-3">
+                            <dt class="text-slate-600">Niños (×<span data-child-count-summary>0</span>)</dt>
+                            <dd data-child-subtotal class="font-semibold text-slate-900">—</dd>
+                        </div>
+                        <div class="flex items-center justify-between gap-3">
+                            <dt class="text-slate-600">Tasas e impuestos ecológicos</dt>
+                            <dd class="font-semibold text-slate-900">Incluido</dd>
+                        </div>
+                    </dl>
+                    <div class="mt-4 flex items-center justify-between gap-3 border-t border-slate-200 pt-4">
+                        <span class="text-sm font-bold text-slate-900">Total estimado</span>
+                        <output data-booking-total aria-live="polite" class="text-lg font-extrabold text-emerald-400">—</output>
+                    </div>
+                </section>
+
+                <div class="mt-4">
+                    <p class="text-xs font-bold text-slate-900">Políticas de Cancelación</p>
+                    <p class="mt-1 text-xs leading-5 text-slate-500">Cancelación gratuita hasta 48 horas antes de comenzar la experiencia con devolución del 100%.</p>
+                </div>
+                <button type="button" disabled aria-describedby="reserva-proximamente" class="mt-5 hidden w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white opacity-70 shadow-lg shadow-emerald-950/30 lg:inline-flex">
+                    <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
+                    Reservar Tour
+                </button>
+                <p id="reserva-proximamente" class="mt-2 hidden text-center text-xs text-slate-500 lg:block">Las reservas en línea estarán disponibles próximamente.</p>
+            </aside>
+        </div>
+    </div>
+</main>
+<!-- En celulares, el total y el botón quedan a la vista al bajar por la página. -->
+<div class="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-8px_24px_rgba(15,23,42,0.12)] lg:hidden">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4">
+        <div class="min-w-0">
+            <p class="text-[11px] font-medium text-slate-500">Total estimado</p>
+            <output data-booking-total aria-live="polite" class="block truncate text-base font-extrabold text-emerald-300">—</output>
+        </div>
+        <button type="button" disabled aria-describedby="reserva-proximamente-movil" class="inline-flex shrink-0 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-emerald-700 px-5 py-3 text-sm font-bold text-white opacity-70 shadow-lg shadow-emerald-950/30">
+            <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
+            Reservar Tour
+        </button>
+    </div>
+    <p id="reserva-proximamente-movil" class="mx-auto mt-1 max-w-6xl text-[11px] text-slate-500">Las reservas en línea estarán disponibles próximamente.</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <!-- Este archivo hace funcionar las fotos, el calendario y el cálculo de precios. -->
+    <script src="{% static 'js/experiencia_detalle_funcionalidad.js' %}"></script>
+{% endblock %}
