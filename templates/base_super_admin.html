@@ -80,7 +80,7 @@
             <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white text-sm transition">
                 <i class="fa-solid fa-gear w-5"></i> Configuración
             </a>
-            <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white text-sm transition">
+            <a href="{% url 'perfil' %}" class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white text-sm transition">
                 <i class="fa-solid fa-user w-5"></i> Mi Perfil
             </a>
             <form action="{% url 'logout' %}" method="post" class="w-full">

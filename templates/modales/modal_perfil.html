@@ -1,0 +1,107 @@
+{% load static %}
+<!-- MODAL REUTILIZABLE DE PERFIL: accion = 'inactivar' | 'eliminar' -->
+<div class="fixed inset-0 w-full h-full z-[9999] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 overflow-y-auto">
+
+  <!-- TARJETA DEL MODAL -->
+  <div class="relative w-full max-w-lg bg-[#0b132b] rounded-2xl shadow-2xl border border-white/10 overflow-hidden text-white">
+
+    <!-- HEADER -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-white/10 shadow-md
+      {% if accion == 'inactivar' %} bg-gradient-to-r from-slate-900 via-amber-950 to-slate-900
+      {% else %} bg-gradient-to-r from-slate-900 via-red-950 to-slate-900{% endif %}">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl flex items-center justify-center shadow-inner border
+          {% if accion == 'inactivar' %} bg-amber-500/20 border-amber-400/30 text-amber-300
+          {% else %} bg-red-500/20 border-red-400/30 text-red-300{% endif %}">
+          {% if accion == 'inactivar' %}
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+          {% else %}
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          {% endif %}
+        </div>
+
+        <div>
+          <h3 class="text-sm font-bold tracking-wide">
+            {% if accion == 'inactivar' %}Inactivar Mi Cuenta{% else %}Eliminar Mi Cuenta{% endif %}
+          </h3>
+          <p class="text-[11px] text-slate-300">
+            {% if accion == 'inactivar' %}Desactivación temporal de la cuenta{% else %}Esta acción es permanente y no se puede deshacer{% endif %}
+          </p>
+        </div>
+      </div>
+
+      <!-- Cerrar (X) -->
+      <a href="{% url 'perfil' %}" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 border border-white/10 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- CONTENIDO -->
+    <form method="POST" action="{% url 'perfil' %}">
+      {% csrf_token %}
+      <input type="hidden" name="accion" value="{{ accion }}">
+
+      <div class="p-6 space-y-4">
+        {% if accion == 'inactivar' %}
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Tu cuenta quedará <strong class="text-amber-400">inactiva</strong>. No podrás iniciar sesión ni recibir notificaciones hasta que un administrador la reactive.
+          </p>
+          <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200">
+            Tu información y tu historial se conservan intactos.
+          </div>
+        {% else %}
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Se eliminará permanentemente tu perfil y todos los datos asociados
+            {% if user.rol == 'GUIA' %}(incluido tu certificado de turismo){% elif user.rol == 'ADMIN_H' or user.rol == 'ADMIN_R' %}(incluidos tus establecimientos){% endif %}.
+            Esta acción no se puede deshacer.
+          </p>
+          <div class="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-[11px] text-red-200">
+            Cuenta: <strong>{{ user.email }}</strong>
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-300 mb-2">
+              Escribe <span class="font-bold text-red-400">ELIMINAR</span> para confirmar:
+            </label>
+            <input id="input-eliminar" type="text" autocomplete="off" placeholder="ELIMINAR"
+              class="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/20 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-red-500 transition">
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- FOOTER -->
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/10 bg-white/5">
+        <a href="{% url 'perfil' %}"
+           class="px-4 py-2.5 text-xs font-bold text-slate-300 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 hover:text-white transition">
+          Cancelar
+        </a>
+
+        <button type="submit"
+          {% if accion == 'eliminar' %}id="btn-confirmar-eliminar" disabled{% endif %}
+          class="px-5 py-2.5 text-xs font-bold text-white rounded-xl shadow-md transition transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed
+          {% if accion == 'inactivar' %} bg-amber-600 hover:bg-amber-700
+          {% else %} bg-red-600 hover:bg-red-700{% endif %}">
+          {% if accion == 'inactivar' %}Sí, Inactivar Cuenta{% else %}Sí, Eliminar Definitivamente{% endif %}
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+{% if accion == 'eliminar' %}
+<script>
+  (function () {
+    const input = document.getElementById('input-eliminar');
+    const boton = document.getElementById('btn-confirmar-eliminar');
+    if (!input || !boton) return;
+
+    input.addEventListener('input', () => {
+      boton.disabled = input.value.trim() !== 'ELIMINAR';
+    });
+    input.focus();
+  })();
+</script>
+{% endif %}

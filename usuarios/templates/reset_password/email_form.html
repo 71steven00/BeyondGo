@@ -15,12 +15,12 @@
     <form method="post" action="" novalidate id="login-form">
         {% csrf_token %}
         <div class="form-group">
-            <label for="email" class="form-label">Correo electrónico</label>
+            <label for="id_email" class="form-label">Correo electrónico</label>
             <div class="input-wrapper">
                 <span class="input-icon-left text-emerald-400">
                     <i class="fa-solid fa-envelope"></i>
                 </span>
-                <input type="email" name="email" id="id_email" required placeholder="correo@ejemplo.com" class="form-input">
+                <input type="email" autocomplete="email" name="email" id="id_email" required placeholder="correo@ejemplo.com" class="form-input">
             </div>
             {% if form.email.errors %}
                 <span class="error-msg text-red-500 text-xs mt-1 block">{{ form.email.errors.0 }}</span>
