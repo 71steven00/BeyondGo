@@ -107,11 +107,15 @@ class Guia(models.Model):
 
 
 
-# 3. ATRIBUTOS DE HOTEL / RESTAURANTE (ESTABLECIMIENTOS) - MODELO UNIFICADO
+# 3. ATRIBUTOS DE HOTEL / RESTAURANTE (ESTABLECIMIENTOS) - MODELO UNIFICADO AQUI ESTA LA CAJA DESPLEGABLE DE GESTIION DE USUARIOSS
+#CADA OOPCION LLEVA DOS VALORES UN VALOR SE GUARDA EN LA BASE DE DATOS Y EL OTRO ES EL QUE SE MUESTRA EN EL FORMULARIO
 class Establecimiento(models.Model):
     TIPO_CHOICES = (
         ('Hotel', 'Hotel'),
         ('Restaurante', 'Restaurante'),
+        ('Glamping', 'Glamping'),
+        ('Cabaña', 'Cabaña'),
+        ('Hostal', 'Hostal'),
     )
     ESTADO_REVISION_CHOICES = (
         ('pendiente', 'Pendiente de revisión'),
@@ -149,5 +153,3 @@ class Establecimiento(models.Model):
 
     def __str__(self):
         return f"{self.nombre} ({self.tipo})"
-
-

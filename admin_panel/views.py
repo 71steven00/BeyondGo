@@ -447,7 +447,7 @@ def gestion_establecimientos(request, pk=None, a=None):
 
     # 4. PAGINACIÓN DE LOS RESULTADOS
     # Configura la paginación para mostrar 6 establecimientos por cada página
-    paginator = Paginator(establecimientos_list, 6)
+    paginator = Paginator(establecimientos_list, 9)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
