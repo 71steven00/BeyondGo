@@ -11,15 +11,19 @@ from django.http import HttpResponseRedirect, request
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.urls import reverse, reverse_lazy
 from django.conf import settings # importacion para enviar correos
-from django.views.generic import FormView, TemplateView, UpdateView
-from .models import Usuario
+from django.views.generic import DetailView, FormView, TemplateView
+from django.utils.decorators import method_decorator #opcional de prueba
+from .models import Establecimiento, Guia, Usuario
 from django.contrib import messages
 from django.contrib.auth.views import LoginView
 # Importamos el formulario desde el módulo de usuarios
 from usuarios.forms import RegistroClienteForm,UsuarioFormPerfil
 from django.template.loader import render_to_string
-
-
+from django.utils.html import strip_tags
+from .forms import RegistroGuiaForm
+from django.contrib.auth.decorators import login_required
+from django.views.generic.edit import UpdateView
+from django.views.decorators.cache import never_cache
 # Create your views here.
 
 # @rol_requerido('ADMIN_H')
@@ -50,12 +54,90 @@ def panel_restaurante(request):
     return render(request, 'ruta/del/archivo.html')
 
 
-# 4. Interfaz para Guía Turístico
-@rol_requerido('ADMIN','GUIA')
-def panel_guia(request):
-    # Retorna la interfaz donde el guía ve sus tours asignados
-    return render(request, 'ruta/del/archivo.html')
+# 4. Interfaz para Guía Turístico -------------------------------------------------------------------------------------------------------------
+def hazte_guia_view(request):
+    if request.method == 'POST':
+        form = RegistroGuiaForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '¡Registro exitoso! Ya puedes iniciar sesión como guía.')
+            return redirect('inicio')  # Redirige a la página de inicio o login tras el registro exitoso
+        else:
+            # --- IMPRIME LOS ERRORES EXACTOS EN LA TERMINAL ---
+            print("ERRORES DEL FORMULARIO DE GUÍA:", form.errors)
+            messages.error(request, 'Por favor, corrige los errores del formulario.')
+    else:
+        form = RegistroGuiaForm()
 
+    context = {
+        'form': form,
+    }
+    return render(request, 'guia_turistico/hazte_guia_forms.html', context)
+# ---------------------------
+# Seccion guia turistico
+@never_cache
+@rol_requerido('GUIA')
+def panel_guia(request):
+    # Verificamos si hay un usuario autenticado de forma segura y obtenemos su perfil de guía
+    if request.user.is_authenticated:
+        guia_perfil = Guia.objects.filter(usuario=request.user).first()
+    else:
+        guia_perfil = None
+
+    # Consultas dinámicas (puedes ajustarlas según tus modelos reales de reservas y estadísticas)
+    # Ejemplo: tours_completados = Reserva.objects.filter(guia=guia_perfil, estado='COMPLETADO').count()
+    tours_completados = 12  # Valor dinámico base o preparado para tu modelo
+    satisfaccion_clientes = 4.9
+
+    context = {
+        'guia_perfil': guia_perfil,
+        'tours_completados': tours_completados,
+        'satisfaccion_clientes': satisfaccion_clientes,
+    }
+        
+    return render(request, 'guia_turistico/panel_guia.html', context)
+
+@never_cache
+@rol_requerido('ADMIN', 'GUIA')
+def panel_guia_detalles(request):
+    pasajeros_qs = Usuario.objects.filter(rol='TURISTA')
+    # Contadores dinámicos para los estados de la cabecera
+    total_pasajeros = pasajeros_qs.count()
+    total_confirmados = pasajeros_qs.filter(is_active=True).count()
+
+    context = {
+        'pasajeros': pasajeros_qs,
+        'total_confirmados': total_confirmados,
+        'total_pasajeros': total_pasajeros,
+    }
+    return render(request, 'guia_turistico/detalles.html', context)
+@never_cache
+@rol_requerido('ADMIN', 'GUIA')
+def panel_guia_disponibilidad(request):
+    # Consultamos los establecimientos o servicios del guía directamente desde la base de datos
+    actividades_db = Establecimiento.objects.filter(usuario=request.user)
+    
+    context = {
+        'actividades': actividades_db,
+    }
+    return render(request, 'guia_turistico/disponibilidad.html', context)
+
+
+@rol_requerido('ADMIN', 'GUIA')
+def panel_guia_planes(request):
+    guia_perfil = Guia.objects.filter(usuario=request.user).first()
+    planes_db = Establecimiento.objects.filter(usuario=request.user)
+    
+    # Verificamos si la URL solicita abrir el modal (ej: /panel-guia/planes/?nuevo=true)
+    mostrar_modal = request.GET.get('nuevo') == 'true'
+
+    context = {
+        'guia_perfil': guia_perfil,
+        'planes': planes_db,
+        'mostrar_modal': mostrar_modal,
+    }
+    return render(request, 'guia_turistico/planes.html', context)
+# -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # 5. Interfaz para Cliente / Turista
 @rol_requerido('TURISTA')

@@ -260,3 +260,92 @@ class UsuarioFormPerfil(forms.ModelForm):
         return usuario
         
         
+        return usuario
+
+
+class RegistroGuiaForm(forms.ModelForm):
+    last_name = forms.CharField(
+        max_length=150,
+        required=True,
+        error_messages={
+            'required': 'Este campo es obligatorio.'
+        }
+    )
+    
+    password = forms.CharField(min_length=8, max_length=14)
+    confirmar_contrasena = forms.CharField()
+    
+    # Campo para el certificado de turismo requerido para los guías
+    certificado_turismo = forms.ImageField(
+        required=True,
+        error_messages={
+            'required': 'El certificado de turismo o tarjeta profesional es obligatorio.'
+        }
+    )
+
+    class Meta:
+        model = Usuario
+        fields = [
+            'first_name',
+            'last_name',
+            'tipo_documento',
+            'numero_documento',
+            'email',
+            'telefono',
+        ]
+
+    # Validaciones directas sobre los datos
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if Usuario.objects.filter(email__iexact=email).exists():
+            raise ValidationError('Este correo electrónico ya se encuentra registrado.')
+        return email
+
+    def clean_numero_documento(self):
+        numero_documento = self.cleaned_data.get('numero_documento')
+        if numero_documento is None:
+            raise ValidationError('El campo no puede estar vacío.')
+        elif Usuario.objects.filter(numero_documento=numero_documento).exists():
+            raise ValidationError('Este número de documento ya está registrado.')
+        return numero_documento
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if password:
+            validate_password(password)
+        return password
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        confirmar_contrasena = cleaned_data.get('confirmar_contrasena')
+
+        if password and confirmar_contrasena and password != confirmar_contrasena:
+            self.add_error('confirmar_contrasena', 'Las contraseñas no coinciden.')
+        elif not password or not confirmar_contrasena:
+            if not password:
+                self.add_error('password', 'La contraseña es requerida.')
+            if not confirmar_contrasena:
+                self.add_error('confirmar_contrasena', 'Debes confirmar la contraseña.')
+        return cleaned_data
+
+    def save(self, commit=True):
+        usuario = super().save(commit=False)
+        # Asignar el username automáticamente basado en el email (como lo manejas en tu app)
+        if not usuario.username:
+            usuario.username = self.cleaned_data.get('email')
+            
+        usuario.set_password(self.cleaned_data['password'])
+        usuario.rol = 'GUIA' # Se asigna el rol de guía
+        usuario.is_active = True # O False si requiere aprobación previa del superadmin
+        
+        if commit:
+            usuario.save()
+            # Guardar el perfil de guía y su certificado adjunto en la tabla auxiliar Guia
+            certificado = self.cleaned_data.get('certificado_turismo')
+            if certificado:
+                Guia.objects.update_or_create(
+                    usuario=usuario,
+                    defaults={'certificado_turismo': certificado}
+                )
+        return usuario

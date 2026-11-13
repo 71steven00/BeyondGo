@@ -13,6 +13,13 @@ urlpatterns = [
     
     # Vista de perfil del usuario autenticado
     path('perfil/', views.PerfilUsuarioView.as_view(), name='perfil'),
-    
+
+    # URL para el guia
+    path('hazte_guia/', views.hazte_guia_view, name='hazte_guia'),
+    path('panel_guia/', views.panel_guia, name='panel_guia'),
+    # URL panel de control del Guia
+    path('panel_guia/detalles/', views.panel_guia_detalles, name='panel_guia_detalles'),
+    path('panel_guia/disponibilidad/', views.panel_guia_disponibilidad, name='panel_guia_disponibilidad'),
+    path('panel_guia/planes/', views.panel_guia_planes, name='panel_guia_planes'),
 ]
 
