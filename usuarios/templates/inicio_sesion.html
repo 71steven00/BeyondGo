@@ -16,12 +16,12 @@
 
     <!-- Campo: Correo / Usuario -->
     <div class="form-group mb-4">
-        <label for="email" class="block text-xs text-slate-300 font-medium mb-1 text-left">Correo electrónico</label>
+        <label for="id_email" class="block text-xs text-slate-300 font-medium mb-1 text-left">Correo electrónico</label>
         <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-emerald-400">
                 <i class="fa-solid fa-envelope"></i>
             </span>
-            <input type="email" name="username" id="id_email" required placeholder="admin@beyondgo.com" 
+            <input type="email" autocomplete="username" name="username" id="id_email" required placeholder="admin@beyondgo.com" 
                 class="w-full pl-9 pr-3 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-xs text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white/15 transition-all">
         </div>
         {% if form.username.errors %}
@@ -34,7 +34,7 @@
     <!-- Campo: Contraseña -->
     <div class="form-group mb-4">
         <div class="flex items-center justify-between mb-1">
-            <label for="password" class="block text-xs text-slate-300 font-medium text-left">Contraseña</label>
+            <label for="id_password" class="block text-xs text-slate-300 font-medium text-left">Contraseña</label>
         </div>
         <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-emerald-400">

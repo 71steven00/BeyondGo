@@ -8,7 +8,7 @@ from django.contrib.auth.password_validation import validate_password  # Aplica 
 from django.core.exceptions import ValidationError  # Captura fallos de complejidad de contraseñas
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponseRedirect, request
-from django.contrib.auth import login as auth_login
+from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.urls import reverse, reverse_lazy
 from django.conf import settings # importacion para enviar correos
 from django.views.generic import FormView, TemplateView, UpdateView
@@ -146,15 +146,51 @@ class CustomLoginView(LoginView):
 class PerfilUsuarioView(UpdateView):
     model = Usuario
     form_class = UsuarioFormPerfil
-    template_name = 'perfil_usuarios.html'
-    success_url = reverse_lazy('perfil')  # Ajusta a tu URL de éxito
-
     def get_object(self):
         return self.request.user
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        accion = self.request.GET.get('accion')
+        if accion in ('inactivar', 'eliminar'):
+            context['mostrar_modal'] = True
+            context['accion'] = accion
+        return context
+    
+    def get_template_names(self):
+        if self.request.user.rol == 'ADMIN':
+            return['perfil_admin.html']
+        return['perfil_usuarios.html']
+            
+        
+    
+    success_url = reverse_lazy('perfil')  # Ajusta a tu URL de éxito
+
+    def post(self, request, *args, **kwargs):
+        accion = request.POST.get('accion')
+
+        if accion == 'inactivar':
+            usuario = request.user
+            usuario.is_active = False
+            usuario.save(update_fields=['is_active'])
+            auth_logout(request)
+            messages.info(request, 'Tu cuenta ha sido inactivada. Contacta al administrador para reactivarla.')
+            return redirect('login')
+
+        if accion == 'eliminar':
+            usuario = request.user
+            auth_logout(request)
+            usuario.delete()
+            messages.success(request, 'Tu cuenta y todos sus datos han sido eliminados.')
+            return redirect('inicio')
+
+        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         messages.success(self.request, 'Perfil actualizado correctamente.')
         return super().form_valid(form)
+    
+
 
 
 """Parte de recuperación de contraseña"""
