@@ -13,5 +13,6 @@ urlpatterns = [
     
     # Vista de perfil del usuario autenticado
     path('perfil/', views.PerfilUsuarioView.as_view(), name='perfil'),
+    
 ]
 

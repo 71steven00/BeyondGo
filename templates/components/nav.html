@@ -59,12 +59,22 @@
                 <i class="fa-regular fa-user text-base"></i>
             <span>Hazte Guía</span>
         </a>
-
-            <a href="{% url 'login' %}"
-                class="flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-white/80 bg-black/50 backdrop-blur-md text-white text-sm font-semibold hover:text-white hover:bg-white/10 transition">
-                    <i class="fa-regular fa-user text-base"></i>
-                <span>Inicio de sesión</span>
-            </a>
+            
+            {% if user.is_authenticated %}
+                <a href="{% url 'perfil' %}"
+                    class="flex items-center gap-2.5 px-4 py-2 rounded-full border border-white/80 bg-black/50 backdrop-blur-md text-white text-sm font-semibold hover:text-white hover:bg-white/10 transition {% if request.resolver_match.url_name == 'perfil' %}bg-white/20{% endif %}">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-[#2ec4b6] text-white text-[11px] font-bold uppercase">
+                            {{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}
+                        </span>
+                    <span>Mi Perfil</span>
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}"
+                    class="flex items-center gap-2.5 px-5 py-2.5 rounded-full border border-white/80 bg-black/50 backdrop-blur-md text-white text-sm font-semibold hover:text-white hover:bg-white/10 transition">
+                        <i class="fa-regular fa-user text-base"></i>
+                    <span>Inicio de sesión</span>
+                </a>
+            {% endif %}
         </div>
 </nav>
 
