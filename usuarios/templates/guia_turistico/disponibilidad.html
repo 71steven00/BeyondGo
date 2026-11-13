@@ -1,0 +1,112 @@
+{% extends 'base_super_admin.html' %}
+{% load static %}
+
+{% block title %}Calendario de Disponibilidad - Panel de Guía | Beyond Go{% endblock %}
+
+{% block extra_head %}
+<!-- FullCalendar CSS CDN -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- BANNER SUPERIOR -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#182038] border border-[#2d3a5e] rounded-2xl p-6 shadow-xl">
+    <div>
+      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Planificación</span>
+      <h1 class="text-2xl font-extrabold text-white mt-0.5">Calendario de Disponibilidad</h1>
+      <p class="text-xs text-slate-400 mt-1">Sincronizado en tiempo real con tu agenda de Google Calendar y base de datos.</p>
+    </div>
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL: Calendario de Google (Izquierda) + Actividades de la Base de Datos (Derecha) -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- COLUMNA IZQUIERDA: FullCalendar con Google Calendar (Ocupa 2 columnas) -->
+    <div class="lg:col-span-2 bg-[#182038] border border-[#2d3a5e] rounded-2xl p-6 shadow-xl">
+      <div id="calendar" class="text-slate-200 text-xs"></div>
+    </div>
+
+    <!-- COLUMNA DERECHA: Detalle del Día y Actividades Dinámicas -->
+    <div class="space-y-6">
+
+      <!-- Tarjeta de Actividades -->
+      <div class="bg-[#182038] border border-[#2d3a5e] rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex justify-between items-center">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wide">Actividades Registradas</h3>
+          <span class="text-xs text-[#39ef68] font-bold">Base de Datos</span>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          {% for act in actividades %}
+          <div class="bg-[#283352] border border-[#37466e] rounded-xl p-3.5 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#39ef68]/20 text-[#39ef68] border border-[#39ef68]/40">
+                {% if act.is_active %}Activo{% else %}Inactivo{% endif %}
+              </span>
+              <span class="text-[10px] text-slate-400 font-semibold"><i class="fa-solid fa-location-dot mr-1"></i> {{ act.ciudad }}</span>
+            </div>
+            <h5 class="text-xs font-extrabold text-white">{{ act.nombre }}</h5>
+            <p class="text-[11px] text-slate-400">{{ act.descripcion|default:"Sin descripción adicional"|truncatechars:60 }}</p>
+          </div>
+          {% empty %}
+          <div class="text-center py-6 text-slate-400 text-xs">
+            No hay actividades registradas en la base de datos.
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Widget: Condiciones Esperadas (Clima) -->
+      <div class="bg-[#182038] border border-[#2d3a5e] rounded-2xl p-6 shadow-xl space-y-3">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Condiciones Esperadas</span>
+        <div class="flex items-center justify-between">
+          <div class="text-2xl font-extrabold text-white">14°C / 5°C</div>
+          <i class="fa-solid fa-cloud-sun text-amber-400 text-3xl"></i>
+        </div>
+        <p class="text-xs text-slate-400 leading-relaxed">Parcialmente nublado, 20% probabilidad de lluvia en la zona alta.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- FullCalendar JS CDN -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+<!-- Plugin de Google Calendar para FullCalendar -->
+<script src='https://cdn.jsdelivr.net/npm/@fullcalendar/google-calendar@6.1.8/index.global.min.js'></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'es',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+      // INTEGRA TU API KEY DE GOOGLE CLOUD Y EL ID DE TU CALENDARIO AQUÍ:
+      googleCalendarApiKey: 'TU_GOOGLE_API_KEY_AQUÍ',
+      events: {
+        googleCalendarId: 'TU_ID_DE_CALENDARIO@group.calendar.google.com',
+        color: '#39ef68',
+        textColor: '#0b1328'
+      },
+      eventClick: function(info) {
+        alert('Evento: ' + info.event.title);
+        info.jsEvent.preventDefault();
+      },
+      themeSystem: 'standard'
+    });
+    calendar.render();
+  });
+</script>
+<script src="{% static 'js/animaciones_alertas.js' %}"></script>
+{% endblock %}

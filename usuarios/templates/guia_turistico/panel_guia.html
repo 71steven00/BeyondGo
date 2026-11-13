@@ -1,0 +1,142 @@
+{% extends 'base_super_admin.html' %}
+{% load static %}
+
+{% block title %}Panel del Guía - Inicio | Beyond Go{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- BANNER DE BIENVENIDA Y BÚSQUEDA -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#182038] border border-[#2d3a5e] rounded-2xl p-6 shadow-xl">
+    <div>
+      <h1 class="text-2xl font-extrabold text-white">¡Bienvenido, {{ request.user.first_name|default:"Guía" }}.</h1>
+      <p class="text-xs text-slate-400 mt-1">Tu siguiente reserva está programada para el día 24 de octubre</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="px-3 py-1 bg-[#39ef68]/10 border border-[#39ef68]/30 text-[#39ef68] rounded-xl text-xs font-bold flex items-center gap-2">
+        <i class="fa-solid fa-award"></i> 
+        {% if guia_perfil and guia_perfil.certificado_turismo %}
+          Guía Certificado (Activo)
+        {% else %}
+          Guía Autorizado BeyondGo
+        {% endif %}
+      </span>
+    </div>
+  </div>
+
+  <!-- GRID PRINCIPAL -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- COLUMNA IZQUIERDA: Próximo Tour y Operaciones -->
+    <div class="lg:col-span-2 space-y-6">
+      
+      <!-- Tarjeta del Próximo Tour -->
+      <div class="bg-[#182038] border border-[#2d3a5e] rounded-2xl overflow-hidden shadow-xl relative">
+        <div class="h-48 w-full relative">
+          <img src="{% static 'images/paramo_oceta.jpg' %}" alt="Páramo de Ocetá" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-[#182038] via-transparent to-black/40"></div>
+          <div class="absolute top-4 right-4 bg-[#39ef68]/20 border border-[#39ef68]/40 text-[#39ef68] px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase backdrop-blur-md">
+            Próximamente en 2 días
+          </div>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <div>
+            <span class="text-[10px] font-bold text-[#39ef68] tracking-widest uppercase">Expedición</span>
+            <h2 class="text-xl font-extrabold text-white mt-1">Páramo de Ocetá</h2>
+            <div class="flex items-center gap-4 text-xs text-slate-400 mt-2">
+              <span><i class="fa-regular fa-calendar mr-1 text-[#39ef68]"></i> Hoy, 08:00 AM</span>
+              <span><i class="fa-solid fa-users mr-1 text-[#39ef68]"></i> 12 Participantes</span>
+            </div>
+          </div>
+
+          <!-- Punto de encuentro -->
+          <div class="bg-[#283352] border border-[#37466e] rounded-xl p-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-[#39ef68]/10 flex items-center justify-center text-[#39ef68]">
+                <i class="fa-solid fa-location-dot text-xs"></i>
+              </div>
+              <div>
+                <span class="block text-[10px] text-slate-400 uppercase font-bold">Punto de Encuentro</span>
+                <span class="text-xs font-semibold text-white">Plaza Principal, Monguí</span>
+              </div>
+            </div>
+            <a href="{% url 'panel_guia_detalles' %}" class="px-4 py-2 bg-[#39ef68] hover:bg-[#32d85d] text-[#0b1328] font-black rounded-lg text-xs transition">
+              Ver paquete <i class="fa-solid fa-arrow-right ml-1"></i>
+            </a>
+          </div>
+
+          <!-- Alerta de pago pendiente -->
+          <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex items-start gap-3">
+            <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm mt-0.5"></i>
+            <div class="flex-1 text-xs text-amber-200">
+              <span class="font-bold block text-amber-400">Pago pendiente</span>
+              3 participantes tienen saldos pendientes por un total de $120,000 COP. Por favor cobrar antes de la salida.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Operaciones Diarias (QR Check-in) -->
+      <div class="bg-[#182038] border border-[#2d3a5e] rounded-2xl p-6 shadow-xl">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wide mb-4">Operaciones Diarias</h3>
+        <div class="bg-gradient-to-r from-blue-900/60 to-[#1c2747] border border-blue-500/30 rounded-xl p-5 flex items-center justify-between">
+          <div class="space-y-1">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 mb-2">
+              <i class="fa-solid fa-qrcode text-base"></i>
+            </div>
+            <h4 class="text-sm font-bold text-white">QR de activaciones de reservas</h4>
+            <p class="text-xs text-slate-300">Escanee el QR para Registrar el Check-in</p>
+          </div>
+          <button class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-blue-600/20">
+            Escanear QR
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- COLUMNA DERECHA: Estadísticas y Clima -->
+    <div class="space-y-6">
+
+      <!-- Widget: Detalles de los tours (Dinámico) -->
+      <div class="bg-[#182038] border border-[#2d3a5e] rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wide">Detalles de los tours</h3>
+          <i class="fa-solid fa-chart-line text-[#39ef68]"></i>
+        </div>
+        <div>
+          <div class="text-4xl font-extrabold text-white">{{ tours_completados }}</div>
+          <span class="text-xs text-slate-400">Tours Completados</span>
+          <div class="text-[11px] text-[#39ef68] font-semibold mt-1">
+            <i class="fa-solid fa-arrow-trend-up mr-1"></i> +2 desde el mes pasado
+          </div>
+        </div>
+        <div class="pt-4 border-t border-[#2d3a5e] flex items-center justify-between text-xs">
+          <span class="text-slate-400">Satisfacción de clientes</span>
+          <span class="font-bold text-white">{{ satisfaccion_clientes }} / 5.0</span>
+        </div>
+        <div class="w-full bg-[#283352] h-2 rounded-full overflow-hidden">
+          <div class="bg-[#39ef68] h-full w-[98%]"></div>
+        </div>
+      </div>
+
+      <!-- Widget: Clima Actual -->
+      <div class="bg-[#182038] border border-[#2d3a5e] rounded-2xl p-6 shadow-xl space-y-3">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Clima Actual</span>
+        <div class="flex items-center justify-between">
+          <div>
+            <h4 class="text-lg font-bold text-white">Monguí</h4>
+            <div class="text-3xl font-extrabold text-white mt-1">12°C</div>
+          </div>
+          <i class="fa-solid fa-cloud-sun text-amber-400 text-4xl"></i>
+        </div>
+        <p class="text-xs text-slate-400">Parcialmente nublado • Humedad 82%</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

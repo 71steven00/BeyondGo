@@ -1,0 +1,156 @@
+{% extends 'base_super_admin.html' %}
+{% load static %}
+
+{% block title %}Detalles y Pasajeros - Panel de Guía | Beyond Go{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- ENCABEZADO DE LA LISTA DE GRUPO -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#182038] border border-[#2d3a5e] rounded-2xl p-6 shadow-xl">
+    <div>
+      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lista del Grupo</span>
+      <h1 class="text-2xl font-extrabold text-white mt-0.5">Páramo de Ocetá</h1>
+      <p class="text-xs text-slate-400 mt-1"><i class="fa-regular fa-calendar text-[#39ef68] mr-1"></i> Oct 24, 2026 • 07:00 AM Departure</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="px-3.5 py-1.5 bg-[#39ef68]/10 border border-[#39ef68]/30 text-[#39ef68] rounded-full text-xs font-bold flex items-center gap-2">
+        <i class="fa-solid fa-circle-check"></i> {{ total_confirmados }}/{{ total_pasajeros }} Confirmados
+      </span>
+      <button class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs transition flex items-center gap-2 shadow-lg shadow-amber-500/20">
+        <i class="fa-solid fa-message"></i> Mensajes
+      </button>
+    </div>
+  </div>
+
+  <!-- BARRA DE FILTROS Y BÚSQUEDA INTERACTIVA -->
+  <div class="bg-[#182038] border border-[#2d3a5e] rounded-2xl p-4 shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
+    <div class="relative w-full md:w-96">
+      <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+      <input type="text" id="buscador-pasajeros" placeholder="Buscar por nombre, documento..." class="w-full bg-[#283352] border border-[#37466e] text-white placeholder-slate-400 rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-[#39ef68] transition">
+    </div>
+    <div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto">
+      <button class="filtro-btn px-4 py-2 bg-[#39ef68] text-slate-950 font-bold rounded-xl text-xs transition shadow-md" data-filter="all">Todo</button>
+      <button class="filtro-btn px-4 py-2 bg-[#283352] hover:bg-[#323f63] text-slate-300 font-semibold rounded-xl text-xs transition" data-filter="pendiente">
+        Pendientes
+      </button>
+    </div>
+  </div>
+
+  <!-- TARJETAS DE PASAJEROS DESDE LA BASE DE DATOS -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="contenedor-pasajeros">
+
+    {% for p in pasajeros %}
+    <div class="tarjeta-pasajero bg-[#182038] border {% if p.is_active %}border-l-4 border-l-[#39ef68] border-[#2d3a5e]{% else %}border-l-4 border-l-amber-500 border-[#2d3a5e]{% endif %} rounded-2xl p-6 shadow-xl space-y-4 relative" 
+         data-estado="{% if p.is_active %}confirmado{% else %}pendiente{% endif %}" 
+         data-texto="{{ p.first_name|lower }} {{ p.last_name|lower }} {{ p.numero_documento|lower }}">
+      
+      <!-- Cabecera de la tarjeta del pasajero -->
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white font-extrabold text-sm shadow-md">
+            {{ p.first_name|slice:":1" }}{% if p.last_name %}{{ p.last_name|slice:":1" }}{% endif %}
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-white">{{ p.first_name }} {{ p.last_name }}</h3>
+            <span class="text-[11px] text-slate-400">Doc: {{ p.numero_documento|default:"No registrado" }}</span>
+          </div>
+        </div>
+        <div>
+          {% if p.is_active %}
+            <span class="px-2.5 py-1 bg-[#39ef68]/10 border border-[#39ef68]/30 text-[#39ef68] rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+              <i class="fa-solid fa-check"></i> Activo / Confirmado
+            </span>
+          {% else %}
+            <span class="px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+              <i class="fa-solid fa-clock"></i> Pendiente
+            </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Información de Contacto (Teléfono y Correo del modelo) -->
+      <div class="grid grid-cols-2 gap-4 pt-3 border-t border-[#2d3a5e] text-xs">
+        <div>
+          <span class="block text-[10px] font-bold text-slate-400 uppercase">Teléfono</span>
+          <span class="font-semibold text-white mt-0.5 block">{{ p.telefono|default:"N/A" }}</span>
+        </div>
+        <div>
+          <span class="block text-[10px] font-bold text-slate-400 uppercase">Correo</span>
+          <span class="font-semibold text-white mt-0.5 block truncate">{{ p.email }}</span>
+        </div>
+      </div>
+
+      <!-- Botones de contacto dinámicos -->
+      <div class="grid grid-cols-2 gap-3 pt-2">
+        {% if p.telefono %}
+          <a href="tel:{{ p.telefono }}" class="py-2.5 px-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md">
+            <i class="fa-solid fa-phone"></i> Llamar
+          </a>
+          <a href="https://wa.me/{{ p.telefono }}" target="_blank" class="py-2.5 px-3 bg-[#283352] hover:bg-[#323f63] text-[#39ef68] border border-[#39ef68]/40 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2">
+            <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+          </a>
+        {% else %}
+          <span class="col-span-2 text-center text-xs text-slate-500 py-2">Sin teléfono registrado</span>
+        {% endif %}
+      </div>
+
+    </div>
+    {% empty %}
+    <div class="col-span-2 text-center py-12 text-slate-400 text-xs">
+      No hay pasajeros registrados con el rol de turista en la base de datos.
+    </div>
+    {% endfor %}
+
+  </div>
+
+</div>
+
+<!-- SCRIPT DE FILTRADO Y BÚSQUEDA -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const inputBuscador = document.getElementById('buscador-pasajeros');
+    const botonesFiltro = document.querySelectorAll('.filtro-btn');
+    const tarjetas = document.querySelectorAll('.tarjeta-pasajero');
+    
+    let filtroActual = 'all';
+
+    function filtrarPasajeros() {
+      const textoBusqueda = inputBuscador.value.toLowerCase().trim();
+
+      tarjetas.forEach(tarjeta => {
+        const textoTarjeta = tarjeta.getAttribute('data-texto');
+        const estadoTarjeta = tarjeta.getAttribute('data-estado');
+
+        const coincideTexto = textoTarjeta.includes(textoBusqueda);
+        let coincideFiltro = true;
+        if (filtroActual === 'pendiente') {
+          coincideFiltro = (estadoTarjeta === 'pendiente');
+        }
+
+        if (coincideTexto && coincideFiltro) {
+          tarjeta.style.display = 'block';
+        } else {
+          tarjeta.style.display = 'none';
+        }
+      });
+    }
+
+    inputBuscador.addEventListener('input', filtrarPasajeros);
+
+    botonesFiltro.forEach(boton => {
+      boton.addEventListener('click', function() {
+        botonesFiltro.forEach(b => {
+          b.classList.remove('bg-[#39ef68]', 'text-slate-950', 'shadow-md');
+          b.classList.add('bg-[#283352]', 'text-slate-300');
+        });
+        this.classList.remove('bg-[#283352]', 'text-slate-300');
+        this.classList.add('bg-[#39ef68]', 'text-slate-950', 'shadow-md');
+
+        filtroActual = this.getAttribute('data-filter');
+        filtrarPasajeros();
+      });
+    });
+  });
+</script>
+{% endblock %}

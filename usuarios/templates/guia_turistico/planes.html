@@ -1,0 +1,179 @@
+{% extends 'base_super_admin.html' %}
+{% load static %}
+
+{% block title %}Mis Planes y Perfil - Panel de Guía | Beyond Go{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- BANNER DE PERFIL Y PORTADA -->
+  <div class="bg-[#182038] border border-[#2d3a5e] rounded-2xl overflow-hidden shadow-xl relative">
+    <div class="h-40 w-full relative">
+      <img src="{% static 'images/paramo_oceta.jpg' %}" alt="Portada" class="w-full h-full object-cover">
+      <div class="absolute inset-0 bg-gradient-to-t from-[#182038] via-transparent to-black/30"></div>
+    </div>
+
+    <!-- Contenido del Perfil Dinámico -->
+    <div class="px-6 pb-6 pt-4 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 relative">
+      <div class="flex flex-col md:flex-row items-start md:items-center gap-4 -mt-14 md:-mt-12">
+        <div class="w-24 h-24 rounded-2xl border-4 border-[#182038] overflow-hidden shadow-xl bg-slate-800 flex items-center justify-center text-white text-2xl font-bold">
+          {{ request.user.first_name|slice:":1" }}{{ request.user.last_name|slice:":1" }}
+        </div>
+        <div class="space-y-1 mt-2 md:mt-0">
+          <h1 class="text-2xl font-extrabold text-white">{{ request.user.first_name }} {{ request.user.last_name }}</h1>
+          <p class="text-xs text-slate-400 font-medium">Guía Autorizado • Aquitania, Boyacá</p>
+          <div class="flex flex-wrap items-center gap-2 pt-1">
+            <span class="px-2.5 py-0.5 bg-[#39ef68]/10 border border-[#39ef68]/30 text-[#39ef68] rounded-full text-[10px] font-bold">Guía Certificado</span>
+            <span class="px-2.5 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full text-[10px] font-bold">Activo en el Sistema</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTÓN ACTUALIZADO PARA ABRIR EL MODAL -->
+      <a href="?nuevo=true" class="px-4 py-2.5 bg-[#39ef68] hover:bg-[#32d85d] text-slate-950 font-black rounded-xl text-xs transition shadow-lg shadow-[#39ef68]/20 flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i> Crear Nuevo Plan
+      </a>
+    </div>
+  </div>
+
+  <!-- GRID PRINCIPAL -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- COLUMNA IZQUIERDA: Credenciales y Estadísticas -->
+    <div class="space-y-6">
+      
+      <!-- Widget: Credenciales (RNT) -->
+      <div class="bg-[#182038] border border-[#2d3a5e] rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wide">Credenciales</h3>
+          <span class="px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-full text-[10px] font-bold uppercase">Vigente</span>
+        </div>
+
+        <div>
+          <span class="text-xs text-slate-400 block font-bold">Estado RNT / Certificado</span>
+          <h4 class="text-xl font-extrabold text-white mt-0.5">
+            {% if guia_perfil and guia_perfil.certificado_turismo %}Cargado y Verificado{% else %}Pendiente de revisión{% endif %}
+          </h4>
+        </div>
+
+        <button class="w-full py-2.5 px-4 bg-[#283352] hover:bg-[#323f63] text-slate-200 border border-[#37466e] rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-file-arrow-up text-[#39ef68]"></i> Actualizar Documentos
+        </button>
+      </div>
+
+      <!-- Widget: Estadísticas Rápidas -->
+      <div class="bg-[#182038] border border-[#2d3a5e] rounded-2xl p-6 shadow-xl space-y-4">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wide">Estadísticas Rápidas</h3>
+        <div class="grid grid-cols-2 gap-4 pt-2">
+          <div class="bg-[#283352] border border-[#37466e] rounded-xl p-4 text-center">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tours Guiados</span>
+            <span class="text-2xl font-extrabold text-[#39ef68]">12</span>
+          </div>
+          <div class="bg-[#283352] border border-[#37466e] rounded-xl p-4 text-center">
+            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Reseñas</span>
+            <span class="text-2xl font-extrabold text-amber-400">4.9</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- COLUMNA DERECHA: Planes de Experiencia Dinámicos -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Cabecera con Filtros Interactivos -->
+      <div class="bg-[#182038] border border-[#2d3a5e] rounded-2xl p-5 shadow-xl flex items-center justify-between">
+        <h3 class="text-sm font-extrabold text-white uppercase tracking-wide">Planes de Experiencia</h3>
+        <div class="flex items-center gap-2">
+          <button class="filtro-plan px-3.5 py-1.5 bg-[#39ef68] text-slate-950 font-bold rounded-xl text-xs transition" data-filter="all">Todos</button>
+          <button class="filtro-plan px-3.5 py-1.5 bg-[#283352] hover:bg-[#323f63] text-slate-300 font-semibold rounded-xl text-xs transition" data-filter="activo">Activo</button>
+        </div>
+      </div>
+
+      <!-- Cuadrícula de Tarjetas de Planes -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="contenedor-planes">
+
+        {% for plan in planes %}
+        <div class="tarjeta-plan bg-[#182038] border border-[#2d3a5e] rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between" data-estado="{% if plan.is_active %}activo{% else %}revision{% endif %}">
+          <div>
+            <div class="h-36 w-full relative bg-slate-800">
+              {% if plan.url_img %}
+                <img src="{{ plan.url_img.url }}" alt="{{ plan.nombre }}" class="w-full h-full object-cover">
+              {% else %}
+                <img src="{% static 'images/paramo_oceta.jpg' %}" alt="Default" class="w-full h-full object-cover">
+              {% endif %}
+              <div class="absolute inset-0 bg-gradient-to-t from-[#182038] via-transparent to-black/30"></div>
+              <div class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md {% if plan.is_active %}bg-[#39ef68]/20 text-[#39ef68] border-[#39ef68]/40{% else %}bg-amber-500/20 text-amber-400 border-amber-500/40{% endif %}">
+                {% if plan.is_active %}Activo{% else %}En Revisión{% endif %}
+              </div>
+            </div>
+
+            <div class="p-5 space-y-2">
+              <h4 class="text-base font-extrabold text-white">{{ plan.nombre }}</h4>
+              <span class="text-[11px] text-slate-400 block"><i class="fa-solid fa-location-dot text-[#39ef68] mr-1"></i> {{ plan.ciudad }}, {{ plan.pais }}</span>
+              <p class="text-xs text-slate-300 leading-relaxed">{{ plan.descripcion|default:"Sin descripción registrada."|truncatechars:80 }}</p>
+            </div>
+          </div>
+
+          <div class="p-5 pt-0">
+            <button class="w-full py-2.5 px-4 bg-[#283352] hover:bg-[#323f63] text-slate-200 border border-[#37466e] font-bold rounded-xl text-xs transition text-center">
+              Gestionar Plan
+            </button>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col-span-2 text-center py-12 text-slate-400 text-xs bg-[#182038] border border-[#2d3a5e] rounded-2xl shadow-xl">
+          No tienes planes o experiencias registradas en la base de datos.
+        </div>
+        {% endfor %}
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Modal de experiencias condicional -->
+{% if mostrar_modal %}
+    {% include 'modales/modal_experiencias.html' %}
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<!-- Script de filtrado para los planes -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const botonesFiltro = document.querySelectorAll('.filtro-plan');
+    const tarjetas = document.querySelectorAll('.tarjeta-plan');
+
+    botonesFiltro.forEach(boton => {
+      boton.addEventListener('click', function() {
+        botonesFiltro.forEach(b => {
+          b.classList.remove('bg-[#39ef68]', 'text-slate-950');
+          b.classList.add('bg-[#283352]', 'text-slate-300');
+        });
+        this.classList.remove('bg-[#283352]', 'text-slate-300');
+        this.classList.add('bg-[#39ef68]', 'text-slate-950');
+
+        const filtro = this.getAttribute('data-filter');
+
+        tarjetas.forEach(tarjeta => {
+          const estado = tarjeta.getAttribute('data-estado');
+          if (filtro === 'all' || estado === filtro) {
+            tarjeta.style.display = 'flex';
+          } else {
+            tarjeta.style.display = 'none';
+          }
+        });
+      });
+    });
+  });
+</script>
+
+<!-- Scripts requeridos -->
+<script src="{% static 'js/animaciones_alertas.js' %}"></script>
+<script src="{% static 'js/experiencia-imagen-preview.js' %}"></script>
+<script src="{% static 'js/experiencia-servicios.js' %}"></script>
+{% endblock %}

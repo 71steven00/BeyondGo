@@ -46,16 +46,30 @@
 
             <!-- Enlaces de Navegación Principal -->
             <nav class="space-y-1">
-                <a href="{%url 'dashboard_admin'%}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if request.resolver_match.url_name == 'dashboard_admin' %}bg-emerald-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %} font-medium text-sm transition">
+                    
+                    {% if request.user.rol == 'GUIA' %}
+                        <!-- OPCIONES EXCLUSIVAS PARA GUÍAS -->
+                        <a href="{% url 'panel_guia' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if request.resolver_match.url_name == 'panel_guia' %}bg-emerald-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %} text-sm transition">
+                            <i class="fa-solid fa-chart-pie w-5"></i> Panel de control
+                        </a>
+                        <a href="{% url 'panel_guia_detalles' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if request.resolver_match.url_name == 'panel_guia_detalles' %}bg-emerald-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %} text-sm transition">
+                            <i class="fa-solid fa-users w-5"></i> Detalles
+                        </a>
+                        <a href="{% url 'panel_guia_disponibilidad' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if request.resolver_match.url_name == 'panel_guia_disponibilidad' %}bg-emerald-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %} text-sm transition">
+                            <i class="fa-solid fa-calendar-days w-5"></i> Disponibilidad
+                        </a>
+                        <a href="{% url 'panel_guia_planes' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if request.resolver_match.url_name == 'panel_guia_planes' %}bg-emerald-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %} text-sm transition">
+                            <i class="fa-solid fa-map-location-dot w-5"></i> Creación de planes
+                        </a>
+
+                    {% elif request.user.rol == 'ADMIN' or request.user.is_superuser %}
+                        <!-- OPCIONES EXCLUSIVAS PARA ADMINISTRADORES -->
+                        <a href="{% url 'dashboard_admin' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white text-sm transition">
                     <i class="fa-solid fa-folder-open w-5"></i> Panel de control
                 </a>
                 <a href="{% url 'solicitudes_miembros' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if request.resolver_match.url_name == 'solicitudes_miembros' %}bg-emerald-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %} font-medium text-sm transition">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-users w-5"></i> Solicitudes Miembros
-                    </div>
-                    {% if request.resolver_match.url_name == 'solicitudes_miembros' and solicitudes_pendientes_count %}
-                    <span class="bg-emerald-500 text-slate-950 text-xs font-bold px-2 py-0.5 rounded-full">{{ solicitudes_pendientes_count }}</span>
-                    {% endif %}
                 </a>
                 <a href="{% url 'gestion_experiencias' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if request.resolver_match.url_name == 'gestion_experiencias' %}bg-emerald-600 text-white font-medium{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %} font-medium text-sm transition">
                     <i class="fa-solid fa-star w-5"></i> Experiencias
