@@ -1,6 +1,6 @@
 {% load crispy_forms_tags %}
 
-<form method="POST" enctype="multipart/form-data" class="max-w-7xl mx-auto py-4 sm:py-6 px-3 sm:px-6 lg:px-8 text-white mb-1">
+<form method="POST" enctype="multipart/form-data" id="perfil-form" class="max-w-7xl mx-auto py-4 sm:py-6 px-3 sm:px-6 lg:px-8 text-white mb-1">
     {% csrf_token %}
 
     <!-- TÍTULO DE LA PÁGINA (Ajustado para dispositivos móviles) -->
@@ -35,13 +35,23 @@
                 <div class="border-t border-gray-700/60 pt-4 text-left text-xs sm:text-sm space-y-2">
                     <div class="flex justify-between items-center">
                         <span class="text-gray-400">Estado</span>
-                        <span class="text-green-400 font-semibold flex items-center gap-1">
-                            <span class="w-2 h-2 rounded-full bg-green-400"></span> Activo
-                        </span>
+                        {% if user.is_active %}
+                                <span class="text-green-400 font-semibold flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-green-400"></span> Activo
+                                </span>
+                            {% else %}
+                                <span class="text-red-400 font-semibold flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-red-400"></span> Inactivo
+                                </span>
+                        {% endif %}
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-400">Última sesión</span>
-                        <span class="font-semibold text-white">Hoy, 09:41 AM</span>
+                        {% if user.last_login %}
+                                {{ user.last_login|date:"d M Y, H:i" }}
+                            {% else %}
+                                Nunca
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -70,14 +80,46 @@
                     <h6 class="font-bold mb-3 flex items-center gap-2 text-red-400 text-sm">
                         <i class="fas fa-exclamation-triangle"></i> Zona de Peligro
                     </h6>
-                    <div class="p-4 rounded-xl bg-[#1a1625]/80 border border-red-900/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
-                            <span class="font-bold block text-white text-xs sm:text-sm">Eliminar Mi Cuenta</span>
-                            <span class="text-gray-400 text-[11px] sm:text-xs">Esta acción es irreversible y eliminará todos los datos asociados.</span>
+
+                    <div class="flex flex-col gap-3">
+                        {% if request.user.rol != 'ADMIN' %}
+                        <!-- Cerrar sesión -->
+                            <div class="p-4 rounded-xl bg-[#0b132b]/80 border border-gray-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div>
+                                    <span class="font-bold block text-white text-xs sm:text-sm">Cerrar Sesión</span>
+                                    <span class="text-gray-400 text-[11px] sm:text-xs">Finaliza tu sesión en este dispositivo.</span>
+                                </div>
+                                <button type="submit" formaction="{% url 'logout' %}" formnovalidate
+                                    class="w-full sm:w-auto px-4 py-2 rounded-lg text-xs font-semibold border border-gray-700 text-gray-200 hover:bg-white/10 transition">
+                                    <i class="fas fa-right-from-bracket mr-1"></i> Cerrar Sesión
+                                </button>
+                            </div>
+                        {% endif %}
+
+                        <!-- Inactivar cuenta -->
+                        <div class="p-4 rounded-xl bg-[#1a1625]/80 border border-amber-900/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <span class="font-bold block text-white text-xs sm:text-sm">Inactivar Mi Cuenta</span>
+                                <span class="text-gray-400 text-[11px] sm:text-xs">Tu cuenta quedará desactivada (no podrás iniciar sesión) hasta que un administrador la reactive.</span>
+                            </div>
+                            <a href="{% url 'perfil' %}?accion=inactivar"
+                                class="w-full sm:w-auto text-center px-4 py-2 rounded-lg text-xs font-semibold border border-amber-500 text-amber-400 hover:bg-amber-500 hover:text-gray-900 transition">
+                                Inactivar Cuenta
+                            </a>
                         </div>
-                        <a href="#" class="w-full sm:w-auto text-center px-4 py-2 rounded-lg text-xs font-semibold border border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition">
-                            Eliminar Cuenta
-                        </a>
+
+                        <!-- Eliminar cuenta -->
+                        <div class="p-4 rounded-xl bg-[#1a1625]/80 border border-red-900/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <span class="font-bold block text-white text-xs sm:text-sm">Eliminar Mi Cuenta</span>
+                                <span class="text-gray-400 text-[11px] sm:text-xs">Esta acción es irreversible y eliminará todos los datos asociados.</span>
+                            </div>
+                            <a href="{% url 'perfil' %}?accion=eliminar"
+                                class="w-full sm:w-auto text-center px-4 py-2 rounded-lg text-xs font-semibold border border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition">
+                                Eliminar Cuenta
+                            </a>
+                        </div>
+
                     </div>
                 </div>
 
@@ -96,3 +138,7 @@
 
     </div>
 </form>
+
+{% if mostrar_modal %}
+    {% include 'modales/modal_perfil.html' %}
+{% endif %}
