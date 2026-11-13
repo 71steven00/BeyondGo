@@ -1,0 +1,193 @@
+{% extends "base_inicio.html" %}
+{% load static %}
+
+{% block header_content %}
+   {% include 'components/header.html' with header_bg_image="/static/img/Arca.avif" header_title="<span class='text-emerald-400'>EL LUGAR DEL</span>, MAJESTUOSO LAGO DE TOTA." header_subtitle="Explora la riqueza cultural, gastronómica y natural de nuestro hermoso municipio." %}
+{% endblock %}
+
+{% block title %}Hospedaje | Beyond Go{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-8">
+        
+        <!-- ENCABEZADO DE RESULTADOS Y CONTEO DINÁMICO -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900">Hospedaje</h1>
+                <p class="text-sm font-semibold text-slate-500 mt-1">
+                    {{ hoteles.count }} propiedades encontradas en Aquitania
+                </p>
+            </div>
+        </div>
+
+        <!-- DISEÑO DE DOS COLUMNAS: IZQ (Tarjetas) / DER (Filtros) -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+            
+            <!-- COLUMNA IZQUIERDA: Tarjetas de Establecimientos Dinámicas -->
+            <div class="lg:col-span-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for establecimiento in hoteles %}
+                        <div class="relative bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition flex flex-col justify-between overflow-hidden">
+                            
+                            <!-- Imagen de portada -->
+                            <div class="relative h-48 w-full bg-slate-100 overflow-hidden">
+                                {% if establecimiento.url_img %}
+                                    <img src="{{ establecimiento.url_img.url }}" alt="{{ establecimiento.nombre }}" class="w-full h-full object-cover">
+                                {% else %}
+                                    <div class="w-full h-full flex items-center justify-center text-slate-400 bg-slate-100">
+                                        <i class="fa-regular fa-image text-3xl"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Badge de tipo -->
+                                <div class="absolute top-3 left-3">
+                                    <span class="px-2.5 py-1 bg-emerald-600 text-white rounded-full text-[10px] font-bold shadow-sm">
+                                        {{ establecimiento.tipo }}
+                                    </span>
+                                </div>
+
+                                <!-- Badge de estado -->
+                                <div class="absolute bottom-3 left-3">
+                                    {% if establecimiento.is_active %}
+                                        <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-bold shadow-sm">Disponible</span>
+                                    {% else %}
+                                        <span class="px-2.5 py-1 bg-amber-50 text-amber-600 rounded-full text-[10px] font-bold shadow-sm">No disponible</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Contenido de la tarjeta -->
+                            <div class="p-5 flex flex-col flex-grow justify-between space-y-3">
+                                <div>
+                                    <h2 class="text-base font-bold text-slate-900 truncate">{{ establecimiento.nombre }}</h2>
+                                    <p class="text-xs text-slate-500 font-medium mt-0.5 flex items-center gap-1">
+                                        <i class="fa-solid fa-location-dot text-slate-400"></i> {{ establecimiento.direccion }}, {{ establecimiento.ciudad }}
+                                    </p>
+                                </div>
+
+                                <!-- Descripción corta -->
+                                <p class="text-xs text-slate-600 line-clamp-2">
+                                    {{ establecimiento.descripcion|default:"Sin descripción registrada." }}
+                                </p>
+
+                                <!-- Servicios reales asociados al establecimiento -->
+                                {% if establecimiento.servicios.all %}
+                                    <div class="flex flex-wrap gap-1.5 pt-1">
+                                        {% for serv in establecimiento.servicios.all %}
+                                            <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md text-[10px] font-medium">
+                                                {{ serv.nombre }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Footer con calificación y detalles -->
+                                <div class="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
+                                    <span class="font-bold text-amber-500 flex items-center gap-1">
+                                        <i class="fa-solid fa-star"></i> 5.0 <span class="text-slate-400 font-normal">(1)</span>
+                                    </span>
+                                    <span class="font-semibold text-emerald-600 hover:underline cursor-pointer">
+                                        Ver detalles &rarr;
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+                    {% empty %}
+                        <div class="col-span-full py-16 text-center bg-white border border-dashed border-slate-200 rounded-2xl">
+                            <i class="fa-solid fa-hotel text-slate-300 text-4xl mb-3"></i>
+                            <p class="text-slate-500 text-sm font-medium">No hay propiedades de hospedaje confirmadas en este momento.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+<!-- COLUMNA DERECHA: Panel de Filtros Dinámicos con Formulario GET -->
+            <form method="GET" action="{% url 'hospedaje' %}" class="lg:col-span-1 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm sticky top-6 space-y-6">
+                
+                <!-- Cabecera de Filtros -->
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-filter text-emerald-600 text-xs"></i>
+                        <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Filtros Activos</h3>
+                    </div>
+                    <a href="{% url 'hospedaje' %}" class="text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 transition">
+                        Limpiar todo
+                    </a>
+                </div>
+
+                <!-- 1. TIPO DE PROPIEDAD -->
+                <div>
+                    <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">Tipo de Propiedad</h4>
+                    <div class="space-y-2 text-xs font-medium text-slate-700">
+                        
+                        <label class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer group">
+                            <div class="flex items-center gap-2.5">
+                                <!-- Usamos name="tipo" y value="Hotel" -->
+                                <input type="checkbox" name="tipo" value="Hotel" {% if 'Hotel' in tipos_seleccionados %}checked{% endif %} class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer">
+                                <span class="group-hover:text-emerald-700 transition">Hoteles</span>
+                            </div>
+                            <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold">{{ total_hoteles }}</span>
+                        </label>
+
+                        <label class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer group">
+                            <div class="flex items-center gap-2.5">
+                                <input type="checkbox" name="tipo" value="Cabaña" {% if 'Cabaña' in tipos_seleccionados %}checked{% endif %} class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer">
+                                <span class="group-hover:text-emerald-700 transition">Cabañas</span>
+                            </div>
+                            <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold">{{ total_cabanas }}</span>
+                        </label>
+
+                        <label class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer group">
+                            <div class="flex items-center gap-2.5">
+                                <input type="checkbox" name="tipo" value="Glamping" {% if 'Glamping' in tipos_seleccionados %}checked{% endif %} class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer">
+                                <span class="group-hover:text-emerald-700 transition">Glamping</span>
+                            </div>
+                            <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold">{{ total_glamping }}</span>
+                        </label>
+
+                        <label class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer group">
+                            <div class="flex items-center gap-2.5">
+                                <input type="checkbox" name="tipo" value="Hostal" {% if 'Hostal' in tipos_seleccionados %}checked{% endif %} class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer">
+                                <span class="group-hover:text-emerald-700 transition">Hostales</span>
+                            </div>
+                            <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold">{{ total_hostales }}</span>
+                        </label>
+
+                    </div>
+                </div>
+
+                <!-- 2. SERVICIOS -->
+                <div class="pt-4 border-t border-slate-100">
+                    <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">Servicios Disponibles</h4>
+                    <div class="space-y-2 text-xs font-medium text-slate-700">
+                        
+                        {% for servicio in servicios_disponibles %}
+                            <label class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition cursor-pointer group">
+                                <div class="flex items-center gap-2.5">
+                                    <!-- Usamos name="servicios" y el ID del servicio como value -->
+                                    <input type="checkbox" name="servicios" value="{{ servicio.id }}" {% if servicio.id|slugify in servicios_seleccionados %}checked{% endif %} class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer">
+                                    <span class="group-hover:text-emerald-700 transition">{{ servicio.nombre }}</span>
+                                </div>
+                                <span class="text-slate-400 text-[10px]">({{ servicio.total_hoteles }})</span>
+                            </label>
+                        {% empty %}
+                            <p class="text-slate-400 text-xs italic py-1">No hay servicios registrados.</p>
+                        {% endfor %}
+
+                    </div>
+                </div>
+
+                <!-- Botón de Aplicar (Cambiado a type="submit") -->
+                <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition shadow-sm cursor-pointer">
+                    Aplicar Filtros
+                </button>
+
+            </form>
+
+            </div>
+
+        </div>
+
+    </div>
+{% endblock %}
